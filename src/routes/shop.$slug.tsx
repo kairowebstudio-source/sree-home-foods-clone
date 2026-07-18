@@ -64,7 +64,7 @@ function ProductPage() {
             </div>
             <p className="text-foreground/80 mt-6 leading-relaxed">{product.description}</p>
             <div className="mt-6 flex flex-wrap gap-2">
-              {product.benefits.map((b) => (
+              {product.benefits.map((b: string) => (
                 <span key={b} className="px-3 py-1 rounded-full bg-leaf/15 text-leaf-dark text-xs font-semibold border border-leaf/30">{b}</span>
               ))}
             </div>
