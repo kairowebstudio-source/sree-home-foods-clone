@@ -1,0 +1,90 @@
+import { Link } from "@tanstack/react-router";
+import { useState } from "react";
+import logo from "@/assets/logo.jpeg";
+
+const nav = [
+  { to: "/", label: "Home" },
+  { to: "/shop", label: "Shop" },
+  { to: "/about", label: "About" },
+  { to: "/wholesale", label: "Wholesale" },
+  { to: "/contact", label: "Contact" },
+];
+
+export function Header() {
+  const [open, setOpen] = useState(false);
+  return (
+    <header className="sticky top-0 z-50 bg-cream/95 backdrop-blur border-b border-border shadow-sm">
+      <div className="mx-auto max-w-7xl px-4 py-3 flex items-center justify-between gap-4">
+        <Link to="/" className="flex items-center gap-2 shrink-0">
+          <img src={logo} alt="Retro Natural Products" className="h-12 md:h-14 w-auto object-contain" />
+        </Link>
+        <nav className="hidden md:flex items-center gap-8">
+          {nav.map((n) => (
+            <Link
+              key={n.to}
+              to={n.to}
+              className="text-sm font-semibold tracking-wide uppercase text-foreground/80 hover:text-brand transition-colors relative after:absolute after:left-0 after:-bottom-1 after:h-[2px] after:w-0 after:bg-gold hover:after:w-full after:transition-all"
+              activeProps={{ className: "text-brand after:w-full" }}
+              activeOptions={{ exact: n.to === "/" }}
+            >
+              {n.label}
+            </Link>
+          ))}
+        </nav>
+        <div className="flex items-center gap-2">
+          <a
+            href="https://wa.me/919999999999"
+            target="_blank"
+            rel="noreferrer"
+            className="hidden md:inline-flex items-center gap-2 rounded-full bg-brand text-brand-foreground px-4 py-2 text-sm font-semibold hover:opacity-90 transition"
+          >
+            <i className="fab fa-whatsapp" /> Order
+          </a>
+          <button
+            className="md:hidden h-10 w-10 grid place-items-center rounded-md border border-border"
+            onClick={() => setOpen((o) => !o)}
+            aria-label="Menu"
+          >
+            <i className={`fas ${open ? "fa-times" : "fa-bars"} text-brand`} />
+          </button>
+        </div>
+      </div>
+      {open && (
+        <div className="md:hidden border-t border-border bg-cream">
+          <nav className="flex flex-col px-4 py-3 gap-1">
+            {nav.map((n) => (
+              <Link
+                key={n.to}
+                to={n.to}
+                onClick={() => setOpen(false)}
+                className="py-3 px-2 text-sm font-semibold uppercase tracking-wide text-foreground/80 hover:text-brand border-b border-border/60"
+                activeProps={{ className: "text-brand" }}
+                activeOptions={{ exact: n.to === "/" }}
+              >
+                {n.label}
+              </Link>
+            ))}
+          </nav>
+        </div>
+      )}
+      <div className="bg-brand text-brand-foreground text-xs md:text-sm overflow-hidden">
+        <div className="flex whitespace-nowrap marquee-track py-2">
+          {Array.from({ length: 2 }).map((_, i) => (
+            <div key={i} className="flex shrink-0 gap-16 px-8">
+              {[
+                "FREE DELIVERY ON ORDERS OVER ₹999",
+                "100% NATURAL · NO PRESERVATIVES",
+                "HANDCRAFTED IN KONASEEMA",
+                "PAN-INDIA SHIPPING",
+              ].map((t) => (
+                <span key={t} className="flex items-center gap-2">
+                  <i className="fas fa-leaf text-gold" /> {t}
+                </span>
+              ))}
+            </div>
+          ))}
+        </div>
+      </div>
+    </header>
+  );
+}
