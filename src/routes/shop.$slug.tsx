@@ -2,6 +2,9 @@ import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { products } from "@/lib/products";
+import { useCart } from "@/lib/cart";
+import { useState } from "react";
+
 
 export const Route = createFileRoute("/shop/$slug")({
   loader: ({ params }) => {
@@ -39,7 +42,10 @@ export const Route = createFileRoute("/shop/$slug")({
 function ProductPage() {
   const { product } = Route.useLoaderData();
   const related = products.filter((p) => p.slug !== product.slug).slice(0, 3);
+  const { add } = useCart();
+  const [qty, setQty] = useState(1);
   const waMsg = encodeURIComponent(`Hi! I'd like to order ${product.name} (${product.weight}) from Retro Natural Products.`);
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -72,17 +78,30 @@ function ProductPage() {
               <span><i className="fas fa-weight-hanging text-gold mr-2" />{product.weight}</span>
               <span><i className="fas fa-shield-heart text-gold mr-2" />100% Natural</span>
             </div>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <a href={`https://wa.me/919999999999?text=${waMsg}`} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-full bg-brand text-brand-foreground px-7 py-3 font-bold uppercase tracking-wider text-sm hover:opacity-90 transition">
-                <i className="fab fa-whatsapp" /> Order on WhatsApp
+            <div className="mt-8 flex flex-wrap items-center gap-3">
+              <div className="inline-flex items-center border-2 border-brand/30 rounded-full bg-cream/70 backdrop-blur">
+                <button onClick={() => setQty((q) => Math.max(1, q - 1))} className="h-11 w-11 grid place-items-center text-brand hover:bg-brand/10 rounded-l-full" aria-label="Decrease">
+                  <i className="fas fa-minus" />
+                </button>
+                <span className="w-10 text-center font-bold text-brand">{qty}</span>
+                <button onClick={() => setQty((q) => q + 1)} className="h-11 w-11 grid place-items-center text-brand hover:bg-brand/10 rounded-r-full" aria-label="Increase">
+                  <i className="fas fa-plus" />
+                </button>
+              </div>
+              <button
+                onClick={() => add(product, qty)}
+                className="inline-flex items-center gap-2 rounded-full bg-brand text-brand-foreground px-7 py-3 font-bold uppercase tracking-wider text-sm hover:opacity-90 transition"
+              >
+                <i className="fas fa-basket-shopping" /> Add to Cart
+              </button>
+              <a href={`https://wa.me/919999999999?text=${waMsg}`} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-full border-2 border-brand text-brand px-7 py-3 font-bold uppercase tracking-wider text-sm hover:bg-brand hover:text-cream transition">
+                <i className="fab fa-whatsapp" /> WhatsApp
               </a>
-              <Link to="/contact" className="inline-flex items-center gap-2 rounded-full border-2 border-brand text-brand px-7 py-3 font-bold uppercase tracking-wider text-sm hover:bg-brand hover:text-cream transition">
-                Enquire
-              </Link>
             </div>
           </div>
         </div>
       </section>
+
 
       <section className="py-16 px-4 bg-brand text-cream text-center">
         <span className="text-gold text-xs tracking-[0.3em] uppercase">You might also love</span>

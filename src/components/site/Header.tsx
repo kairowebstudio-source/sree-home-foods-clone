@@ -1,6 +1,8 @@
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 import logo from "@/assets/logo.jpeg";
+import { useCart } from "@/lib/cart";
+
 
 const nav = [
   { to: "/", label: "Home" },
@@ -12,6 +14,8 @@ const nav = [
 
 export function Header() {
   const [open, setOpen] = useState(false);
+  const { count, setOpen: setCartOpen } = useCart();
+
   return (
     <header className="sticky top-0 z-50 bg-cream/95 backdrop-blur border-b border-border shadow-sm">
       <div className="mx-auto max-w-7xl px-4 py-3 flex items-center justify-between gap-4">
@@ -40,6 +44,19 @@ export function Header() {
           >
             <i className="fab fa-whatsapp" /> Order
           </a>
+          <button
+            onClick={() => setCartOpen(true)}
+            aria-label={`Open cart, ${count} items`}
+            className="relative h-10 w-10 grid place-items-center rounded-full border border-gold/50 bg-cream/70 backdrop-blur text-brand hover:bg-brand hover:text-cream transition"
+          >
+            <i className="fas fa-basket-shopping" />
+            {count > 0 && (
+              <span className="absolute -top-1 -right-1 min-w-5 h-5 px-1 rounded-full bg-gold text-brand text-[10px] font-bold grid place-items-center border border-cream">
+                {count}
+              </span>
+            )}
+          </button>
+
           <button
             className="md:hidden h-10 w-10 grid place-items-center rounded-md border border-border"
             onClick={() => setOpen((o) => !o)}
