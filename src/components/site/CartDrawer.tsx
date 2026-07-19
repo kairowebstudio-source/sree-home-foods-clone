@@ -118,16 +118,16 @@ export function CartDrawer() {
               <span className="font-semibold text-brand">{count}</span>
             </div>
             <p className="text-[11px] text-muted-foreground leading-relaxed">
-              Final pricing is shared on WhatsApp — we tailor freight and bulk discounts to your location.
+              Shipping and taxes are calculated at checkout.
             </p>
-            <a
-              href={`https://wa.me/919999999999?text=${waMsg}`}
-              target="_blank"
-              rel="noreferrer"
+            <Link
+              to="/checkout"
+              onClick={() => setOpen(false)}
               className="w-full inline-flex items-center justify-center gap-2 rounded-full bg-brand text-cream px-5 py-3 font-bold uppercase tracking-wider text-xs hover:opacity-90 transition"
             >
-              <i className="fab fa-whatsapp" /> Checkout on WhatsApp
-            </a>
+              <i className="fas fa-lock" /> Checkout
+            </Link>
+
             <button
               onClick={clear}
               className="w-full text-xs text-brand/70 hover:text-brand py-1"
