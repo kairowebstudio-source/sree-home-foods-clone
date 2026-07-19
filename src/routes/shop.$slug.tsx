@@ -2,6 +2,9 @@ import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { products } from "@/lib/products";
+import { useCart } from "@/lib/cart";
+import { useState } from "react";
+
 
 export const Route = createFileRoute("/shop/$slug")({
   loader: ({ params }) => {
