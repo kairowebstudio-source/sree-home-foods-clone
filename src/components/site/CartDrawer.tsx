@@ -12,11 +12,6 @@ export function CartDrawer() {
     };
   }, [open]);
 
-  const waMsg = encodeURIComponent(
-    `Hi! I'd like to order from Retro Natural Products:\n\n${items
-      .map((i) => `• ${i.name} (${i.weight}) × ${i.qty}`)
-      .join("\n")}\n\nPlease share pricing and delivery details.`,
-  );
 
   return (
     <>
