@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
-import logo from "@/assets/logo.jpeg";
+import logoAsset from "@/assets/retro-logo.png.asset.json";
+const logo = logoAsset.url;
 import { useCart } from "@/lib/cart";
 
 
@@ -20,7 +21,7 @@ export function Header() {
     <header className="sticky top-0 z-50 bg-cream/95 backdrop-blur border-b border-border shadow-sm">
       <div className="mx-auto max-w-7xl px-4 py-3 flex items-center justify-between gap-4">
         <Link to="/" className="flex items-center gap-2 shrink-0">
-          <img src={logo} alt="Retro Natural Products" className="h-12 md:h-14 w-auto object-contain" />
+          <img src={logo} alt="Retro Natural Products" className="h-14 md:h-16 w-auto object-contain" />
         </Link>
         <nav className="hidden md:flex items-center gap-8">
           {nav.map((n) => (
