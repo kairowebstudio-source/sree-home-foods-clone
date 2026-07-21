@@ -3,8 +3,8 @@ import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { Marquee } from "@/components/site/Marquee";
 import { products } from "@/lib/products";
-import godavariBg from "@/assets/godavari-bg.png";
 import welcomeBg from "@/assets/welcome-bg.mp4.asset.json";
+import sectionsBg from "@/assets/sections-bg.mp4.asset.json";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -80,11 +80,13 @@ function Home() {
         </div>
       </section>
 
-      <Marquee items={["100% Natural Ingredients", "Traditional Recipes", "Premium Quality", "No Preservatives", "Handcrafted with Love"]} />
-
       {/* COLLECTIONS */}
-      <section className="py-20 px-4 bg-cream">
-        <div className="mx-auto max-w-7xl">
+      <section className="relative py-20 px-4 overflow-hidden">
+        <video autoPlay muted loop playsInline className="absolute inset-0 w-full h-full object-cover">
+          <source src={sectionsBg.url} type="video/mp4" />
+        </video>
+        <div className="absolute inset-0 bg-cream/85" />
+        <div className="relative mx-auto max-w-7xl">
           <div className="text-center mb-12">
             <span className="text-gold text-xs tracking-[0.3em] font-bold uppercase">Our Collections</span>
             <h2 className="mt-2 font-display text-4xl md:text-5xl text-brand">Naturally Crafted Goodness</h2>
@@ -124,8 +126,11 @@ function Home() {
       </section>
 
       {/* LEGACY / ABOUT */}
-      <section className="relative py-24 px-4" style={{ backgroundImage: `url(${godavariBg})`, backgroundSize: "cover", backgroundPosition: "center" }}>
-        <div className="absolute inset-0 bg-cream/70" />
+      <section className="relative py-24 px-4 overflow-hidden">
+        <video autoPlay muted loop playsInline className="absolute inset-0 w-full h-full object-cover">
+          <source src={sectionsBg.url} type="video/mp4" />
+        </video>
+        <div className="absolute inset-0 bg-cream/80" />
         <div className="relative mx-auto max-w-5xl text-center">
           <span className="text-leaf-dark text-xs tracking-[0.3em] font-bold uppercase">Retro Natural Products</span>
           <h2 className="mt-2 font-display text-4xl md:text-5xl text-brand">A Legacy of Purity & Care</h2>
