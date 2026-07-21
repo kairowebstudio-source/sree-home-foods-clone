@@ -27,7 +27,7 @@ function Home() {
         <video autoPlay muted loop playsInline className="absolute inset-0 w-full h-full object-cover">
           <source src={welcomeBg.url} type="video/mp4" />
         </video>
-        <div className="absolute inset-0 bg-gradient-to-b from-[#1a0d0d]/70 via-[#1a0d0d]/50 to-[#1a0d0d]/80" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#1a0d0d]/20 via-transparent to-[#1a0d0d]/40" />
         <div className="relative mx-auto max-w-7xl px-4 py-24 md:py-36 text-cream text-center">
           <div className="inline-block px-4 py-1 rounded-full border border-gold/60 text-gold text-xs tracking-[0.3em] uppercase mb-6">
             ✦ Authentic · Natural · Timeless ✦
