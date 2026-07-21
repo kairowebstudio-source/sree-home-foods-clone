@@ -126,8 +126,11 @@ function Home() {
       </section>
 
       {/* LEGACY / ABOUT */}
-      <section className="relative py-24 px-4" style={{ backgroundImage: `url(${godavariBg})`, backgroundSize: "cover", backgroundPosition: "center" }}>
-        <div className="absolute inset-0 bg-cream/70" />
+      <section className="relative py-24 px-4 overflow-hidden">
+        <video autoPlay muted loop playsInline className="absolute inset-0 w-full h-full object-cover">
+          <source src={sectionsBg.url} type="video/mp4" />
+        </video>
+        <div className="absolute inset-0 bg-cream/80" />
         <div className="relative mx-auto max-w-5xl text-center">
           <span className="text-leaf-dark text-xs tracking-[0.3em] font-bold uppercase">Retro Natural Products</span>
           <h2 className="mt-2 font-display text-4xl md:text-5xl text-brand">A Legacy of Purity & Care</h2>
