@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import banner from "@/assets/konaseema-banner.png";
-import logoAsset from "@/assets/retro-logo.png.asset.json";
+import logoAsset from "@/assets/retro-logo-new.png.asset.json";
 const logo = logoAsset.url;
 
 export function Footer() {
