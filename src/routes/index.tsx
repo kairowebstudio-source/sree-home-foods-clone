@@ -25,7 +25,7 @@ function Home() {
       {/* HERO */}
       <section className="relative overflow-hidden">
         <video autoPlay muted loop playsInline className="absolute inset-0 w-full h-full object-cover">
-          <source src="/media/hero.mp4" type="video/mp4" />
+          <source src={welcomeBg.url} type="video/mp4" />
         </video>
         <div className="absolute inset-0 bg-gradient-to-b from-[#1a0d0d]/70 via-[#1a0d0d]/50 to-[#1a0d0d]/80" />
         <div className="relative mx-auto max-w-7xl px-4 py-24 md:py-36 text-cream text-center">
