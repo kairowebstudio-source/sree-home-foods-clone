@@ -80,10 +80,12 @@ function Home() {
         </div>
       </section>
 
-      <Marquee items={["100% Natural Ingredients", "Traditional Recipes", "Premium Quality", "No Preservatives", "Handcrafted with Love"]} />
-
       {/* COLLECTIONS */}
-      <section className="py-20 px-4 bg-cream">
+      <section className="relative py-20 px-4 overflow-hidden">
+        <video autoPlay muted loop playsInline className="absolute inset-0 w-full h-full object-cover">
+          <source src={sectionsBg.url} type="video/mp4" />
+        </video>
+        <div className="absolute inset-0 bg-cream/85" />
         <div className="mx-auto max-w-7xl">
           <div className="text-center mb-12">
             <span className="text-gold text-xs tracking-[0.3em] font-bold uppercase">Our Collections</span>
