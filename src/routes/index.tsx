@@ -84,47 +84,29 @@ function Home() {
       </section>
 
       {/* COLLECTIONS */}
-      <section className="relative py-10 md:py-14 px-4 overflow-hidden">
+      <section className="relative py-10 md:py-16 px-3 sm:px-4 overflow-hidden">
         <video autoPlay muted loop playsInline className="absolute inset-0 w-full h-full object-cover">
           <source src={sectionsBg.url} type="video/mp4" />
         </video>
-        <div className="absolute inset-0 bg-cream/30" />
+        <div className="absolute inset-0 bg-cream/20 md:bg-cream/35" />
         <div className="relative mx-auto max-w-6xl">
-          <div className="text-center mb-8">
-            <span className="text-gold text-xs tracking-[0.3em] font-bold uppercase">Our Collections</span>
-            <h2 className="mt-2 font-display text-3xl md:text-4xl text-brand">Naturally Crafted Goodness</h2>
+          <div className="text-center mb-6 md:mb-10">
+            <span className="text-gold text-[10px] sm:text-xs tracking-[0.3em] font-bold uppercase">Our Collections</span>
+            <h2 className="mt-2 font-display text-2xl sm:text-3xl md:text-4xl text-brand">Naturally Crafted Goodness</h2>
             <div className="flex items-center justify-center gap-3 mt-3">
-              <span className="h-px w-12 bg-gold" />
+              <span className="h-px w-10 sm:w-12 bg-gold" />
               <i className="fas fa-leaf text-leaf" />
-              <span className="h-px w-12 bg-gold" />
+              <span className="h-px w-10 sm:w-12 bg-gold" />
             </div>
           </div>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-3">
             {featured.map((p) => (
-              <Link
-                key={p.slug}
-                to="/shop/$slug"
-                params={{ slug: p.slug }}
-                className="group rounded-xl overflow-hidden border border-gold/30 bg-cream/70 backdrop-blur-sm shadow-sm hover:shadow-xl transition-all hover:-translate-y-1"
-              >
-                <div className="aspect-[4/3] bg-white/60 p-3 overflow-hidden">
-                  <img src={p.image} alt={p.name} className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500" />
-                </div>
-                <div className="p-3 border-t border-gold/20">
-                  <span className="text-[10px] uppercase tracking-widest text-gold font-bold">{p.category}</span>
-                  <h3 className="mt-0.5 font-display text-base text-brand leading-tight">{p.name}</h3>
-                  <div className="mt-2 flex items-center justify-between">
-                    <span className="text-[10px] text-foreground/60">{p.weight}</span>
-                    <span className="inline-flex items-center gap-1 text-xs font-semibold text-brand group-hover:gap-2 transition-all">
-                      View <i className="fas fa-arrow-right text-[10px]" />
-                    </span>
-                  </div>
-                </div>
-              </Link>
+              <ProductCard key={p.slug} product={p} />
             ))}
           </div>
         </div>
       </section>
+
 
       {/* LEGACY / ABOUT */}
       <section className="relative py-24 px-4 overflow-hidden">
