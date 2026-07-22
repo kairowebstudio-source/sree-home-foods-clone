@@ -227,3 +227,80 @@ function Home() {
     </div>
   );
 }
+
+function ProductCard({ product: p }: { product: Product }) {
+  const { add } = useCart();
+  const [qty, setQty] = useState(1);
+  const dec = () => setQty((q) => Math.max(1, q - 1));
+  const inc = () => setQty((q) => Math.min(99, q + 1));
+  return (
+    <div className="group flex flex-col rounded-xl overflow-hidden border border-gold/30 bg-cream/75 backdrop-blur-sm shadow-sm hover:shadow-xl transition-all">
+      <Link
+        to="/shop/$slug"
+        params={{ slug: p.slug }}
+        className="block aspect-square sm:aspect-[4/3] bg-white/60 p-2 sm:p-3 overflow-hidden"
+      >
+        <img
+          src={p.image}
+          alt={p.name}
+          className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
+        />
+      </Link>
+      <div className="p-2.5 sm:p-3 border-t border-gold/20 flex flex-col gap-2">
+        <div>
+          <span className="text-[9px] sm:text-[10px] uppercase tracking-widest text-gold font-bold">
+            {p.category}
+          </span>
+          <Link
+            to="/shop/$slug"
+            params={{ slug: p.slug }}
+            className="block mt-0.5 font-display text-sm sm:text-base text-brand leading-tight line-clamp-2 hover:underline"
+          >
+            {p.name}
+          </Link>
+          <p className="text-[10px] sm:text-[11px] text-foreground/60 mt-0.5">{p.weight}</p>
+        </div>
+        <div className="flex items-baseline gap-1.5">
+          <span className="font-display text-brand text-base sm:text-lg font-bold">
+            {formatPrice(p.price)}
+          </span>
+          {p.mrp && p.mrp > p.price && (
+            <span className="text-[10px] sm:text-xs text-foreground/50 line-through">
+              {formatPrice(p.mrp)}
+            </span>
+          )}
+        </div>
+        <div className="flex items-center gap-1.5 sm:gap-2">
+          <div className="inline-flex items-center border border-border rounded-full bg-white/80 shrink-0">
+            <button
+              type="button"
+              onClick={dec}
+              className="h-7 w-7 grid place-items-center text-brand hover:bg-brand/10 rounded-l-full"
+              aria-label="Decrease quantity"
+            >
+              <i className="fas fa-minus text-[9px]" />
+            </button>
+            <span className="w-6 text-center text-xs font-semibold">{qty}</span>
+            <button
+              type="button"
+              onClick={inc}
+              className="h-7 w-7 grid place-items-center text-brand hover:bg-brand/10 rounded-r-full"
+              aria-label="Increase quantity"
+            >
+              <i className="fas fa-plus text-[9px]" />
+            </button>
+          </div>
+          <button
+            type="button"
+            onClick={() => add(p, qty)}
+            className="flex-1 min-w-0 inline-flex items-center justify-center gap-1 rounded-full bg-brand text-cream px-2 py-1.5 sm:py-2 font-bold uppercase tracking-wider text-[10px] sm:text-[11px] hover:opacity-90 transition"
+          >
+            <i className="fas fa-basket-shopping text-[10px]" />
+            <span className="hidden xs:inline sm:inline">Add</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
