@@ -85,7 +85,7 @@ function Home() {
         <video autoPlay muted loop playsInline className="absolute inset-0 w-full h-full object-cover">
           <source src={sectionsBg.url} type="video/mp4" />
         </video>
-        <div className="absolute inset-0 bg-cream/85" />
+        <div className="absolute inset-0 bg-cream/40" />
         <div className="relative mx-auto max-w-7xl">
           <div className="text-center mb-12">
             <span className="text-gold text-xs tracking-[0.3em] font-bold uppercase">Our Collections</span>
@@ -130,7 +130,7 @@ function Home() {
         <video autoPlay muted loop playsInline className="absolute inset-0 w-full h-full object-cover">
           <source src={sectionsBg.url} type="video/mp4" />
         </video>
-        <div className="absolute inset-0 bg-cream/80" />
+        <div className="absolute inset-0 bg-cream/40" />
         <div className="relative mx-auto max-w-5xl text-center">
           <span className="text-leaf-dark text-xs tracking-[0.3em] font-bold uppercase">Retro Natural Products</span>
           <h2 className="mt-2 font-display text-4xl md:text-5xl text-brand">A Legacy of Purity & Care</h2>
