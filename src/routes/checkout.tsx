@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { useCart } from "@/lib/cart";
+import { formatPrice } from "@/lib/products";
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({
@@ -170,7 +171,7 @@ function Checkout() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="font-display text-brand text-sm leading-tight line-clamp-2">{i.name}</p>
-                    <p className="text-[11px] text-muted-foreground">{i.weight}</p>
+                    <p className="text-[11px] text-muted-foreground">{i.weight} · {formatPrice(i.price)}</p>
                     <div className="mt-1.5 flex items-center justify-between">
                       <div className="inline-flex items-center border border-border rounded-full bg-cream">
                         <button type="button" onClick={() => setQty(i.slug, i.qty - 1)} className="h-6 w-6 grid place-items-center text-brand hover:bg-brand/10 rounded-l-full" aria-label="Decrease">
@@ -191,9 +192,17 @@ function Checkout() {
             </ul>
 
             <div className="mt-5 pt-4 border-t border-gold/30 space-y-2 text-sm">
-              <Row label="Items" value={String(count)} />
-              <Row label="Shipping" value="Calculated on confirmation" />
-              <Row label="Total" value="Confirmed on order" bold />
+              {(() => {
+                const subtotal = items.reduce((s, i) => s + i.price * i.qty, 0);
+                const shipping = subtotal >= 999 ? 0 : subtotal > 0 ? 60 : 0;
+                return (
+                  <>
+                    <Row label={`Items (${count})`} value={formatPrice(subtotal)} />
+                    <Row label="Shipping" value={shipping === 0 ? "Free" : formatPrice(shipping)} />
+                    <Row label="Total" value={formatPrice(subtotal + shipping)} bold />
+                  </>
+                );
+              })()}
             </div>
 
             <button

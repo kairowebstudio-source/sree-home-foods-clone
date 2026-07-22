@@ -1,10 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useState } from "react";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { Marquee } from "@/components/site/Marquee";
-import { products } from "@/lib/products";
+import { products, formatPrice, type Product } from "@/lib/products";
+import { useCart } from "@/lib/cart";
 import welcomeBg from "@/assets/welcome-bg.mp4.asset.json";
 import sectionsBg from "@/assets/sections-bg.mp4.asset.json";
+
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -81,54 +84,36 @@ function Home() {
       </section>
 
       {/* COLLECTIONS */}
-      <section className="relative py-10 md:py-14 px-4 overflow-hidden">
+      <section className="relative py-10 md:py-16 px-3 sm:px-4 overflow-hidden">
         <video autoPlay muted loop playsInline className="absolute inset-0 w-full h-full object-cover">
           <source src={sectionsBg.url} type="video/mp4" />
         </video>
-        <div className="absolute inset-0 bg-cream/30" />
+        <div className="absolute inset-0 bg-cream/20 md:bg-cream/35" />
         <div className="relative mx-auto max-w-6xl">
-          <div className="text-center mb-8">
-            <span className="text-gold text-xs tracking-[0.3em] font-bold uppercase">Our Collections</span>
-            <h2 className="mt-2 font-display text-3xl md:text-4xl text-brand">Naturally Crafted Goodness</h2>
+          <div className="text-center mb-6 md:mb-10">
+            <span className="text-gold text-[10px] sm:text-xs tracking-[0.3em] font-bold uppercase">Our Collections</span>
+            <h2 className="mt-2 font-display text-2xl sm:text-3xl md:text-4xl text-brand">Naturally Crafted Goodness</h2>
             <div className="flex items-center justify-center gap-3 mt-3">
-              <span className="h-px w-12 bg-gold" />
+              <span className="h-px w-10 sm:w-12 bg-gold" />
               <i className="fas fa-leaf text-leaf" />
-              <span className="h-px w-12 bg-gold" />
+              <span className="h-px w-10 sm:w-12 bg-gold" />
             </div>
           </div>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-3">
             {featured.map((p) => (
-              <Link
-                key={p.slug}
-                to="/shop/$slug"
-                params={{ slug: p.slug }}
-                className="group rounded-xl overflow-hidden border border-gold/30 bg-cream/70 backdrop-blur-sm shadow-sm hover:shadow-xl transition-all hover:-translate-y-1"
-              >
-                <div className="aspect-[4/3] bg-white/60 p-3 overflow-hidden">
-                  <img src={p.image} alt={p.name} className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500" />
-                </div>
-                <div className="p-3 border-t border-gold/20">
-                  <span className="text-[10px] uppercase tracking-widest text-gold font-bold">{p.category}</span>
-                  <h3 className="mt-0.5 font-display text-base text-brand leading-tight">{p.name}</h3>
-                  <div className="mt-2 flex items-center justify-between">
-                    <span className="text-[10px] text-foreground/60">{p.weight}</span>
-                    <span className="inline-flex items-center gap-1 text-xs font-semibold text-brand group-hover:gap-2 transition-all">
-                      View <i className="fas fa-arrow-right text-[10px]" />
-                    </span>
-                  </div>
-                </div>
-              </Link>
+              <ProductCard key={p.slug} product={p} />
             ))}
           </div>
         </div>
       </section>
+
 
       {/* LEGACY / ABOUT */}
       <section className="relative py-24 px-4 overflow-hidden">
         <video autoPlay muted loop playsInline className="absolute inset-0 w-full h-full object-cover">
           <source src={sectionsBg.url} type="video/mp4" />
         </video>
-        <div className="absolute inset-0 bg-cream/40" />
+        <div className="absolute inset-0 bg-cream/25 md:bg-cream/40" />
         <div className="relative mx-auto max-w-5xl text-center">
           <span className="text-leaf-dark text-xs tracking-[0.3em] font-bold uppercase">Retro Natural Products</span>
           <h2 className="mt-2 font-display text-4xl md:text-5xl text-brand">A Legacy of Purity & Care</h2>
@@ -242,3 +227,80 @@ function Home() {
     </div>
   );
 }
+
+function ProductCard({ product: p }: { product: Product }) {
+  const { add } = useCart();
+  const [qty, setQty] = useState(1);
+  const dec = () => setQty((q) => Math.max(1, q - 1));
+  const inc = () => setQty((q) => Math.min(99, q + 1));
+  return (
+    <div className="group flex flex-col rounded-xl overflow-hidden border border-gold/30 bg-cream/75 backdrop-blur-sm shadow-sm hover:shadow-xl transition-all">
+      <Link
+        to="/shop/$slug"
+        params={{ slug: p.slug }}
+        className="block aspect-square sm:aspect-[4/3] bg-white/60 p-2 sm:p-3 overflow-hidden"
+      >
+        <img
+          src={p.image}
+          alt={p.name}
+          className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
+        />
+      </Link>
+      <div className="p-2.5 sm:p-3 border-t border-gold/20 flex flex-col gap-2">
+        <div>
+          <span className="text-[9px] sm:text-[10px] uppercase tracking-widest text-gold font-bold">
+            {p.category}
+          </span>
+          <Link
+            to="/shop/$slug"
+            params={{ slug: p.slug }}
+            className="block mt-0.5 font-display text-sm sm:text-base text-brand leading-tight line-clamp-2 hover:underline"
+          >
+            {p.name}
+          </Link>
+          <p className="text-[10px] sm:text-[11px] text-foreground/60 mt-0.5">{p.weight}</p>
+        </div>
+        <div className="flex items-baseline gap-1.5">
+          <span className="font-display text-brand text-base sm:text-lg font-bold">
+            {formatPrice(p.price)}
+          </span>
+          {p.mrp && p.mrp > p.price && (
+            <span className="text-[10px] sm:text-xs text-foreground/50 line-through">
+              {formatPrice(p.mrp)}
+            </span>
+          )}
+        </div>
+        <div className="flex items-center gap-1.5 sm:gap-2">
+          <div className="inline-flex items-center border border-border rounded-full bg-white/80 shrink-0">
+            <button
+              type="button"
+              onClick={dec}
+              className="h-7 w-7 grid place-items-center text-brand hover:bg-brand/10 rounded-l-full"
+              aria-label="Decrease quantity"
+            >
+              <i className="fas fa-minus text-[9px]" />
+            </button>
+            <span className="w-6 text-center text-xs font-semibold">{qty}</span>
+            <button
+              type="button"
+              onClick={inc}
+              className="h-7 w-7 grid place-items-center text-brand hover:bg-brand/10 rounded-r-full"
+              aria-label="Increase quantity"
+            >
+              <i className="fas fa-plus text-[9px]" />
+            </button>
+          </div>
+          <button
+            type="button"
+            onClick={() => add(p, qty)}
+            className="flex-1 min-w-0 inline-flex items-center justify-center gap-1 rounded-full bg-brand text-cream px-2 py-1.5 sm:py-2 font-bold uppercase tracking-wider text-[10px] sm:text-[11px] hover:opacity-90 transition"
+          >
+            <i className="fas fa-basket-shopping text-[10px]" />
+            <span className="hidden xs:inline sm:inline">Add</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+

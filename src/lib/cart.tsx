@@ -6,6 +6,7 @@ export type CartItem = {
   name: string;
   image: string;
   weight: string;
+  price: number;
   qty: number;
 };
 
@@ -44,7 +45,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setItems((prev) => {
       const ex = prev.find((i) => i.slug === p.slug);
       if (ex) return prev.map((i) => (i.slug === p.slug ? { ...i, qty: i.qty + qty } : i));
-      return [...prev, { slug: p.slug, name: p.name, image: p.image, weight: p.weight, qty }];
+      return [...prev, { slug: p.slug, name: p.name, image: p.image, weight: p.weight, price: p.price, qty }];
     });
     setOpen(true);
   };
