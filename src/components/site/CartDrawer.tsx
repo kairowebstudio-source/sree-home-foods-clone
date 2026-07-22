@@ -1,4 +1,5 @@
 import { useCart } from "@/lib/cart";
+import { formatPrice } from "@/lib/products";
 import { Link } from "@tanstack/react-router";
 import { useEffect } from "react";
 
