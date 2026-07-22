@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { useCart } from "@/lib/cart";
+import { formatPrice } from "@/lib/products";
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({
