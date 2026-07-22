@@ -192,9 +192,17 @@ function Checkout() {
             </ul>
 
             <div className="mt-5 pt-4 border-t border-gold/30 space-y-2 text-sm">
-              <Row label="Items" value={String(count)} />
-              <Row label="Shipping" value="Calculated on confirmation" />
-              <Row label="Total" value="Confirmed on order" bold />
+              {(() => {
+                const subtotal = items.reduce((s, i) => s + i.price * i.qty, 0);
+                const shipping = subtotal >= 999 ? 0 : subtotal > 0 ? 60 : 0;
+                return (
+                  <>
+                    <Row label={`Items (${count})`} value={formatPrice(subtotal)} />
+                    <Row label="Shipping" value={shipping === 0 ? "Free" : formatPrice(shipping)} />
+                    <Row label="Total" value={formatPrice(subtotal + shipping)} bold />
+                  </>
+                );
+              })()}
             </div>
 
             <button
