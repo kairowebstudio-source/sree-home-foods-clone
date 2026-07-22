@@ -79,6 +79,7 @@ export function CartDrawer() {
                       {i.name}
                     </Link>
                     <p className="text-xs text-muted-foreground mt-0.5">{i.weight}</p>
+                    <p className="text-sm font-semibold text-brand mt-0.5">{formatPrice(i.price)} <span className="text-[10px] font-normal text-foreground/60">× {i.qty} = {formatPrice(i.price * i.qty)}</span></p>
                     <div className="mt-2 flex items-center justify-between">
                       <div className="inline-flex items-center border border-border rounded-full bg-cream">
                         <button
