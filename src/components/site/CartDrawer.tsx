@@ -119,6 +119,10 @@ export function CartDrawer() {
               <span className="text-foreground/70">Items</span>
               <span className="font-semibold text-brand">{count}</span>
             </div>
+            <div className="flex items-center justify-between text-base pt-1 border-t border-gold/20">
+              <span className="font-display text-brand">Subtotal</span>
+              <span className="font-bold text-brand">{formatPrice(items.reduce((s, i) => s + i.price * i.qty, 0))}</span>
+            </div>
             <p className="text-[11px] text-muted-foreground leading-relaxed">
               Shipping and taxes are calculated at checkout.
             </p>
