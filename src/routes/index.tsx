@@ -81,41 +81,39 @@ function Home() {
       </section>
 
       {/* COLLECTIONS */}
-      <section className="relative py-20 px-4 overflow-hidden">
+      <section className="relative py-10 md:py-14 px-4 overflow-hidden">
         <video autoPlay muted loop playsInline className="absolute inset-0 w-full h-full object-cover">
           <source src={sectionsBg.url} type="video/mp4" />
         </video>
-        <div className="absolute inset-0 bg-cream/40" />
-        <div className="relative mx-auto max-w-7xl">
-          <div className="text-center mb-12">
+        <div className="absolute inset-0 bg-cream/30" />
+        <div className="relative mx-auto max-w-6xl">
+          <div className="text-center mb-8">
             <span className="text-gold text-xs tracking-[0.3em] font-bold uppercase">Our Collections</span>
-            <h2 className="mt-2 font-display text-4xl md:text-5xl text-brand">Naturally Crafted Goodness</h2>
-            <div className="flex items-center justify-center gap-3 mt-4">
-              <span className="h-px w-16 bg-gold" />
+            <h2 className="mt-2 font-display text-3xl md:text-4xl text-brand">Naturally Crafted Goodness</h2>
+            <div className="flex items-center justify-center gap-3 mt-3">
+              <span className="h-px w-12 bg-gold" />
               <i className="fas fa-leaf text-leaf" />
-              <span className="h-px w-16 bg-gold" />
+              <span className="h-px w-12 bg-gold" />
             </div>
-            <p className="mt-4 text-muted-foreground max-w-2xl mx-auto">Every jar tells the story of Konaseema — its soil, its hands, its traditions.</p>
           </div>
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {featured.map((p) => (
               <Link
                 key={p.slug}
                 to="/shop/$slug"
                 params={{ slug: p.slug }}
-                className="group bg-card rounded-2xl overflow-hidden border border-border shadow-sm hover:shadow-xl transition-all hover:-translate-y-1"
+                className="group rounded-xl overflow-hidden border border-gold/30 bg-cream/70 backdrop-blur-sm shadow-sm hover:shadow-xl transition-all hover:-translate-y-1"
               >
-                <div className="aspect-square bg-white p-6 overflow-hidden">
+                <div className="aspect-[4/3] bg-white/60 p-3 overflow-hidden">
                   <img src={p.image} alt={p.name} className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500" />
                 </div>
-                <div className="p-5 border-t border-border">
-                  <span className="text-xs uppercase tracking-widest text-gold font-bold">{p.category}</span>
-                  <h3 className="mt-1 font-display text-xl text-brand">{p.name}</h3>
-                  <p className="text-sm text-muted-foreground mt-1">{p.tagline}</p>
-                  <div className="mt-4 flex items-center justify-between">
-                    <span className="text-xs text-foreground/60">{p.weight}</span>
-                    <span className="inline-flex items-center gap-1 text-sm font-semibold text-brand group-hover:gap-2 transition-all">
-                      View <i className="fas fa-arrow-right text-xs" />
+                <div className="p-3 border-t border-gold/20">
+                  <span className="text-[10px] uppercase tracking-widest text-gold font-bold">{p.category}</span>
+                  <h3 className="mt-0.5 font-display text-base text-brand leading-tight">{p.name}</h3>
+                  <div className="mt-2 flex items-center justify-between">
+                    <span className="text-[10px] text-foreground/60">{p.weight}</span>
+                    <span className="inline-flex items-center gap-1 text-xs font-semibold text-brand group-hover:gap-2 transition-all">
+                      View <i className="fas fa-arrow-right text-[10px]" />
                     </span>
                   </div>
                 </div>
