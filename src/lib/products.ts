@@ -11,10 +11,15 @@ export type Product = {
   tagline: string;
   category: "Powders" | "Spices" | "Honey" | "Traditional";
   weight: string;
+  price: number;
+  mrp?: number;
   image: string;
   description: string;
   benefits: string[];
 };
+
+export const formatPrice = (n: number) =>
+  `₹${n.toLocaleString("en-IN", { maximumFractionDigits: 0 })}`;
 
 export const products: Product[] = [
   {
