@@ -171,7 +171,7 @@ function Checkout() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="font-display text-brand text-sm leading-tight line-clamp-2">{i.name}</p>
-                    <p className="text-[11px] text-muted-foreground">{i.weight}</p>
+                    <p className="text-[11px] text-muted-foreground">{i.weight} · {formatPrice(i.price)}</p>
                     <div className="mt-1.5 flex items-center justify-between">
                       <div className="inline-flex items-center border border-border rounded-full bg-cream">
                         <button type="button" onClick={() => setQty(i.slug, i.qty - 1)} className="h-6 w-6 grid place-items-center text-brand hover:bg-brand/10 rounded-l-full" aria-label="Decrease">
