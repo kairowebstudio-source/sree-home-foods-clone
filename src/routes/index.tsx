@@ -1,10 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useState } from "react";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { Marquee } from "@/components/site/Marquee";
-import { products } from "@/lib/products";
+import { products, formatPrice, type Product } from "@/lib/products";
+import { useCart } from "@/lib/cart";
 import welcomeBg from "@/assets/welcome-bg.mp4.asset.json";
 import sectionsBg from "@/assets/sections-bg.mp4.asset.json";
+
 
 export const Route = createFileRoute("/")({
   head: () => ({
