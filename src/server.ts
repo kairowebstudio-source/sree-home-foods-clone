@@ -13,7 +13,7 @@ function buildCspPolicy(): string {
   const directives = [
     `default-src 'self'`,
     `script-src 'self' 'unsafe-inline' 'unsafe-eval'`,
-    `style-src 'self' 'unsafe-inline' https://fonts.googleapis.com`,
+    `style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com`,
     `font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com`,
     `img-src 'self' data: blob: https://*.supabase.co`,
     `connect-src 'self' https://*.supabase.co`,
