@@ -1,14 +1,10 @@
 import { Link } from "@tanstack/react-router";
-import banner from "@/assets/konaseema-banner.png";
 
 const logo = "/media/33191-removebg-preview.png";
 
 export function Footer() {
   return (
     <>
-      <div className="w-full bg-cream">
-        <img src={banner} alt="From the heart of Konaseema to your home" className="w-full h-auto block" />
-      </div>
       <footer className="bg-[#1a0d0d] text-cream/90">
         <div className="mx-auto max-w-7xl px-4 py-14 grid gap-10 md:grid-cols-4">
           <div>
