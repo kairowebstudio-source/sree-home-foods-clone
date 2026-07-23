@@ -4,6 +4,7 @@ import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { useCart } from "@/lib/cart";
 import { formatPrice } from "@/lib/products";
+import { submitOrder } from "@/lib/admin.server";
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({
@@ -50,17 +51,46 @@ function Checkout() {
     e.preventDefault();
     if (items.length === 0) return;
     setSubmitting(true);
-    // TODO: Wire Zoho Payments here. For now, generate an order id and confirm on-site.
-    const orderId = "RNP-" + Date.now().toString(36).toUpperCase();
-    await new Promise((r) => setTimeout(r, 700));
+
+    const total = items.reduce((s, i) => s + i.price * i.qty, 0);
+    const shipping = total >= 999 ? 0 : total > 0 ? 60 : 0;
+
     try {
-      sessionStorage.setItem(
-        "retro-last-order",
-        JSON.stringify({ orderId, form, items, count, placedAt: new Date().toISOString() }),
-      );
-    } catch {}
-    clear();
-    navigate({ to: "/checkout/success", search: { id: orderId } });
+      const { orderId } = await submitOrder({
+        data: {
+          customer_name: form.name,
+          phone: form.phone,
+          email: form.email,
+          address: form.address,
+          city: form.city,
+          state: form.state,
+          pincode: form.pincode,
+          notes: form.notes,
+          items: items.map((i) => ({
+            slug: i.slug,
+            name: i.name,
+            price: i.price,
+            qty: i.qty,
+          })),
+          total: total + shipping,
+        },
+      });
+
+      try {
+        sessionStorage.setItem(
+          "retro-last-order",
+          JSON.stringify({ orderId, form, items, count, placedAt: new Date().toISOString() }),
+        );
+      } catch {}
+
+      clear();
+      navigate({ to: "/checkout/success", search: { id: orderId } });
+    } catch (err) {
+      console.error("Order submission failed:", err);
+      alert("Something went wrong while placing your order. Please try again or contact us via WhatsApp.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   if (items.length === 0) {

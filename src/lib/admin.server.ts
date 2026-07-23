@@ -1,41 +1,16 @@
 import { createServerFn } from "@tanstack/react-start";
-import { readFileSync, writeFileSync, existsSync, mkdirSync } from "node:fs";
-import { join } from "node:path";
 import type { Product } from "./products";
-import { products as defaultProducts, categories } from "./products";
-
-// ── Data file helpers ──────────────────────────────────────────
-
-const DATA_DIR = join(process.cwd(), "tmp-data");
-const PRODUCTS_FILE = join(DATA_DIR, "products.json");
-
-function ensureDir() {
-  if (!existsSync(DATA_DIR)) mkdirSync(DATA_DIR, { recursive: true });
-}
-
-function load(): Product[] {
-  try {
-    ensureDir();
-    if (existsSync(PRODUCTS_FILE)) {
-      return JSON.parse(readFileSync(PRODUCTS_FILE, "utf-8"));
-    }
-  } catch (e) {
-    console.error("Failed to load products from file:", e);
-  }
-  // Seed with defaults on first run
-  save(defaultProducts);
-  return defaultProducts;
-}
-
-function save(list: Product[]) {
-  ensureDir();
-  writeFileSync(PRODUCTS_FILE, JSON.stringify(list, null, 2), "utf-8");
-}
+import { supabaseAdmin } from "./supabase";
 
 // ── Server Functions ───────────────────────────────────────────
 
 export const getProducts = createServerFn({ method: "GET" }).handler(async () => {
-  return load();
+  const { data, error } = await supabaseAdmin
+    .from("products")
+    .select("*")
+    .order("created_at", { ascending: true });
+  if (error) throw new Error(`Failed to load products: ${error.message}`);
+  return (data as Product[]) || [];
 });
 
 export const adminLogin = createServerFn({ method: "POST" })
@@ -62,40 +37,95 @@ type ProductInput = {
 export const addProduct = createServerFn({ method: "POST" })
   .validator((d: ProductInput) => d)
   .handler(async ({ data }) => {
-    const list = load();
-    const product: Product = {
+    const product = {
       slug: data.slug,
       name: data.name,
       tagline: data.tagline,
       category: data.category,
       weight: data.weight,
       price: data.price,
-      mrp: data.mrp || undefined,
+      mrp: data.mrp || null,
       image: data.image || "/placeholder.svg",
       description: data.description,
       benefits: data.benefits,
     };
-    list.push(product);
-    save(list);
-    return product;
+    const { error } = await supabaseAdmin.from("products").insert(product);
+    if (error) throw new Error(`Failed to add product: ${error.message}`);
+    return product as Product;
   });
 
 export const updateProduct = createServerFn({ method: "POST" })
   .validator((d: Product) => d)
   .handler(async ({ data }) => {
-    const list = load();
-    const idx = list.findIndex((p) => p.slug === data.slug);
-    if (idx === -1) throw new Error("Product not found");
-    list[idx] = data;
-    save(list);
+    const { error } = await supabaseAdmin
+      .from("products")
+      .update({
+        name: data.name,
+        tagline: data.tagline,
+        category: data.category,
+        weight: data.weight,
+        price: data.price,
+        mrp: data.mrp || null,
+        image: data.image,
+        description: data.description,
+        benefits: data.benefits,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("slug", data.slug);
+    if (error) throw new Error(`Failed to update product: ${error.message}`);
     return data;
   });
 
 export const deleteProduct = createServerFn({ method: "POST" })
   .validator((d: string) => d)
   .handler(async ({ data }) => {
-    const list = load();
-    const filtered = list.filter((p) => p.slug !== data);
-    save(filtered);
+    const { error } = await supabaseAdmin.from("products").delete().eq("slug", data);
+    if (error) throw new Error(`Failed to delete product: ${error.message}`);
     return { success: true };
   });
+
+export type OrderData = {
+  customer_name: string;
+  phone: string;
+  email: string;
+  address: string;
+  city: string;
+  state?: string;
+  pincode: string;
+  notes: string;
+  items: { slug: string; name: string; price: number; qty: number }[];
+  total: number;
+};
+
+export const submitOrder = createServerFn({ method: "POST" })
+  .validator((d: OrderData) => d)
+  .handler(async ({ data }) => {
+    const fullAddress = data.state ? `${data.address}, ${data.city}, ${data.state} - ${data.pincode}` : `${data.address}, ${data.city} - ${data.pincode}`;
+    const { data: order, error } = await supabaseAdmin
+      .from("orders")
+      .insert({
+        customer_name: data.customer_name,
+        phone: data.phone,
+        email: data.email,
+        address: fullAddress,
+        city: data.city,
+        pincode: data.pincode,
+        items: data.items,
+        total: data.total,
+        notes: data.notes,
+        status: "pending",
+      })
+      .select("id")
+      .single();
+    if (error) throw new Error(`Failed to save order: ${error.message}`);
+    return { orderId: order.id };
+  });
+
+export const getOrders = createServerFn({ method: "GET" }).handler(async () => {
+  const { data, error } = await supabaseAdmin
+    .from("orders")
+    .select("*")
+    .order("created_at", { ascending: false });
+  if (error) throw new Error(`Failed to load orders: ${error.message}`);
+  return data || [];
+});
