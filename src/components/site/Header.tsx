@@ -21,7 +21,7 @@ export function Header() {
     <header className="absolute top-0 left-0 right-0 z-50 bg-transparent">
       <div className="mx-auto max-w-7xl px-4 py-4 flex items-center justify-between gap-4">
         <Link to="/" className="flex items-center gap-2 shrink-0">
-          <img src={logo} alt="Retro Natural Products" className="h-20 md:h-28 w-auto object-contain mix-blend-multiply" style={{ background: "transparent" }} />
+          <img src={logo} alt="Retro Natural Products" className="h-20 md:h-28 w-auto object-contain drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)]" />
         </Link>
         <nav className="hidden md:flex items-center gap-8">
           {nav.map((n) => (
