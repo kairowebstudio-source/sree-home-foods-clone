@@ -96,7 +96,7 @@ function Checkout() {
   if (items.length === 0) {
     return (
       <div className="min-h-screen bg-background">
-        <Header />
+        <Header variant="solid" />
         <section className="py-24 px-4 text-center">
           <div className="mx-auto max-w-lg bg-cream/80 backdrop-blur border border-gold/30 rounded-3xl p-10 shadow-sm">
             <div className="mx-auto h-20 w-20 rounded-full bg-brand/10 text-brand grid place-items-center text-3xl">
@@ -119,7 +119,7 @@ function Checkout() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
+      <Header variant="solid" />
 
       <section className="bg-brand text-cream py-10 px-4 text-center">
         <span className="text-gold text-xs tracking-[0.3em] uppercase">Almost There</span>

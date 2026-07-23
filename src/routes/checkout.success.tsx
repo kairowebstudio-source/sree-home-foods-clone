@@ -18,7 +18,7 @@ function Success() {
   const { id } = Route.useSearch();
   return (
     <div className="min-h-screen bg-background">
-      <Header />
+      <Header variant="solid" />
       <section className="py-20 px-4">
         <div className="mx-auto max-w-xl bg-cream/85 backdrop-blur border border-gold/30 rounded-3xl p-10 text-center shadow-sm">
           <div className="mx-auto h-20 w-20 rounded-full bg-leaf/20 text-leaf-dark grid place-items-center text-4xl border-4 border-leaf/30">
