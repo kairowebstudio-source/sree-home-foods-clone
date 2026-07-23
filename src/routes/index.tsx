@@ -107,6 +107,14 @@ function Home() {
               <ProductCard key={p.slug} product={p} />
             ))}
           </div>
+          <div className="text-center mt-10">
+            <Link
+              to="/shop"
+              className="inline-flex items-center gap-2 rounded-full bg-brand text-cream px-8 py-3 font-bold uppercase tracking-wider text-sm hover:bg-brand/90 transition shadow-lg"
+            >
+              <i className="fas fa-store" /> View All Products
+            </Link>
+          </div>
         </div>
       </section>
 
