@@ -135,13 +135,18 @@ export const submitOrder = createServerFn({ method: "POST" })
   });
 
 export const getOrders = createServerFn({ method: "GET" }).handler(async () => {
-  const client = supabaseAdmin();
-  const { data, error } = await client
-    .from("orders")
-    .select("*")
-    .order("created_at", { ascending: false });
-  if (error) throw new Error(`Failed to load orders: ${error.message}`);
-  return data || [];
+  if (!supabaseEnabled()) return [];
+  try {
+    const client = supabaseAdmin();
+    const { data, error } = await client
+      .from("orders")
+      .select("*")
+      .order("created_at", { ascending: false });
+    if (error) throw new Error(error.message);
+    return data || [];
+  } catch {
+    return [];
+  }
 });
 
 // ── Image Upload ───────────────────────────────────────────────

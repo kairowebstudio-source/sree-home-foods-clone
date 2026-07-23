@@ -1,8 +1,22 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { useEffect, useState, useCallback, useRef } from "react";
-import { getProducts, addProduct, updateProduct, deleteProduct, adminLogin, uploadProductImage } from "@/lib/admin.server";
+import { getProducts, getOrders, addProduct, updateProduct, deleteProduct, adminLogin, uploadProductImage } from "@/lib/admin.server";
 import { categories } from "@/lib/products";
 import type { Product } from "@/lib/products";
+
+function formatDate(iso: string) {
+  return new Date(iso).toLocaleDateString("en-IN", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+function formatPrice(n: number) {
+  return `₹${n.toLocaleString("en-IN", { maximumFractionDigits: 0 })}`;
+}
 
 export const Route = createFileRoute("/admin/")({
   head: () => ({
@@ -306,9 +320,17 @@ function AdminPage() {
   const [loginError, setLoginError] = useState("");
   const [loggingIn, setLoggingIn] = useState(false);
 
+  // Tab state
+  const [tab, setTab] = useState<"products" | "orders">("products");
+
   // Product state
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Order state
+  const [orders, setOrders] = useState<any[]>([]);
+  const [ordersLoading, setOrdersLoading] = useState(false);
+  const [viewOrder, setViewOrder] = useState<any | null>(null);
 
   // Modals
   const [addOpen, setAddOpen] = useState(false);
@@ -340,6 +362,22 @@ function AdminPage() {
       }
     })();
   }, [authed, showToast]);
+
+  // Load orders when tab switches to orders
+  useEffect(() => {
+    if (!authed || tab !== "orders") return;
+    (async () => {
+      setOrdersLoading(true);
+      try {
+        const list = await getOrders();
+        setOrders(list);
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setOrdersLoading(false);
+      }
+    })();
+  }, [authed, tab]);
 
   // Login handler
   const handleLogin = async (e: React.FormEvent) => {
@@ -506,6 +544,30 @@ function AdminPage() {
 
       {/* Dashboard Content */}
       <main className="max-w-7xl mx-auto px-4 py-8">
+        {/* Tab Navigation */}
+        <div className="flex items-center gap-1 mb-6 bg-cream rounded-xl border border-border p-1 w-fit">
+          <button
+            onClick={() => setTab("products")}
+            className={`px-5 py-2 rounded-lg text-sm font-semibold uppercase tracking-wider transition ${
+              tab === "products"
+                ? "bg-brand text-cream shadow-sm"
+                : "text-foreground/60 hover:text-brand hover:bg-brand/5"
+            }`}
+          >
+            <i className="fas fa-box mr-1.5" /> Products
+          </button>
+          <button
+            onClick={() => setTab("orders")}
+            className={`px-5 py-2 rounded-lg text-sm font-semibold uppercase tracking-wider transition ${
+              tab === "orders"
+                ? "bg-brand text-cream shadow-sm"
+                : "text-foreground/60 hover:text-brand hover:bg-brand/5"
+            }`}
+          >
+            <i className="fas fa-truck mr-1.5" /> Orders
+          </button>
+        </div>
+
         {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           {[
@@ -526,7 +588,8 @@ function AdminPage() {
           ))}
         </div>
 
-        {/* Products Section */}
+        {/* ── Products Section ── */}
+        {tab === "products" && (
         <div className="bg-cream rounded-2xl border border-border shadow-sm overflow-hidden">
           <div className="px-6 py-5 border-b border-border flex flex-wrap items-center justify-between gap-3">
             <div>
@@ -611,11 +674,106 @@ function AdminPage() {
               </table>
             </div>
           )}
-        </div>
+        </div>)}
+
+        {/* ── Orders Section ── */}
+        {tab === "orders" && (
+        <div className="bg-cream rounded-2xl border border-border shadow-sm overflow-hidden">
+          <div className="px-6 py-5 border-b border-border flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h2 className="font-display text-xl text-brand">Orders</h2>
+              <p className="text-xs text-foreground/60 mt-0.5">View and manage customer orders</p>
+            </div>
+            {orders.length > 0 && (
+              <span className="text-xs text-foreground/50 bg-brand/5 rounded-full px-3 py-1">
+                {orders.length} order{orders.length !== 1 ? "s" : ""}
+              </span>
+            )}
+          </div>
+
+          {ordersLoading ? (
+            <div className="p-16 text-center">
+              <i className="fas fa-spinner fa-spin text-3xl text-gold" />
+              <p className="mt-3 text-sm text-foreground/60">Loading orders...</p>
+            </div>
+          ) : orders.length === 0 ? (
+            <div className="p-16 text-center">
+              <i className="fas fa-receipt text-4xl text-foreground/20" />
+              <p className="mt-3 text-sm text-foreground/60">No orders yet.</p>
+              <p className="text-xs text-foreground/40 mt-1">Orders placed on the website will appear here.</p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="bg-brand/5 border-b border-border">
+                    <th className="text-left px-4 py-3 font-semibold text-foreground/70 uppercase tracking-wider text-xs">Order</th>
+                    <th className="text-left px-4 py-3 font-semibold text-foreground/70 uppercase tracking-wider text-xs hidden md:table-cell">Customer</th>
+                    <th className="text-left px-4 py-3 font-semibold text-foreground/70 uppercase tracking-wider text-xs hidden sm:table-cell">Date</th>
+                    <th className="text-left px-4 py-3 font-semibold text-foreground/70 uppercase tracking-wider text-xs">Status</th>
+                    <th className="text-right px-4 py-3 font-semibold text-foreground/70 uppercase tracking-wider text-xs">Total</th>
+                    <th className="text-right px-4 py-3 font-semibold text-foreground/70 uppercase tracking-wider text-xs">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {orders.map((o) => {
+                    const itemCount = (o.items || []).reduce((s: number, i: any) => s + (i.qty || 0), 0);
+                    return (
+                      <tr key={o.id} className="border-b border-border/50 hover:bg-brand/5 transition">
+                        <td className="px-4 py-4">
+                          <span className="font-mono text-xs text-brand font-semibold">#{o.id?.slice(0, 8)}</span>
+                        </td>
+                        <td className="px-4 py-4 hidden md:table-cell">
+                          <div>
+                            <p className="font-semibold text-foreground">{o.customer_name}</p>
+                            <p className="text-xs text-foreground/50">{o.phone}</p>
+                          </div>
+                        </td>
+                        <td className="px-4 py-4 text-foreground/70 hidden sm:table-cell text-xs">
+                          {formatDate(o.created_at)}
+                        </td>
+                        <td className="px-4 py-4">
+                          <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                            o.status === "pending"
+                              ? "bg-amber-50 text-amber-700 border border-amber-200"
+                              : o.status === "shipped"
+                              ? "bg-blue-50 text-blue-700 border border-blue-200"
+                              : o.status === "delivered"
+                              ? "bg-leaf/15 text-leaf-dark border border-leaf/30"
+                              : "bg-red-50 text-red-700 border border-red-200"
+                          }`}>
+                            {o.status === "pending" && <i className="fas fa-clock" />}
+                            {o.status === "shipped" && <i className="fas fa-shipping-fast" />}
+                            {o.status === "delivered" && <i className="fas fa-check-circle" />}
+                            {o.status === "cancelled" && <i className="fas fa-ban" />}
+                            {o.status || "pending"}
+                          </span>
+                        </td>
+                        <td className="px-4 py-4 text-right font-semibold text-foreground">
+                          {formatPrice(o.total)}
+                        </td>
+                        <td className="px-4 py-4 text-right">
+                          <button
+                            onClick={() => setViewOrder(o)}
+                            className="h-8 w-8 rounded-lg hover:bg-brand/10 grid place-items-center text-foreground/60 hover:text-brand transition"
+                            title="View details"
+                          >
+                            <i className="fas fa-eye text-xs" />
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>)}
 
         {/* Footer note */}
         <p className="text-center text-xs text-foreground/40 mt-8">
-          <i className="fas fa-shield-halved mr-1" /> Changes are saved immediately.
+          <i className="fas fa-shield-halved mr-1" />
+          {tab === "products" ? "Changes are saved immediately." : "Orders are loaded from Supabase."}
         </p>
       </main>
 
@@ -635,6 +793,94 @@ function AdminPage() {
             onSave={(data) => handleEdit(data as Product)}
             onCancel={() => setEditTarget(null)}
           />
+        )}
+      </Modal>
+
+      {/* ── Order Detail Modal ── */}
+      <Modal open={!!viewOrder} onClose={() => setViewOrder(null)} title="Order Details">
+        {viewOrder && (
+          <div className="space-y-6">
+            {/* Customer info */}
+            <div className="bg-white rounded-xl border border-border p-5">
+              <h3 className="font-display text-lg text-brand mb-3">Customer</h3>
+              <div className="grid sm:grid-cols-2 gap-3 text-sm">
+                <div>
+                  <span className="text-xs text-foreground/50 uppercase tracking-wider">Name</span>
+                  <p className="font-semibold text-foreground">{viewOrder.customer_name}</p>
+                </div>
+                <div>
+                  <span className="text-xs text-foreground/50 uppercase tracking-wider">Phone</span>
+                  <p className="font-semibold text-foreground">{viewOrder.phone}</p>
+                </div>
+                {viewOrder.email && (
+                  <div className="sm:col-span-2">
+                    <span className="text-xs text-foreground/50 uppercase tracking-wider">Email</span>
+                    <p className="font-semibold text-foreground">{viewOrder.email}</p>
+                  </div>
+                )}
+                <div className="sm:col-span-2">
+                  <span className="text-xs text-foreground/50 uppercase tracking-wider">Delivery Address</span>
+                  <p className="font-semibold text-foreground">{viewOrder.address}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Order info */}
+            <div className="bg-white rounded-xl border border-border p-5">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="font-display text-lg text-brand">Order</h3>
+                <span className="font-mono text-xs text-foreground/50">ID: {viewOrder.id}</span>
+              </div>
+              <div className="flex items-center gap-2 mb-4">
+                <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                  viewOrder.status === "pending"
+                    ? "bg-amber-50 text-amber-700 border border-amber-200"
+                    : viewOrder.status === "shipped"
+                    ? "bg-blue-50 text-blue-700 border border-blue-200"
+                    : viewOrder.status === "delivered"
+                    ? "bg-leaf/15 text-leaf-dark border border-leaf/30"
+                    : "bg-red-50 text-red-700 border border-red-200"
+                }`}>
+                  {viewOrder.status || "pending"}
+                </span>
+                <span className="text-xs text-foreground/50">{formatDate(viewOrder.created_at)}</span>
+              </div>
+
+              {/* Items */}
+              <h4 className="text-xs uppercase tracking-wider font-semibold text-foreground/70 mb-2">Items</h4>
+              <div className="divide-y divide-border/50 border border-border rounded-lg overflow-hidden">
+                {(viewOrder.items || []).map((item: any, i: number) => (
+                  <div key={i} className="flex items-center justify-between px-4 py-3 bg-white/50">
+                    <div>
+                      <p className="text-sm font-semibold text-foreground">{item.name}</p>
+                      <p className="text-xs text-foreground/50">{formatPrice(item.price)} × {item.qty}</p>
+                    </div>
+                    <span className="text-sm font-semibold text-foreground">
+                      {formatPrice(item.price * item.qty)}
+                    </span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Total */}
+              <div className="flex items-center justify-between mt-4 pt-3 border-t border-border">
+                <span className="font-display text-lg text-brand">Total</span>
+                <span className="font-display text-lg text-brand">{formatPrice(viewOrder.total)}</span>
+              </div>
+
+              {viewOrder.notes && (
+                <div className="mt-4 bg-amber-50 border border-amber-200 rounded-lg px-4 py-3">
+                  <p className="text-xs text-amber-700 font-semibold uppercase tracking-wider mb-1">Notes</p>
+                  <p className="text-sm text-amber-800">{viewOrder.notes}</p>
+                </div>
+              )}
+            </div>
+
+            <button onClick={() => setViewOrder(null)}
+              className="w-full rounded-full border border-border px-6 py-2.5 font-semibold text-sm text-foreground/70 hover:bg-accent/30 transition">
+              Close
+            </button>
+          </div>
         )}
       </Modal>
 
