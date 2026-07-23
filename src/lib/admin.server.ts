@@ -5,7 +5,8 @@ import { supabaseAdmin } from "./supabase";
 // ── Server Functions ───────────────────────────────────────────
 
 export const getProducts = createServerFn({ method: "GET" }).handler(async () => {
-  const { data, error } = await supabaseAdmin
+  const client = supabaseAdmin();
+  const { data, error } = await client
     .from("products")
     .select("*")
     .order("created_at", { ascending: true });
@@ -37,6 +38,7 @@ type ProductInput = {
 export const addProduct = createServerFn({ method: "POST" })
   .validator((d: ProductInput) => d)
   .handler(async ({ data }) => {
+    const client = supabaseAdmin();
     const product = {
       slug: data.slug,
       name: data.name,
@@ -49,7 +51,7 @@ export const addProduct = createServerFn({ method: "POST" })
       description: data.description,
       benefits: data.benefits,
     };
-    const { error } = await supabaseAdmin.from("products").insert(product);
+    const { error } = await client.from("products").insert(product);
     if (error) throw new Error(`Failed to add product: ${error.message}`);
     return product as Product;
   });
@@ -57,7 +59,8 @@ export const addProduct = createServerFn({ method: "POST" })
 export const updateProduct = createServerFn({ method: "POST" })
   .validator((d: Product) => d)
   .handler(async ({ data }) => {
-    const { error } = await supabaseAdmin
+    const client = supabaseAdmin();
+    const { error } = await client
       .from("products")
       .update({
         name: data.name,
@@ -79,7 +82,8 @@ export const updateProduct = createServerFn({ method: "POST" })
 export const deleteProduct = createServerFn({ method: "POST" })
   .validator((d: string) => d)
   .handler(async ({ data }) => {
-    const { error } = await supabaseAdmin.from("products").delete().eq("slug", data);
+    const client = supabaseAdmin();
+    const { error } = await client.from("products").delete().eq("slug", data);
     if (error) throw new Error(`Failed to delete product: ${error.message}`);
     return { success: true };
   });
@@ -100,8 +104,9 @@ export type OrderData = {
 export const submitOrder = createServerFn({ method: "POST" })
   .validator((d: OrderData) => d)
   .handler(async ({ data }) => {
+    const client = supabaseAdmin();
     const fullAddress = data.state ? `${data.address}, ${data.city}, ${data.state} - ${data.pincode}` : `${data.address}, ${data.city} - ${data.pincode}`;
-    const { data: order, error } = await supabaseAdmin
+    const { data: order, error } = await client
       .from("orders")
       .insert({
         customer_name: data.customer_name,
@@ -122,7 +127,8 @@ export const submitOrder = createServerFn({ method: "POST" })
   });
 
 export const getOrders = createServerFn({ method: "GET" }).handler(async () => {
-  const { data, error } = await supabaseAdmin
+  const client = supabaseAdmin();
+  const { data, error } = await client
     .from("orders")
     .select("*")
     .order("created_at", { ascending: false });
@@ -135,12 +141,13 @@ export const getOrders = createServerFn({ method: "GET" }).handler(async () => {
 export const uploadProductImage = createServerFn({ method: "POST" })
   .validator((d: { base64: string; filename: string; contentType: string }) => d)
   .handler(async ({ data }) => {
+    const client = supabaseAdmin();
     // Ensure the product-images bucket exists (public)
     const bucketName = "product-images";
-    const { data: buckets } = await supabaseAdmin.storage.listBuckets();
+    const { data: buckets } = await client.storage.listBuckets();
     const exists = buckets?.some((b) => b.name === bucketName);
     if (!exists) {
-      await supabaseAdmin.storage.createBucket(bucketName, {
+      await client.storage.createBucket(bucketName, {
         public: true,
         fileSizeLimit: 5 * 1024 * 1024, // 5MB
       });
@@ -150,7 +157,7 @@ export const uploadProductImage = createServerFn({ method: "POST" })
     const buffer = Buffer.from(data.base64, "base64");
 
     // Upload
-    const { error: uploadError } = await supabaseAdmin.storage
+    const { error: uploadError } = await client.storage
       .from(bucketName)
       .upload(data.filename, buffer, {
         contentType: data.contentType,
@@ -160,7 +167,7 @@ export const uploadProductImage = createServerFn({ method: "POST" })
     if (uploadError) throw new Error(`Failed to upload image: ${uploadError.message}`);
 
     // Get public URL
-    const { data: publicUrl } = supabaseAdmin.storage
+    const { data: publicUrl } = client.storage
       .from(bucketName)
       .getPublicUrl(data.filename);
 

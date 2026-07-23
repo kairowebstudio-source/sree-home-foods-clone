@@ -1,16 +1,19 @@
-import { createClient } from "@supabase/supabase-js";
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
-// Server-side client using service role key (full access)
-export const supabaseAdmin = createClient(
-  process.env.SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  {
-    auth: { persistSession: false },
-  },
-);
+let _admin: SupabaseClient | null = null;
 
-// Client-side anon key (for future use with RLS)
-export const supabaseAnon = createClient(
-  process.env.SUPABASE_URL!,
-  process.env.SUPABASE_ANON_KEY!,
-);
+function getAdmin(): SupabaseClient {
+  if (_admin) return _admin;
+  const url = process.env.SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !key) {
+    throw new Error("Supabase env vars (SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY) not set");
+  }
+  _admin = createClient(url, key, { auth: { persistSession: false } });
+  return _admin;
+}
+
+// Lazy helper: only creates the client when first accessed
+export function supabaseAdmin(): SupabaseClient {
+  return getAdmin();
+}
