@@ -15,16 +15,8 @@ export const Route = createFileRoute("/about")({
 function About() {
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <Header />
-      <main className="flex-1">
-        <div className="w-full h-full">
-          <img
-            src="/media/IMG-20260718-WA0003.jpg"
-            alt="About Retro Natural Products"
-            className="w-full h-auto object-contain"
-          />
-        </div>
-      </main>
+      <Header variant="solid" />
+      <main className="flex-1" />
       <Footer />
     </div>
   );
