@@ -1,10 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { Marquee } from "@/components/site/Marquee";
-import { products, formatPrice, type Product } from "@/lib/products";
+import { formatPrice, type Product } from "@/lib/products";
 import { useCart } from "@/lib/cart";
+import { getProducts } from "@/lib/admin.server";
 
 
 export const Route = createFileRoute("/")({
@@ -18,7 +19,11 @@ export const Route = createFileRoute("/")({
 });
 
 function Home() {
-  const featured = products.slice(0, 6);
+  const [productList, setProductList] = useState<Product[]>([]);
+  useEffect(() => {
+    getProducts().then(setProductList).catch(() => {});
+  }, []);
+  const featured = productList.slice(0, 6);
   return (
     <div className="min-h-screen bg-background">
       <Header />

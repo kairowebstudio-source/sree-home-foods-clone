@@ -1,8 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
-import { products, categories } from "@/lib/products";
+import { type Product, categories } from "@/lib/products";
+import { getProducts } from "@/lib/admin.server";
 
 export const Route = createFileRoute("/shop/")({
   head: () => ({
@@ -15,8 +16,12 @@ export const Route = createFileRoute("/shop/")({
 });
 
 function Shop() {
+  const [productList, setProductList] = useState<Product[]>([]);
+  useEffect(() => {
+    getProducts().then(setProductList).catch(() => {});
+  }, []);
   const [cat, setCat] = useState<(typeof categories)[number]>("All");
-  const filtered = cat === "All" ? products : products.filter((p) => p.category === cat);
+  const filtered = cat === "All" ? productList : productList.filter((p) => p.category === cat);
   return (
     <div className="min-h-screen bg-background">
       <Header />

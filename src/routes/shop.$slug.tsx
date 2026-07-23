@@ -1,16 +1,18 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
-import { products } from "@/lib/products";
 import { useCart } from "@/lib/cart";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import type { Product } from "@/lib/products";
+import { getProducts } from "@/lib/admin.server";
 
 
 export const Route = createFileRoute("/shop/$slug")({
-  loader: ({ params }) => {
-    const product = products.find((p) => p.slug === params.slug);
+  loader: async ({ params }) => {
+    const allProducts = await getProducts();
+    const product = allProducts.find((p: Product) => p.slug === params.slug);
     if (!product) throw notFound();
-    return { product };
+    return { product, allProducts };
   },
   head: ({ loaderData }) => ({
     meta: loaderData
@@ -40,8 +42,8 @@ export const Route = createFileRoute("/shop/$slug")({
 });
 
 function ProductPage() {
-  const { product } = Route.useLoaderData();
-  const related = products.filter((p) => p.slug !== product.slug).slice(0, 3);
+  const { product, allProducts } = Route.useLoaderData();
+  const related = (allProducts || []).filter((p: Product) => p.slug !== product.slug).slice(0, 3);
   const { add } = useCart();
   const [qty, setQty] = useState(1);
   const waMsg = encodeURIComponent(`Hi! I'd like to order ${product.name} (${product.weight}) from Retro Natural Products.`);
