@@ -15,9 +15,10 @@ export const Route = createFileRoute("/about")({
 
 function About() {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <Header />
-      <section className="relative py-24 px-4" style={{ backgroundImage: `url(${godavariBg})`, backgroundSize: "cover" }}>
+      <main className="flex-1">
+        <section className="relative py-24 px-4" style={{ backgroundImage: `url(${godavariBg})`, backgroundSize: "cover" }}>
         <div className="absolute inset-0 bg-cream/70" />
         <div className="relative mx-auto max-w-3xl text-center">
           <span className="text-gold text-xs tracking-[0.3em] uppercase font-bold">Our Story</span>
@@ -49,6 +50,7 @@ function About() {
           </div>
         </div>
       </section>
+      </main>
       <Footer />
     </div>
   );

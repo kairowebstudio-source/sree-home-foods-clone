@@ -14,9 +14,10 @@ export const Route = createFileRoute("/wholesale")({
 
 function Wholesale() {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <Header variant="solid" />
-      <section className="bg-brand text-cream py-20 px-4 text-center">
+      <main className="flex-1">
+        <section className="bg-brand text-cream py-20 px-4 text-center">
         <span className="text-gold text-xs tracking-[0.3em] uppercase font-bold">Wholesale & Manufacturing</span>
         <h1 className="font-display text-5xl mt-2">Top Brands Source Their Stock Here.</h1>
         <p className="mt-4 text-cream/80 max-w-2xl mx-auto">Partner with Retro Natural Products for bulk supply, private-label packing, and reliable dispatch from our Konaseema facility.</p>
@@ -41,6 +42,7 @@ function Wholesale() {
           </a>
         </div>
       </section>
+      </main>
       <Footer />
     </div>
   );

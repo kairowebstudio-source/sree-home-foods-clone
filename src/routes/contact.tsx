@@ -14,9 +14,10 @@ export const Route = createFileRoute("/contact")({
 
 function Contact() {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <Header variant="solid" />
-      <section className="bg-brand text-cream py-16 px-4 text-center">
+      <main className="flex-1">
+        <section className="bg-brand text-cream py-16 px-4 text-center">
         <span className="text-gold text-xs tracking-[0.3em] uppercase">Say Hello</span>
         <h1 className="font-display text-5xl mt-2">Contact Us</h1>
       </section>
@@ -48,6 +49,7 @@ function Contact() {
           </form>
         </div>
       </section>
+      </main>
       <Footer />
     </div>
   );
