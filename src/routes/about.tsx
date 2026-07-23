@@ -16,7 +16,15 @@ function About() {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <Header variant="solid" />
-      <main className="flex-1" />
+      <main className="flex-1">
+        <div className="w-full">
+          <img
+            src="/media/IMG-20260718-WA0003.jpg"
+            alt="About Retro Natural Products"
+            className="w-full h-auto object-contain"
+          />
+        </div>
+      </main>
       <Footer />
     </div>
   );
