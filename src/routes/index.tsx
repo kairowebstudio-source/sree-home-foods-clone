@@ -5,8 +5,7 @@ import { Footer } from "@/components/site/Footer";
 import { Marquee } from "@/components/site/Marquee";
 import { products, formatPrice, type Product } from "@/lib/products";
 import { useCart } from "@/lib/cart";
-import welcomeBg from "@/assets/welcome-bg.mp4.asset.json";
-import sectionsBg from "@/assets/sections-bg.mp4.asset.json";
+
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -27,7 +26,7 @@ function Home() {
       {/* HERO */}
       <section className="relative overflow-hidden">
         <video autoPlay muted loop playsInline className="absolute inset-0 w-full h-full object-cover">
-          <source src={welcomeBg.url} type="video/mp4" />
+          <source src="/media/welcome-bg.mp4" type="video/mp4" />
         </video>
         <div className="absolute inset-0 bg-gradient-to-b from-[#1a0d0d]/20 via-transparent to-[#1a0d0d]/40" />
         <div className="relative mx-auto max-w-7xl px-4 py-24 md:py-36 text-cream text-center">
@@ -85,7 +84,7 @@ function Home() {
       {/* COLLECTIONS */}
       <section className="relative py-10 md:py-16 px-3 sm:px-4 overflow-hidden">
         <video autoPlay muted loop playsInline className="absolute inset-0 w-full h-full object-cover">
-          <source src={sectionsBg.url} type="video/mp4" />
+          <source src="/media/sections-bg.mp4" type="video/mp4" />
         </video>
         <div className="absolute inset-0 bg-cream/20 md:bg-cream/35" />
         <div className="relative mx-auto max-w-6xl">
@@ -110,7 +109,7 @@ function Home() {
       {/* LEGACY / ABOUT */}
       <section className="relative py-24 px-4 overflow-hidden">
         <video autoPlay muted loop playsInline className="absolute inset-0 w-full h-full object-cover">
-          <source src={sectionsBg.url} type="video/mp4" />
+          <source src="/media/sections-bg.mp4" type="video/mp4" />
         </video>
         <div className="absolute inset-0 bg-cream/25 md:bg-cream/40" />
         <div className="relative mx-auto max-w-5xl text-center">
