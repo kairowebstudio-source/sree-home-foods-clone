@@ -154,35 +154,47 @@ export const getOrders = createServerFn({ method: "GET" }).handler(async () => {
 export const uploadProductImage = createServerFn({ method: "POST" })
   .validator((d: { base64: string; filename: string; contentType: string }) => d)
   .handler(async ({ data }) => {
-    const client = supabaseAdmin();
-    // Ensure the product-images bucket exists (public)
-    const bucketName = "product-images";
-    const { data: buckets } = await client.storage.listBuckets();
-    const exists = buckets?.some((b) => b.name === bucketName);
-    if (!exists) {
-      await client.storage.createBucket(bucketName, {
-        public: true,
-        fileSizeLimit: 5 * 1024 * 1024, // 5MB
-      });
+    // Fallback: embed as data URL when Supabase isn't available
+    if (!supabaseEnabled()) {
+      const dataUrl = `data:${data.contentType};base64,${data.base64}`;
+      return { url: dataUrl };
     }
 
-    // Decode base64
-    const buffer = Buffer.from(data.base64, "base64");
+    try {
+      const client = supabaseAdmin();
+      const bucketName = "product-images";
 
-    // Upload
-    const { error: uploadError } = await client.storage
-      .from(bucketName)
-      .upload(data.filename, buffer, {
-        contentType: data.contentType,
-        upsert: true,
-      });
+      // Ensure the bucket exists (public)
+      const { data: buckets } = await client.storage.listBuckets();
+      const exists = buckets?.some((b) => b.name === bucketName);
+      if (!exists) {
+        await client.storage.createBucket(bucketName, {
+          public: true,
+          fileSizeLimit: 5 * 1024 * 1024,
+        });
+      }
 
-    if (uploadError) throw new Error(`Failed to upload image: ${uploadError.message}`);
+      // Upload
+      const buffer = Buffer.from(data.base64, "base64");
+      const { error: uploadError } = await client.storage
+        .from(bucketName)
+        .upload(data.filename, buffer, {
+          contentType: data.contentType,
+          upsert: true,
+        });
 
-    // Get public URL
-    const { data: publicUrl } = client.storage
-      .from(bucketName)
-      .getPublicUrl(data.filename);
+      if (uploadError) throw new Error(uploadError.message);
 
-    return { url: publicUrl.publicUrl };
+      // Get public URL
+      const { data: publicUrl } = client.storage
+        .from(bucketName)
+        .getPublicUrl(data.filename);
+
+      return { url: publicUrl.publicUrl };
+    } catch (err) {
+      // Fallback: use data URL when Supabase Storage fails
+      console.warn("Supabase upload failed, falling back to data URL:", err);
+      const dataUrl = `data:${data.contentType};base64,${data.base64}`;
+      return { url: dataUrl };
+    }
   });
