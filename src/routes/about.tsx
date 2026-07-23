@@ -1,7 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
-import godavariBg from "@/assets/godavari-bg.png";
 
 export const Route = createFileRoute("/about")({
   head: () => ({
@@ -18,7 +17,7 @@ function About() {
     <div className="min-h-screen bg-background flex flex-col">
       <Header />
       <main className="flex-1">
-        <section className="relative py-24 px-4" style={{ backgroundImage: `url(${godavariBg})`, backgroundSize: "cover" }}>
+        <section className="relative py-24 px-4" style={{ backgroundImage: `url(/media/IMG-20260718-WA0003.jpg)`, backgroundSize: "cover", backgroundPosition: "center" }}>
         <div className="absolute inset-0 bg-cream/70" />
         <div className="relative mx-auto max-w-3xl text-center">
           <span className="text-gold text-xs tracking-[0.3em] uppercase font-bold">Our Story</span>
