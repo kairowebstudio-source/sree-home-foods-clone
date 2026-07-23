@@ -43,9 +43,12 @@ type ProductInput = {
   benefits: string[];
 };
 
+const NEEDS_ENV_MSG = "Set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY in Vercel env vars to save products.";
+
 export const addProduct = createServerFn({ method: "POST" })
   .validator((d: ProductInput) => d)
   .handler(async ({ data }) => {
+    if (!supabaseEnabled()) throw new Error(NEEDS_ENV_MSG);
     const client = supabaseAdmin();
     const product = {
       slug: data.slug,
@@ -67,6 +70,7 @@ export const addProduct = createServerFn({ method: "POST" })
 export const updateProduct = createServerFn({ method: "POST" })
   .validator((d: Product) => d)
   .handler(async ({ data }) => {
+    if (!supabaseEnabled()) throw new Error(NEEDS_ENV_MSG);
     const client = supabaseAdmin();
     const { error } = await client
       .from("products")
@@ -90,6 +94,7 @@ export const updateProduct = createServerFn({ method: "POST" })
 export const deleteProduct = createServerFn({ method: "POST" })
   .validator((d: string) => d)
   .handler(async ({ data }) => {
+    if (!supabaseEnabled()) throw new Error(NEEDS_ENV_MSG);
     const client = supabaseAdmin();
     const { error } = await client.from("products").delete().eq("slug", data);
     if (error) throw new Error(`Failed to delete product: ${error.message}`);
@@ -112,6 +117,7 @@ export type OrderData = {
 export const submitOrder = createServerFn({ method: "POST" })
   .validator((d: OrderData) => d)
   .handler(async ({ data }) => {
+    if (!supabaseEnabled()) throw new Error("Set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY in Vercel env vars to accept orders.");
     const client = supabaseAdmin();
     const fullAddress = data.state ? `${data.address}, ${data.city}, ${data.state} - ${data.pincode}` : `${data.address}, ${data.city} - ${data.pincode}`;
     const { data: order, error } = await client

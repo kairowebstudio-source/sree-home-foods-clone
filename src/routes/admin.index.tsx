@@ -414,8 +414,9 @@ function AdminPage() {
       setProducts((prev) => [...prev, created]);
       setAddOpen(false);
       showToast(`"${created.name}" added successfully`);
-    } catch {
-      showToast("Failed to add product", false);
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "Failed to add product";
+      showToast(msg, false);
     } finally {
       setSaving(false);
     }
@@ -428,8 +429,9 @@ function AdminPage() {
       setProducts((prev) => prev.map((p) => (p.slug === data.slug ? data : p)));
       setEditTarget(null);
       showToast(`"${data.name}" updated`);
-    } catch {
-      showToast("Failed to update product", false);
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "Failed to update product";
+      showToast(msg, false);
     } finally {
       setSaving(false);
     }
@@ -443,8 +445,9 @@ function AdminPage() {
       setProducts((prev) => prev.filter((p) => p.slug !== deleteTarget.slug));
       setDeleteTarget(null);
       showToast(`"${deleteTarget.name}" deleted`);
-    } catch {
-      showToast("Failed to delete product", false);
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "Failed to delete product";
+      showToast(msg, false);
     } finally {
       setDeleting(false);
     }
