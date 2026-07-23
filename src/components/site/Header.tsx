@@ -85,24 +85,6 @@ export function Header() {
           </nav>
         </div>
       )}
-      <div className="bg-brand text-brand-foreground text-xs md:text-sm overflow-hidden">
-        <div className="flex whitespace-nowrap marquee-track py-2">
-          {Array.from({ length: 2 }).map((_, i) => (
-            <div key={i} className="flex shrink-0 gap-16 px-8">
-              {[
-                "FREE DELIVERY ON ORDERS OVER ₹999",
-                "100% NATURAL · NO PRESERVATIVES",
-                "HANDCRAFTED IN KONASEEMA",
-                "PAN-INDIA SHIPPING",
-              ].map((t) => (
-                <span key={t} className="flex items-center gap-2">
-                  <i className="fas fa-leaf text-gold" /> {t}
-                </span>
-              ))}
-            </div>
-          ))}
-        </div>
-      </div>
     </header>
   );
 }

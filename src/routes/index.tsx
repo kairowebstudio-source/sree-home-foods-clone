@@ -5,8 +5,6 @@ import { Footer } from "@/components/site/Footer";
 import { Marquee } from "@/components/site/Marquee";
 import { products, formatPrice, type Product } from "@/lib/products";
 import { useCart } from "@/lib/cart";
-import welcomeBg from "@/assets/welcome-bg.mp4.asset.json";
-import sectionsBg from "@/assets/sections-bg.mp4.asset.json";
 
 
 export const Route = createFileRoute("/")({
@@ -26,11 +24,8 @@ function Home() {
       <Header />
 
       {/* HERO */}
-      <section className="relative overflow-hidden">
-        <video autoPlay muted loop playsInline className="absolute inset-0 w-full h-full object-cover">
-          <source src={welcomeBg.url} type="video/mp4" />
-        </video>
-        <div className="absolute inset-0 bg-gradient-to-b from-[#1a0d0d]/20 via-transparent to-[#1a0d0d]/40" />
+      <section className="relative overflow-hidden bg-gradient-to-br from-brand via-[#6b1a1a] to-[#4a0f0f]">
+        <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(circle at 20% 50%, rgba(212,161,42,0.3) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255,255,255,0.1) 0%, transparent 40%)' }} />
         <div className="relative mx-auto max-w-7xl px-4 py-24 md:py-36 text-cream text-center">
           <div className="inline-block px-4 py-1 rounded-full border border-gold/60 text-gold text-xs tracking-[0.3em] uppercase mb-6">
             ✦ Authentic · Natural · Timeless ✦
@@ -84,11 +79,8 @@ function Home() {
       </section>
 
       {/* COLLECTIONS */}
-      <section className="relative py-10 md:py-16 px-3 sm:px-4 overflow-hidden">
-        <video autoPlay muted loop playsInline className="absolute inset-0 w-full h-full object-cover">
-          <source src={sectionsBg.url} type="video/mp4" />
-        </video>
-        <div className="absolute inset-0 bg-cream/20 md:bg-cream/35" />
+      <section className="relative py-10 md:py-16 px-3 sm:px-4 overflow-hidden bg-gradient-to-b from-cream via-white/90 to-cream">
+        <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%238a1e1e" fill-opacity="1"%3E%3Cpath d="M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")' }} />
         <div className="relative mx-auto max-w-6xl">
           <div className="text-center mb-6 md:mb-10">
             <span className="text-gold text-[10px] sm:text-xs tracking-[0.3em] font-bold uppercase">Our Collections</span>
@@ -109,11 +101,8 @@ function Home() {
 
 
       {/* LEGACY / ABOUT */}
-      <section className="relative py-24 px-4 overflow-hidden">
-        <video autoPlay muted loop playsInline className="absolute inset-0 w-full h-full object-cover">
-          <source src={sectionsBg.url} type="video/mp4" />
-        </video>
-        <div className="absolute inset-0 bg-cream/25 md:bg-cream/40" />
+      <section className="relative py-24 px-4 overflow-hidden bg-gradient-to-b from-cream via-white/95 to-cream/90">
+        <div className="absolute inset-0 opacity-[0.04]" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%238a1e1e" fill-opacity="1"%3E%3Cpath d="M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")' }} />
         <div className="relative mx-auto max-w-5xl text-center">
           <span className="text-leaf-dark text-xs tracking-[0.3em] font-bold uppercase">Retro Natural Products</span>
           <h2 className="mt-2 font-display text-4xl md:text-5xl text-brand">A Legacy of Purity & Care</h2>
