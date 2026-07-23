@@ -39,9 +39,9 @@ function Home() {
             ✦ Authentic · Natural · Timeless ✦
           </div>
           <h1 className="font-display text-4xl md:text-7xl font-bold leading-tight">
-            <span className="block">Bringing the</span>
-            <span className="block text-gold">Konaseema Kitchen</span>
-            <span className="block font-script text-3xl md:text-5xl text-cream/90 mt-2">to your home</span>
+            <span className="block">Welcome to</span>
+            <span className="block text-gold">Retro Natural</span>
+            <span className="block font-script text-3xl md:text-5xl text-cream/90 mt-2">Products</span>
           </h1>
           <div className="flex items-center justify-center gap-3 my-6">
             <span className="h-px w-16 bg-gold" />
