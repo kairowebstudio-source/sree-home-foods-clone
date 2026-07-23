@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
-import { useEffect, useState, useCallback } from "react";
-import { getProducts, addProduct, updateProduct, deleteProduct, adminLogin } from "@/lib/admin.server";
+import { useEffect, useState, useCallback, useRef } from "react";
+import { getProducts, addProduct, updateProduct, deleteProduct, adminLogin, uploadProductImage } from "@/lib/admin.server";
 import { categories } from "@/lib/products";
 import type { Product } from "@/lib/products";
 
@@ -90,6 +90,7 @@ function ProductForm({
   onSave: (data: Product | Omit<Product, "image"> & { image: string }) => void;
   onCancel: () => void;
 }) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [slug, setSlug] = useState(initial?.slug ?? "");
   const [name, setName] = useState(initial?.name ?? "");
   const [tagline, setTagline] = useState(initial?.tagline ?? "");
@@ -97,16 +98,69 @@ function ProductForm({
   const [weight, setWeight] = useState(initial?.weight ?? "");
   const [price, setPrice] = useState(String(initial?.price ?? ""));
   const [mrp, setMrp] = useState(String(initial?.mrp ?? ""));
-  const [image, setImage] = useState(initial?.image ?? "");
+  const [imageUrl, setImageUrl] = useState(initial?.image ?? "");
   const [description, setDescription] = useState(initial?.description ?? "");
   const [benefitsStr, setBenefitsStr] = useState(initial?.benefits.join(", ") ?? "");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // Upload state
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string>(initial?.image ?? "");
+  const [uploading, setUploading] = useState(false);
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setSelectedFile(file);
+    // Show local preview
+    const reader = new FileReader();
+    reader.onload = () => setPreviewUrl(reader.result as string);
+    reader.readAsDataURL(file);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const benefits = benefitsStr
       .split(",")
       .map((b) => b.trim())
       .filter(Boolean);
+
+    let finalImage = imageUrl || "/placeholder.svg";
+
+    // Upload file if selected
+    if (selectedFile) {
+      setUploading(true);
+      try {
+        // Read as base64
+        const base64 = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => {
+            const result = reader.result as string;
+            // Strip the data:image/...;base64, prefix
+            const b64 = result.split(",")[1];
+            resolve(b64);
+          };
+          reader.onerror = reject;
+          reader.readAsDataURL(selectedFile);
+        });
+
+        const filename = `${Date.now()}-${selectedFile.name.replace(/[^a-zA-Z0-9.-]/g, "_")}`;
+        const { url } = await uploadProductImage({
+          data: {
+            base64,
+            filename,
+            contentType: selectedFile.type,
+          },
+        });
+        finalImage = url;
+      } catch (err) {
+        console.error("Upload failed:", err);
+        alert("Failed to upload image. Please try again.");
+        setUploading(false);
+        return;
+      }
+      setUploading(false);
+    }
+
     onSave({
       slug: slug.toLowerCase().replace(/\s+/g, "-"),
       name,
@@ -115,11 +169,13 @@ function ProductForm({
       weight,
       price: Number(price),
       mrp: mrp ? Number(mrp) : undefined,
-      image: image || "/placeholder.svg",
+      image: finalImage,
       description,
       benefits,
     } as Product & { image: string });
   };
+
+  const triggerFilePicker = () => fileInputRef.current?.click();
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
@@ -170,13 +226,49 @@ function ProductForm({
         </div>
       </div>
 
+      {/* Image Upload */}
       <div>
-        <label className="block text-xs uppercase tracking-wider font-semibold text-foreground/70 mb-1">Image URL</label>
-        <input value={image} onChange={(e) => setImage(e.target.value)} placeholder="/placeholder.svg or https://..."
-          className="w-full rounded-lg border border-border bg-white px-3 py-2.5 text-sm focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand/30" />
-        {image && (
-          <img src={image} alt="Preview" className="mt-2 h-20 w-20 object-contain rounded-lg border border-border bg-white" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
-        )}
+        <label className="block text-xs uppercase tracking-wider font-semibold text-foreground/70 mb-1.5">Product Image</label>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          onChange={handleFileSelect}
+          className="hidden"
+        />
+        <div
+          onClick={triggerFilePicker}
+          className="relative border-2 border-dashed border-border rounded-xl p-6 text-center cursor-pointer hover:border-brand/50 hover:bg-brand/5 transition group"
+        >
+          {previewUrl ? (
+            <div className="flex items-center gap-4">
+              <img
+                src={previewUrl}
+                alt="Preview"
+                className="h-24 w-24 rounded-xl object-contain bg-white border border-border shrink-0"
+              />
+              <div className="text-left">
+                <p className="text-sm font-semibold text-foreground">
+                  {selectedFile ? selectedFile.name : initial?.name || "Current image"}
+                </p>
+                <p className="text-xs text-foreground/50 mt-0.5">
+                  {selectedFile ? `${(selectedFile.size / 1024).toFixed(1)} KB` : "Click to replace"}
+                </p>
+                <span className="inline-flex items-center gap-1 text-xs text-brand font-semibold mt-2 group-hover:underline">
+                  <i className="fas fa-rotate" /> Change image
+                </span>
+              </div>
+            </div>
+          ) : (
+            <div>
+              <div className="mx-auto h-14 w-14 rounded-full bg-brand/10 text-brand grid place-items-center text-xl mb-3">
+                <i className="fas fa-cloud-arrow-up" />
+              </div>
+              <p className="text-sm font-semibold text-foreground">Click to upload an image</p>
+              <p className="text-xs text-foreground/50 mt-1">PNG, JPG, WebP up to 5MB</p>
+            </div>
+          )}
+        </div>
       </div>
 
       <div>

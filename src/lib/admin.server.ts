@@ -129,3 +129,40 @@ export const getOrders = createServerFn({ method: "GET" }).handler(async () => {
   if (error) throw new Error(`Failed to load orders: ${error.message}`);
   return data || [];
 });
+
+// ── Image Upload ───────────────────────────────────────────────
+
+export const uploadProductImage = createServerFn({ method: "POST" })
+  .validator((d: { base64: string; filename: string; contentType: string }) => d)
+  .handler(async ({ data }) => {
+    // Ensure the product-images bucket exists (public)
+    const bucketName = "product-images";
+    const { data: buckets } = await supabaseAdmin.storage.listBuckets();
+    const exists = buckets?.some((b) => b.name === bucketName);
+    if (!exists) {
+      await supabaseAdmin.storage.createBucket(bucketName, {
+        public: true,
+        fileSizeLimit: 5 * 1024 * 1024, // 5MB
+      });
+    }
+
+    // Decode base64
+    const buffer = Buffer.from(data.base64, "base64");
+
+    // Upload
+    const { error: uploadError } = await supabaseAdmin.storage
+      .from(bucketName)
+      .upload(data.filename, buffer, {
+        contentType: data.contentType,
+        upsert: true,
+      });
+
+    if (uploadError) throw new Error(`Failed to upload image: ${uploadError.message}`);
+
+    // Get public URL
+    const { data: publicUrl } = supabaseAdmin.storage
+      .from(bucketName)
+      .getPublicUrl(data.filename);
+
+    return { url: publicUrl.publicUrl };
+  });
