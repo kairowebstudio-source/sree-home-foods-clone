@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import banner from "@/assets/konaseema-banner.png";
-import logoAsset from "@/assets/retro-logo-new.png.asset.json";
-const logo = logoAsset.url;
+
+const logo = "/media/logo.jpeg";
 
 export function Footer() {
   return (
@@ -12,7 +12,7 @@ export function Footer() {
       <footer className="bg-[#1a0d0d] text-cream/90">
         <div className="mx-auto max-w-7xl px-4 py-14 grid gap-10 md:grid-cols-4">
           <div>
-            <img src={logo} alt="Retro Natural Products" className="h-20 w-auto bg-cream rounded-md p-2 mb-4" />
+            <img src={logo} alt="Retro Natural Products" className="h-20 w-auto bg-cream rounded-md p-2 mb-4 object-contain" />
             <p className="text-sm text-cream/70 leading-relaxed">
               Handcrafted powders, spices and traditional foods sourced from the fertile Konaseema region of Andhra Pradesh.
             </p>

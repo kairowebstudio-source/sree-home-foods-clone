@@ -294,7 +294,7 @@ function ProductCard({ product: p }: { product: Product }) {
             className="flex-1 min-w-0 inline-flex items-center justify-center gap-1 rounded-full bg-brand text-cream px-2 py-1.5 sm:py-2 font-bold uppercase tracking-wider text-[10px] sm:text-[11px] hover:opacity-90 transition"
           >
             <i className="fas fa-basket-shopping text-[10px]" />
-            <span className="hidden xs:inline sm:inline">Add</span>
+            <span className="hidden sm:inline">Add</span>
           </button>
         </div>
       </div>
