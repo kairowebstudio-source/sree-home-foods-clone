@@ -15,7 +15,7 @@ export const Route = createFileRoute("/wholesale")({
 function Wholesale() {
   return (
     <div className="min-h-screen bg-background">
-      <Header />
+      <Header variant="solid" />
       <section className="bg-brand text-cream py-20 px-4 text-center">
         <span className="text-gold text-xs tracking-[0.3em] uppercase font-bold">Wholesale & Manufacturing</span>
         <h1 className="font-display text-5xl mt-2">Top Brands Source Their Stock Here.</h1>

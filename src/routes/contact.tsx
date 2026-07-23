@@ -15,7 +15,7 @@ export const Route = createFileRoute("/contact")({
 function Contact() {
   return (
     <div className="min-h-screen bg-background">
-      <Header />
+      <Header variant="solid" />
       <section className="bg-brand text-cream py-16 px-4 text-center">
         <span className="text-gold text-xs tracking-[0.3em] uppercase">Say Hello</span>
         <h1 className="font-display text-5xl mt-2">Contact Us</h1>

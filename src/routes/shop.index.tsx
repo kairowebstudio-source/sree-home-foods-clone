@@ -24,7 +24,7 @@ function Shop() {
   const filtered = cat === "All" ? productList : productList.filter((p) => p.category === cat);
   return (
     <div className="min-h-screen bg-background">
-      <Header />
+      <Header variant="solid" />
       <section className="bg-brand text-cream py-16 px-4 text-center">
         <span className="text-gold text-xs tracking-[0.3em] uppercase">Our Shop</span>
         <h1 className="font-display text-5xl mt-2">The Full Collection</h1>

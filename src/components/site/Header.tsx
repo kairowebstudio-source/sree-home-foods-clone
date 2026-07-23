@@ -4,7 +4,6 @@ import { useCart } from "@/lib/cart";
 
 const logo = "/media/logo.jpeg";
 
-
 const nav = [
   { to: "/", label: "Home" },
   { to: "/shop", label: "Shop" },
@@ -13,15 +12,30 @@ const nav = [
   { to: "/contact", label: "Contact" },
 ];
 
-export function Header() {
+export function Header({ variant }: { variant?: "transparent" | "solid" }) {
   const [open, setOpen] = useState(false);
   const { count, setOpen: setCartOpen } = useCart();
+  const solid = variant === "solid";
 
   return (
-    <header className="absolute top-0 left-0 right-0 z-50 bg-transparent">
+    <header
+      className={`left-0 right-0 z-50 ${
+        solid
+          ? "sticky top-0 bg-cream border-b border-border shadow-sm"
+          : "absolute top-0 bg-transparent"
+      }`}
+    >
       <div className="mx-auto max-w-7xl px-4 py-4 flex items-center justify-between gap-4">
         <Link to="/" className="flex items-center gap-2 shrink-0">
-          <img src={logo} alt="Retro Natural Products" className="h-20 md:h-28 w-auto object-contain drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)]" />
+          <img
+            src={logo}
+            alt="Retro Natural Products"
+            className={`h-20 md:h-28 w-auto object-contain ${
+              solid
+                ? "mix-blend-multiply"
+                : "drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)] brightness-110 contrast-75"
+            }`}
+          />
         </Link>
         <nav className="hidden md:flex items-center gap-8">
           {nav.map((n) => (
