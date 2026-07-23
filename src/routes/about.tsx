@@ -6,7 +6,7 @@ export const Route = createFileRoute("/about")({
   head: () => ({
     meta: [
       { title: "About — Retro Natural Products" },
-      { name: "description", content: "The story behind Retro Natural Products — a family workshop keeping Konaseema's food traditions alive." },
+      { name: "description", content: "The story behind Retro Natural Products — a family workshop keeping traditional food traditions alive." },
     ],
   }),
   component: About,

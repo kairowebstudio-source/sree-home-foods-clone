@@ -10,7 +10,7 @@ export const Route = createFileRoute("/checkout")({
   head: () => ({
     meta: [
       { title: "Checkout — Retro Natural Products" },
-      { name: "description", content: "Complete your order of handcrafted Konaseema natural foods." },
+      { name: "description", content: "Complete your order of handcrafted natural foods." },
       { name: "robots", content: "noindex" },
     ],
   }),

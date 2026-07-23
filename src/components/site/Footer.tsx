@@ -10,7 +10,8 @@ export function Footer() {
           <div>
             <img src={logo} alt="Retro Natural Products" className="h-20 w-auto bg-cream rounded-md p-2 mb-4 object-contain" />
             <p className="text-sm text-cream/70 leading-relaxed">
-              Handcrafted powders, spices and traditional foods sourced from the fertile Konaseema region of Andhra Pradesh.
+              Handcrafted powders, spices and traditional foods — pure, natural,
+              and made with love.
             </p>
           </div>
           <div>
@@ -34,7 +35,7 @@ export function Footer() {
           <div>
             <h4 className="text-gold font-display text-lg mb-4">Reach Us</h4>
             <ul className="space-y-2 text-sm text-cream/80">
-              <li className="flex gap-2"><i className="fas fa-map-marker-alt text-gold mt-1" /> Konaseema, East Godavari, Andhra Pradesh 533232</li>
+              <li className="flex gap-2"><i className="fas fa-map-marker-alt text-gold mt-1" /> Andhra Pradesh, India</li>
               <li className="flex gap-2"><i className="fas fa-phone text-gold mt-1" /> +91 99999 99999</li>
               <li className="flex gap-2"><i className="fas fa-envelope text-gold mt-1" /> hello@retronaturalproducts.com</li>
             </ul>

@@ -11,8 +11,8 @@ import { getProducts } from "@/lib/admin.server";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Retro Natural Products — Authentic Konaseema Foods" },
-      { name: "description", content: "Shop handcrafted powders, spices, raw honey and traditional foods from the heart of Konaseema. 100% natural. Delivered across India." },
+      { title: "Retro Natural Products — Authentic Traditional Foods" },
+      { name: "description", content: "Shop handcrafted powders, spices, raw honey and traditional foods. 100% natural. Delivered across India." },
     ],
   }),
   component: Home,
@@ -142,7 +142,7 @@ function Home() {
           <div className="grid sm:grid-cols-4 gap-6 mt-12">
             {[
               { i: "fa-jar", t: "Traditional Powders", d: "Stone-milled, sun-dried, nothing added." },
-              { i: "fa-mortar-pestle", t: "Origin Spices", d: "Direct from Guntur and Konaseema farms." },
+              { i: "fa-mortar-pestle", t: "Origin Spices", d: "Direct from the finest farms." },
               { i: "fa-jar-wheat", t: "Raw Honey", d: "Wild-harvested and never heated." },
               { i: "fa-bowl-food", t: "Heritage Foods", d: "Age-old Andhra recipes, ready in minutes." },
             ].map((b) => (
@@ -166,7 +166,7 @@ function Home() {
             <h2 className="mt-3 font-display text-4xl md:text-5xl">Trusted by Retailers Across India.</h2>
             <p className="mt-4 text-cream/80 leading-relaxed">
               Partner with us for bulk supply of premium natural products — private label
-              options, custom weights and reliable dispatch from our Konaseema facility.
+              options, custom weights and reliable dispatch from our facility.
             </p>
             <div className="mt-6 flex items-center gap-3 bg-cream/10 border border-gold/30 rounded-full px-5 py-3 w-fit">
               <i className="fas fa-phone-alt text-gold" />

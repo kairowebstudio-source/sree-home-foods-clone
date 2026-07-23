@@ -20,7 +20,7 @@ function Wholesale() {
         <section className="bg-brand text-cream py-20 px-4 text-center">
         <span className="text-gold text-xs tracking-[0.3em] uppercase font-bold">Wholesale & Manufacturing</span>
         <h1 className="font-display text-5xl mt-2">Top Brands Source Their Stock Here.</h1>
-        <p className="mt-4 text-cream/80 max-w-2xl mx-auto">Partner with Retro Natural Products for bulk supply, private-label packing, and reliable dispatch from our Konaseema facility.</p>
+        <p className="mt-4 text-cream/80 max-w-2xl mx-auto">Partner with Retro Natural Products for bulk supply, private-label packing, and reliable dispatch from our facility.</p>
       </section>
       <section className="py-20 px-4">
         <div className="mx-auto max-w-5xl grid md:grid-cols-3 gap-6">

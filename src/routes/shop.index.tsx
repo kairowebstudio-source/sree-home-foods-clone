@@ -28,7 +28,7 @@ function Shop() {
       <section className="bg-brand text-cream py-16 px-4 text-center">
         <span className="text-gold text-xs tracking-[0.3em] uppercase">Our Shop</span>
         <h1 className="font-display text-5xl mt-2">The Full Collection</h1>
-        <p className="text-cream/80 mt-3 max-w-xl mx-auto">Everything we make — natural, honest, and shipped fresh from Konaseema.</p>
+        <p className="text-cream/80 mt-3 max-w-xl mx-auto">Everything we make — natural, honest, and shipped fresh to your door.</p>
       </section>
       <section className="py-12 px-4">
         <div className="mx-auto max-w-7xl">

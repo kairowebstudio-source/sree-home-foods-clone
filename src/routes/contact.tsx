@@ -25,7 +25,7 @@ function Contact() {
         <div className="mx-auto max-w-5xl grid md:grid-cols-2 gap-10">
           <div className="space-y-6">
             {[
-              { i: "fa-map-marker-alt", t: "Visit", d: "Konaseema, East Godavari,\nAndhra Pradesh 533232" },
+              { i: "fa-map-marker-alt", t: "Visit", d: "Andhra Pradesh, India" },
               { i: "fa-phone", t: "Call", d: "+91 99999 99999" },
               { i: "fa-envelope", t: "Email", d: "hello@retronaturalproducts.com" },
               { i: "fa-clock", t: "Hours", d: "Mon–Sat · 9:00 AM – 7:00 PM" },
