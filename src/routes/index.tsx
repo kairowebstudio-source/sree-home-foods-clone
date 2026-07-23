@@ -49,8 +49,8 @@ function Home() {
             <span className="h-px w-16 bg-gold" />
           </div>
           <p className="max-w-2xl mx-auto text-cream/85 md:text-lg leading-relaxed">
-            Pure ingredients. Time-honoured recipes. The soulful flavours of Andhra Pradesh —
-            handcrafted, unhurried, and delivered with care.
+            Farm-fresh spices, ghee, honey and traditional powders — crafted the way our
+            grandparents did. Nothing added. Nothing hidden.
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-4">
             <Link
