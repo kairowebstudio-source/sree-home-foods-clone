@@ -7,6 +7,47 @@ type ServerEntry = {
   fetch: (request: Request, env: unknown, ctx: unknown) => Promise<Response> | Response;
 };
 
+// ── Security Headers ────────────────────────────────────────────
+
+function buildCspPolicy(): string {
+  const directives = [
+    `default-src 'self'`,
+    `script-src 'self' 'unsafe-inline' 'unsafe-eval'`,
+    `style-src 'self' 'unsafe-inline' https://fonts.googleapis.com`,
+    `font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com`,
+    `img-src 'self' data: blob: https://*.supabase.co`,
+    `connect-src 'self' https://*.supabase.co`,
+    `frame-ancestors 'none'`,
+    `base-uri 'self'`,
+    `form-action 'self'`,
+  ];
+  return directives.join("; ");
+}
+
+const SECURITY_HEADERS: Record<string, string> = {
+  "Content-Security-Policy": buildCspPolicy(),
+  "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload",
+  "X-Content-Type-Options": "nosniff",
+  "X-Frame-Options": "DENY",
+  "Referrer-Policy": "strict-origin-when-cross-origin",
+  "Permissions-Policy": "camera=(), microphone=(), geolocation=(), payment=()",
+};
+
+function addSecurityHeaders(response: Response): Response {
+  const headers = new Headers(response.headers);
+  for (const [key, value] of Object.entries(SECURITY_HEADERS)) {
+    // Don't override if already set (vercel.json edge headers take precedence)
+    if (!headers.has(key)) {
+      headers.set(key, value);
+    }
+  }
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers,
+  });
+}
+
 let serverEntryPromise: Promise<ServerEntry> | undefined;
 
 async function getServerEntry(): Promise<ServerEntry> {
@@ -49,7 +90,8 @@ export default {
     try {
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);
-      return await normalizeCatastrophicSsrResponse(response);
+      const withHeaders = await normalizeCatastrophicSsrResponse(response);
+      return addSecurityHeaders(withHeaders);
     } catch (error) {
       console.error(error);
       return new Response(renderErrorPage(), {
