@@ -1,8 +1,8 @@
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
-import logoAsset from "@/assets/retro-logo-new.png.asset.json";
-const logo = logoAsset.url;
 import { useCart } from "@/lib/cart";
+
+const logo = "/media/logo.jpeg";
 
 
 const nav = [
