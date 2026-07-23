@@ -1,17 +1,25 @@
 import { createServerFn } from "@tanstack/react-start";
 import type { Product } from "./products";
-import { supabaseAdmin } from "./supabase";
+import { products as fallbackProducts } from "./products";
+import { supabaseAdmin, supabaseEnabled } from "./supabase";
 
 // ── Server Functions ───────────────────────────────────────────
 
 export const getProducts = createServerFn({ method: "GET" }).handler(async () => {
-  const client = supabaseAdmin();
-  const { data, error } = await client
-    .from("products")
-    .select("*")
-    .order("created_at", { ascending: true });
-  if (error) throw new Error(`Failed to load products: ${error.message}`);
-  return (data as Product[]) || [];
+  if (!supabaseEnabled()) {
+    return fallbackProducts;
+  }
+  try {
+    const client = supabaseAdmin();
+    const { data, error } = await client
+      .from("products")
+      .select("*")
+      .order("created_at", { ascending: true });
+    if (error) throw new Error(error.message);
+    return (data as Product[]) || [];
+  } catch {
+    return fallbackProducts;
+  }
 });
 
 export const adminLogin = createServerFn({ method: "POST" })
