@@ -462,7 +462,7 @@ function AdminPage() {
           <form onSubmit={handleLogin} className="bg-cream rounded-2xl border border-gold/30 shadow-xl p-8 space-y-6">
             <div className="text-center">
               <Link to="/" className="inline-block mb-4">
-                <img src="/media/logo.jpeg" alt="Retro Natural Products" className="h-16 w-auto mx-auto" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
+                <img src="/media/33191-removebg-preview.png" alt="Retro Natural Products" className="h-16 w-auto mx-auto" />
               </Link>
               <h1 className="font-display text-2xl text-brand">Admin Access</h1>
               <p className="text-sm text-foreground/60 mt-1">Enter your password to continue</p>

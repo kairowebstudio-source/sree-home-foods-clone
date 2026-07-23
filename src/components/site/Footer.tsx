@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import banner from "@/assets/konaseema-banner.png";
 
-const logo = "/media/logo.jpeg";
+const logo = "/media/33191-removebg-preview.png";
 
 export function Footer() {
   return (

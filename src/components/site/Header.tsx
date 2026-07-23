@@ -2,7 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { useCart } from "@/lib/cart";
 
-const logo = "/media/logo.jpeg";
+const logo = "/media/33191-removebg-preview.png";
 
 const nav = [
   { to: "/", label: "Home" },
