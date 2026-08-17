@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import type { Product } from "./products";
 import { products as fallbackProducts } from "./products";
-import { supabaseAdmin, supabaseEnabled } from "./supabase";
+import { supabaseAdmin, supabaseEnabled } from "./supabase.server";
 
 // ── Server Functions ───────────────────────────────────────────
 
