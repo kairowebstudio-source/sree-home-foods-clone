@@ -50,6 +50,9 @@ export const addProduct = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     if (!supabaseEnabled()) throw new Error(NEEDS_ENV_MSG);
     const client = supabaseAdmin();
+    if (data.image?.startsWith("data:") && data.image.length > 1_500_000) {
+      throw new Error("Failed to add product: image is too large. Re-upload with a smaller file.");
+    }
     const product = {
       slug: data.slug,
       name: data.name,
@@ -72,6 +75,36 @@ export const updateProduct = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     if (!supabaseEnabled()) throw new Error(NEEDS_ENV_MSG);
     const client = supabaseAdmin();
+
+    // Never resend a stored data-URL image back into the request — those can
+    // be megabytes and blow past the serverless request-size limit. Only the
+    // image changes we actually want get written.
+    const incomingImage = (data.image ?? "").trim();
+    let imagePatch: string | undefined;
+
+    if (incomingImage && !incomingImage.startsWith("data:")) {
+      // Real URL (storage / placeholder) — always safe to store
+      imagePatch = incomingImage;
+    } else if (incomingImage.startsWith("data:")) {
+      // Only replace the stored image if this is a NEW small data URL;
+      // unchanged or oversized ones are skipped (keep the stored value).
+      const { data: existing } = await client
+        .from("products")
+        .select("image")
+        .eq("slug", data.slug)
+        .maybeSingle();
+      const stored = (existing?.image as string | null) ?? "";
+      if (stored !== incomingImage) {
+        if (incomingImage.length > 1_500_000) {
+          throw new Error(
+            "Failed to update product: image is too large. Re-upload the image with a smaller file.",
+          );
+        }
+        imagePatch = incomingImage;
+      }
+    }
+    // incomingImage === "" → keep the stored image unchanged
+
     const { error } = await client
       .from("products")
       .update({
@@ -81,7 +114,7 @@ export const updateProduct = createServerFn({ method: "POST" })
         weight: data.weight,
         price: data.price,
         mrp: data.mrp || null,
-        image: data.image,
+        ...(imagePatch !== undefined ? { image: imagePatch } : {}),
         description: data.description,
         benefits: data.benefits,
         updated_at: new Date().toISOString(),
@@ -160,47 +193,104 @@ export const getOrders = createServerFn({ method: "GET" }).handler(async () => {
 export const uploadProductImage = createServerFn({ method: "POST" })
   .validator((d: { base64: string; filename: string; contentType: string }) => d)
   .handler(async ({ data }) => {
-    // Fallback: embed as data URL when Supabase isn't available
+    // Hard cap: refuse oversized payloads with a clear error instead of
+    // letting them fail downstream or bloat the database.
+    if (data.base64.length > 3_000_000) {
+      throw new Error(
+        "Image is still too large after compression. Please use a JPG or PNG under 2MB.",
+      );
+    }
+
+    // Dev fallback: no Supabase configured → embed the image directly.
     if (!supabaseEnabled()) {
-      const dataUrl = `data:${data.contentType};base64,${data.base64}`;
-      return { url: dataUrl };
+      return { url: `data:${data.contentType};base64,${data.base64}` };
     }
 
-    try {
-      const client = supabaseAdmin();
-      const bucketName = "product-images";
+    const client = supabaseAdmin();
+    const bucketName = "product-images";
 
-      // Ensure the bucket exists (public)
-      const { data: buckets } = await client.storage.listBuckets();
-      const exists = buckets?.some((b) => b.name === bucketName);
-      if (!exists) {
-        await client.storage.createBucket(bucketName, {
-          public: true,
-          fileSizeLimit: 5 * 1024 * 1024,
-        });
-      }
-
-      // Upload
-      const buffer = Buffer.from(data.base64, "base64");
-      const { error: uploadError } = await client.storage
-        .from(bucketName)
-        .upload(data.filename, buffer, {
-          contentType: data.contentType,
-          upsert: true,
-        });
-
-      if (uploadError) throw new Error(uploadError.message);
-
-      // Get public URL
-      const { data: publicUrl } = client.storage
-        .from(bucketName)
-        .getPublicUrl(data.filename);
-
-      return { url: publicUrl.publicUrl };
-    } catch (err) {
-      // Fallback: use data URL when Supabase Storage fails
-      console.warn("Supabase upload failed, falling back to data URL:", err);
-      const dataUrl = `data:${data.contentType};base64,${data.base64}`;
-      return { url: dataUrl };
+    // Ensure the bucket exists (public)
+    const { data: buckets } = await client.storage.listBuckets();
+    const exists = buckets?.some((b) => b.name === bucketName);
+    if (!exists) {
+      await client.storage.createBucket(bucketName, {
+        public: true,
+        fileSizeLimit: 5 * 1024 * 1024,
+      });
     }
+
+    // Upload
+    const buffer = Buffer.from(data.base64, "base64");
+    const { error: uploadError } = await client.storage
+      .from(bucketName)
+      .upload(data.filename, buffer, {
+        contentType: data.contentType,
+        upsert: true,
+      });
+    if (uploadError) {
+      // Fail loudly — silently storing data URLs bloats the database and
+      // breaks later edits, which is exactly what caused these failures.
+      throw new Error(
+        `Failed to upload image to Supabase Storage: ${uploadError.message}. Check the SUPABASE_SERVICE_ROLE_KEY env var in Vercel.`,
+      );
+    }
+
+    const { data: publicUrl } = client.storage
+      .from(bucketName)
+      .getPublicUrl(data.filename);
+
+    return { url: publicUrl.publicUrl };
   });
+
+// ── One-time repair: move old embedded (data URL) images to Storage ──
+// Products saved while storage uploads were failing have the whole image
+// embedded in the database row, which makes pages slow and edits fail.
+
+export const migrateDataUrlImages = createServerFn({ method: "POST" }).handler(async () => {
+  if (!supabaseEnabled()) throw new Error(NEEDS_ENV_MSG);
+  const client = supabaseAdmin();
+
+  const { data: rows, error } = await client
+    .from("products")
+    .select("slug, image")
+    .like("image", "data:%");
+  if (error) throw new Error(`Failed to load products: ${error.message}`);
+
+  let migrated = 0;
+  let failed = 0;
+  for (const row of rows || []) {
+    const image = (row.image as string) || "";
+    const match = image.match(/^data:([^;]+);base64,(.+)$/);
+    if (!match) continue;
+
+    const contentType = match[1] || "image/png";
+    const filename = `migrated-${row.slug}-${Date.now()}.png`;
+    const { error: uploadError } = await client.storage
+      .from("product-images")
+      .upload(filename, Buffer.from(match[2], "base64"), {
+        contentType,
+        upsert: true,
+      });
+    if (uploadError) {
+      failed++;
+      console.warn(`Failed to migrate ${row.slug}:`, uploadError.message);
+      continue;
+    }
+
+    const { data: publicUrl } = client.storage
+      .from("product-images")
+      .getPublicUrl(filename);
+    const { error: updateError } = await client
+      .from("products")
+      .update({ image: publicUrl.publicUrl, updated_at: new Date().toISOString() })
+      .eq("slug", row.slug);
+    if (updateError) {
+      failed++;
+      console.warn(`Failed to update ${row.slug}:`, updateError.message);
+      continue;
+    }
+    migrated++;
+  }
+
+  return { migrated, failed };
+});

@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { useEffect, useState, useCallback, useRef } from "react";
-import { getProducts, getOrders, addProduct, updateProduct, deleteProduct, adminLogin, uploadProductImage } from "@/lib/admin.server";
+import { getProducts, getOrders, addProduct, updateProduct, deleteProduct, adminLogin, uploadProductImage, migrateDataUrlImages } from "@/lib/admin.server";
 import { categories } from "@/lib/products";
 import type { Product } from "@/lib/products";
 
@@ -205,6 +205,13 @@ function ProductForm({
     if (selectedFile) {
       setUploading(true);
       try {
+        // If compression couldn't shrink the file (e.g. unsupported format),
+        // fail fast with a clear message instead of hitting server limits.
+        if (selectedFile.size > 2 * 1024 * 1024) {
+          throw new Error(
+            "This image is too large to upload (over 2MB after compression). Please use a JPG or PNG under 2MB.",
+          );
+        }
         // Read as base64
         const base64 = await new Promise<string>((resolve, reject) => {
           const reader = new FileReader();
@@ -229,11 +236,20 @@ function ProductForm({
         finalImage = url;
       } catch (err) {
         console.error("Upload failed:", err);
-        alert("Failed to upload image. Please try again.");
+        alert(
+          err instanceof Error && err.message
+            ? err.message
+            : "Failed to upload image. Please try again.",
+        );
         setUploading(false);
         return;
       }
       setUploading(false);
+    } else if (finalImage.startsWith("data:")) {
+      // Don't resend a stored data-URL image when editing — it can be
+      // megabytes and blows past serverless request limits. The server
+      // keeps the existing image when an empty one is sent.
+      finalImage = "";
     }
 
     onSave({
@@ -400,6 +416,7 @@ function AdminPage() {
   const [deleteTarget, setDeleteTarget] = useState<Product | null>(null);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [migrating, setMigrating] = useState(false);
 
   // Toast
   const [toast, setToast] = useState<{ msg: string; ok: boolean } | null>(null);
@@ -488,7 +505,11 @@ function AdminPage() {
     setSaving(true);
     try {
       await updateProduct({ data });
-      setProducts((prev) => prev.map((p) => (p.slug === data.slug ? data : p)));
+      setProducts((prev) =>
+        prev.map((p) =>
+          p.slug === data.slug ? { ...data, image: data.image || p.image } : p,
+        ),
+      );
       setEditTarget(null);
       showToast(`"${data.name}" updated`);
     } catch (e) {
@@ -512,6 +533,24 @@ function AdminPage() {
       showToast(msg, false);
     } finally {
       setDeleting(false);
+    }
+  };
+
+  const handleMigrateImages = async () => {
+    if (!confirm("Move any old embedded images to Supabase Storage? This makes pages load faster and fixes edit failures.")) return;
+    setMigrating(true);
+    try {
+      const res = await migrateDataUrlImages();
+      showToast(
+        `Fixed: ${res.migrated} image(s) moved to storage${res.failed ? `, ${res.failed} failed` : ""}`,
+        res.failed === 0,
+      );
+      const list = await getProducts();
+      setProducts(list);
+    } catch (e) {
+      showToast(e instanceof Error ? e.message : "Failed to fix images", false);
+    } finally {
+      setMigrating(false);
     }
   };
 
@@ -661,10 +700,17 @@ function AdminPage() {
               <h2 className="font-display text-xl text-brand">Products</h2>
               <p className="text-xs text-foreground/60 mt-0.5">Manage your product catalog</p>
             </div>
-            <button onClick={() => setAddOpen(true)}
-              className="rounded-full bg-brand text-brand-foreground px-5 py-2.5 font-bold uppercase tracking-wider text-xs hover:opacity-90 transition flex items-center gap-2">
-              <i className="fas fa-plus" /> Add Product
-            </button>
+            <div className="flex items-center gap-2">
+              <button onClick={handleMigrateImages} disabled={migrating}
+                className="rounded-full border border-border px-4 py-2.5 font-semibold uppercase tracking-wider text-xs hover:bg-brand/5 transition flex items-center gap-2 disabled:opacity-50">
+                {migrating ? <i className="fas fa-spinner fa-spin" /> : <i className="fas fa-wand-magic-sparkles" />}
+                {migrating ? "Fixing…" : "Fix old images"}
+              </button>
+              <button onClick={() => setAddOpen(true)}
+                className="rounded-full bg-brand text-brand-foreground px-5 py-2.5 font-bold uppercase tracking-wider text-xs hover:opacity-90 transition flex items-center gap-2">
+                <i className="fas fa-plus" /> Add Product
+              </button>
+            </div>
           </div>
 
           {loading ? (
