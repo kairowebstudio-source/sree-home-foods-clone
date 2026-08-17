@@ -206,40 +206,57 @@ export const uploadProductImage = createServerFn({ method: "POST" })
       return { url: `data:${data.contentType};base64,${data.base64}` };
     }
 
-    const client = supabaseAdmin();
-    const bucketName = "product-images";
+    let url: string;
+    try {
+      const client = supabaseAdmin();
+      const bucketName = "product-images";
 
-    // Ensure the bucket exists (public)
-    const { data: buckets } = await client.storage.listBuckets();
-    const exists = buckets?.some((b) => b.name === bucketName);
-    if (!exists) {
-      await client.storage.createBucket(bucketName, {
-        public: true,
-        fileSizeLimit: 5 * 1024 * 1024,
-      });
+      // Ensure the bucket exists (public)
+      const { data: buckets } = await client.storage.listBuckets();
+      const exists = buckets?.some((b) => b.name === bucketName);
+      if (!exists) {
+        await client.storage.createBucket(bucketName, {
+          public: true,
+          fileSizeLimit: 5 * 1024 * 1024,
+        });
+      }
+
+      // Upload
+      const buffer = Buffer.from(data.base64, "base64");
+      const { error: uploadError } = await client.storage
+        .from(bucketName)
+        .upload(data.filename, buffer, {
+          contentType: data.contentType,
+          upsert: true,
+        });
+      if (uploadError) {
+        // Fail loudly — silently storing data URLs bloats the database and
+        // breaks later edits, which is exactly what caused these failures.
+        throw new Error(`Supabase Storage rejected the upload: ${uploadError.message}`);
+      }
+
+      const { data: publicUrl } = client.storage
+        .from(bucketName)
+        .getPublicUrl(data.filename);
+      url = publicUrl.publicUrl;
+    } catch (err) {
+      const detail = err instanceof Error ? err.message : String(err);
+      const isNetworkFailure =
+        /fetch failed|enotfound|getaddrinfo|econnrefused|network|socket/i.test(detail);
+      if (isNetworkFailure) {
+        // The server couldn't even reach Supabase — almost always a wrong URL.
+        console.error(
+          "Supabase unreachable. Configured SUPABASE_URL host:",
+          process.env.SUPABASE_URL ? new URL(process.env.SUPABASE_URL).host : "(not set)",
+        );
+        throw new Error(
+          `Could not connect to Supabase (${detail}). In Vercel, SUPABASE_URL must be the exact "Project URL" from Supabase → Project Settings → API — e.g. https://your-project-ref.supabase.co — NOT the dashboard link. Update it and redeploy.`,
+        );
+      }
+      throw new Error(`Failed to upload image to Supabase Storage: ${detail}`);
     }
 
-    // Upload
-    const buffer = Buffer.from(data.base64, "base64");
-    const { error: uploadError } = await client.storage
-      .from(bucketName)
-      .upload(data.filename, buffer, {
-        contentType: data.contentType,
-        upsert: true,
-      });
-    if (uploadError) {
-      // Fail loudly — silently storing data URLs bloats the database and
-      // breaks later edits, which is exactly what caused these failures.
-      throw new Error(
-        `Failed to upload image to Supabase Storage: ${uploadError.message}. Check the SUPABASE_SERVICE_ROLE_KEY env var in Vercel.`,
-      );
-    }
-
-    const { data: publicUrl } = client.storage
-      .from(bucketName)
-      .getPublicUrl(data.filename);
-
-    return { url: publicUrl.publicUrl };
+    return { url };
   });
 
 // ── One-time repair: move old embedded (data URL) images to Storage ──
