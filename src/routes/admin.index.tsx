@@ -18,6 +18,59 @@ function formatPrice(n: number) {
   return `₹${n.toLocaleString("en-IN", { maximumFractionDigits: 0 })}`;
 }
 
+// ── Client-side image optimization ─────────────────────────────
+// Resize + re-encode the image in the browser before upload so the
+// payload sent to the server is tiny (100–300KB instead of several MB).
+// This makes uploads fast and avoids Vercel serverless request limits.
+
+const MAX_DIM = 1000; // max width/height in px
+const JPEG_QUALITY = 0.82;
+const WEBP_QUALITY = 0.85;
+
+async function optimizeImageFile(file: File): Promise<File> {
+  // Already small — no point re-encoding
+  if (file.size <= 300 * 1024 && file.type !== "image/heic") return file;
+
+  const url = URL.createObjectURL(file);
+  try {
+    const img = new Image();
+    await new Promise<void>((resolve, reject) => {
+      img.onload = () => resolve();
+      img.onerror = () => reject(new Error("Unable to read image"));
+      img.src = url;
+    });
+
+    const scale = Math.min(1, MAX_DIM / Math.max(img.width, img.height));
+    const w = Math.max(1, Math.round(img.width * scale));
+    const h = Math.max(1, Math.round(img.height * scale));
+
+    // Small dimensions and already small file — keep the original
+    if (scale === 1 && file.size <= 700 * 1024) return file;
+
+    const canvas = document.createElement("canvas");
+    canvas.width = w;
+    canvas.height = h;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return file;
+    ctx.drawImage(img, 0, 0, w, h);
+
+    // Keep transparency for PNG/WebP, otherwise JPEG is much smaller
+    const keepAlpha = file.type === "image/png" || file.type === "image/webp";
+    const mime = keepAlpha ? "image/webp" : "image/jpeg";
+
+    const blob = await new Promise<Blob | null>((resolve) => {
+      canvas.toBlob(resolve, mime, keepAlpha ? WEBP_QUALITY : JPEG_QUALITY);
+    });
+    if (!blob || blob.size >= file.size) return file;
+
+    const base = file.name.replace(/\.[^.]+$/, "") || "image";
+    const ext = blob.type === "image/webp" ? "webp" : "jpg";
+    return new File([blob], `${base}.${ext}`, { type: blob.type });
+  } finally {
+    URL.revokeObjectURL(url);
+  }
+}
+
 export const Route = createFileRoute("/admin/")({
   head: () => ({
     meta: [
@@ -121,14 +174,22 @@ function ProductForm({
   const [previewUrl, setPreviewUrl] = useState<string>(initial?.image ?? "");
   const [uploading, setUploading] = useState(false);
 
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    // Instant preview of the original
     setSelectedFile(file);
-    // Show local preview
-    const reader = new FileReader();
-    reader.onload = () => setPreviewUrl(reader.result as string);
-    reader.readAsDataURL(file);
+    setPreviewUrl(URL.createObjectURL(file));
+    // Compress/resize in the background so the upload is fast
+    try {
+      const optimized = await optimizeImageFile(file);
+      if (optimized !== file) {
+        setSelectedFile(optimized);
+        setPreviewUrl(URL.createObjectURL(optimized));
+      }
+    } catch {
+      // Keep the original file if optimization fails
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -279,7 +340,7 @@ function ProductForm({
                 <i className="fas fa-cloud-arrow-up" />
               </div>
               <p className="text-sm font-semibold text-foreground">Click to upload an image</p>
-              <p className="text-xs text-foreground/50 mt-1">PNG, JPG, WebP up to 5MB</p>
+              <p className="text-xs text-foreground/50 mt-1">PNG, JPG, WebP · auto-compressed before upload</p>
             </div>
           )}
         </div>
@@ -298,9 +359,10 @@ function ProductForm({
       </div>
 
       <div className="flex gap-3 pt-2">
-        <button type="submit"
-          className="rounded-full bg-brand text-brand-foreground px-6 py-2.5 font-bold uppercase tracking-wider text-sm hover:opacity-90 transition flex items-center gap-2">
-          <i className="fas fa-floppy-disk" /> Save Product
+        <button type="submit" disabled={uploading}
+          className="rounded-full bg-brand text-brand-foreground px-6 py-2.5 font-bold uppercase tracking-wider text-sm hover:opacity-90 transition flex items-center gap-2 disabled:opacity-60">
+          {uploading ? <i className="fas fa-spinner fa-spin" /> : <i className="fas fa-floppy-disk" />}
+          {uploading ? "Uploading…" : "Save Product"}
         </button>
         <button type="button" onClick={onCancel}
           className="rounded-full border border-border px-6 py-2.5 font-semibold text-sm text-foreground/70 hover:bg-accent/30 transition">
