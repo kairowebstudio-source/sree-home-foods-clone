@@ -213,12 +213,12 @@ export const uploadProductImage = createServerFn({ method: "POST" })
       const client = supabaseAdmin();
       const bucketName = "product-images";
 
-      // Ensure the bucket exists (public)
+      // Ensure the bucket exists (private; images are served via signed URLs)
       const { data: buckets } = await client.storage.listBuckets();
       const exists = buckets?.some((b) => b.name === bucketName);
       if (!exists) {
         await client.storage.createBucket(bucketName, {
-          public: true,
+          public: false,
           fileSizeLimit: 5 * 1024 * 1024,
         });
       }
@@ -234,13 +234,17 @@ export const uploadProductImage = createServerFn({ method: "POST" })
       if (uploadError) {
         // Fail loudly — silently storing data URLs bloats the database and
         // breaks later edits, which is exactly what caused these failures.
-        throw new Error(`Supabase Storage rejected the upload: ${uploadError.message}`);
+        throw new Error(`Storage rejected the upload: ${uploadError.message}`);
       }
 
-      const { data: publicUrl } = client.storage
+      const TEN_YEARS = 60 * 60 * 24 * 365 * 10;
+      const { data: signed, error: signError } = await client.storage
         .from(bucketName)
-        .getPublicUrl(data.filename);
-      url = publicUrl.publicUrl;
+        .createSignedUrl(data.filename, TEN_YEARS);
+      if (signError || !signed?.signedUrl) {
+        throw new Error(`Could not create image URL: ${signError?.message ?? "unknown error"}`);
+      }
+      url = signed.signedUrl;
     } catch (err) {
       const detail = err instanceof Error ? err.message : String(err);
       const isNetworkFailure =
