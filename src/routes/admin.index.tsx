@@ -845,7 +845,9 @@ function AdminPage() {
                         </td>
                         <td className="px-4 py-4">
                           <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-                            o.status === "pending"
+                            o.status === "paid"
+                              ? "bg-leaf/15 text-leaf-dark border border-leaf/30"
+                              : o.status === "pending"
                               ? "bg-amber-50 text-amber-700 border border-amber-200"
                               : o.status === "shipped"
                               ? "bg-blue-50 text-blue-700 border border-blue-200"
@@ -853,6 +855,7 @@ function AdminPage() {
                               ? "bg-leaf/15 text-leaf-dark border border-leaf/30"
                               : "bg-red-50 text-red-700 border border-red-200"
                           }`}>
+                            {o.status === "paid" && <i className="fas fa-credit-card" />}
                             {o.status === "pending" && <i className="fas fa-clock" />}
                             {o.status === "shipped" && <i className="fas fa-shipping-fast" />}
                             {o.status === "delivered" && <i className="fas fa-check-circle" />}
@@ -944,7 +947,9 @@ function AdminPage() {
               </div>
               <div className="flex items-center gap-2 mb-4">
                 <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-                  viewOrder.status === "pending"
+                  viewOrder.status === "paid"
+                    ? "bg-leaf/15 text-leaf-dark border border-leaf/30"
+                    : viewOrder.status === "pending"
                     ? "bg-amber-50 text-amber-700 border border-amber-200"
                     : viewOrder.status === "shipped"
                     ? "bg-blue-50 text-blue-700 border border-blue-200"

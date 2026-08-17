@@ -5,6 +5,7 @@ import { Footer } from "@/components/site/Footer";
 import { useCart } from "@/lib/cart";
 import { formatPrice } from "@/lib/products";
 import { submitOrder } from "@/lib/admin.server";
+import { createRazorpayOrder, verifyRazorpayPayment } from "@/lib/razorpay.server";
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({
@@ -47,6 +48,15 @@ function Checkout() {
 
   const set = <K extends keyof Form>(k: K, v: Form[K]) => setForm((f) => ({ ...f, [k]: v }));
 
+  const saveLastOrder = (orderId: string) => {
+    try {
+      sessionStorage.setItem(
+        "retro-last-order",
+        JSON.stringify({ orderId, form, items, count, placedAt: new Date().toISOString() }),
+      );
+    } catch {}
+  };
+
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (items.length === 0) return;
@@ -74,18 +84,54 @@ function Checkout() {
           })),
           total: total + shipping,
           method: form.method,
+          notify: form.method === "cod",
         },
       });
 
-      try {
-        sessionStorage.setItem(
-          "retro-last-order",
-          JSON.stringify({ orderId, form, items, count, placedAt: new Date().toISOString() }),
-        );
-      } catch {}
+      if (form.method === "cod") {
+        saveLastOrder(orderId);
+        clear();
+        navigate({ to: "/checkout/success", search: { id: orderId } });
+      } else {
+        // Online payment via Razorpay
+        try {
+          await loadRazorpayScript();
+          const rzp = await createRazorpayOrder({
+            data: { orderId, amount: total + shipping },
+          });
+          const outcome = await startRazorpayCheckout({
+            keyId: rzp.keyId,
+            razorpayOrderId: rzp.razorpayOrderId,
+            amount: rzp.amount,
+            customer: { name: form.name, email: form.email, phone: form.phone },
+            onSuccess: async ({ razorpayPaymentId, razorpaySignature }) => {
+              await verifyRazorpayPayment({
+                data: {
+                  orderId,
+                  razorpayOrderId: rzp.razorpayOrderId,
+                  razorpayPaymentId,
+                  razorpaySignature,
+                },
+              });
+            },
+          });
 
-      clear();
-      navigate({ to: "/checkout/success", search: { id: orderId } });
+          if (outcome === "paid") {
+            saveLastOrder(orderId);
+            clear();
+            navigate({ to: "/checkout/success", search: { id: orderId } });
+          } else {
+            alert(
+              "Payment was not completed. Your order is saved — our team will follow up with a payment link, or you can try again.",
+            );
+          }
+        } catch (err) {
+          console.error("Razorpay checkout failed:", err);
+          alert(
+            "We couldn't start the payment. Your order is saved — our team will contact you with a payment link, or you can retry.",
+          );
+        }
+      }
     } catch (err) {
       console.error("Order submission failed:", err);
       alert("Something went wrong while placing your order. Please try again or contact us via WhatsApp.");
@@ -171,7 +217,7 @@ function Checkout() {
                   onClick={() => set("method", "online")}
                   icon="fa-credit-card"
                   title="Pay Online"
-                  desc="UPI / Cards / Netbanking · Powered by Zoho Payments (coming soon)"
+                  desc="UPI / Cards / Netbanking · Secure Razorpay checkout"
                 />
                 <PayOption
                   active={form.method === "cod"}
@@ -183,7 +229,7 @@ function Checkout() {
               </div>
               {form.method === "online" && (
                 <p className="text-[11px] text-brand/80 mt-3 bg-gold/15 border border-gold/40 rounded-lg px-3 py-2">
-                  <i className="fas fa-circle-info mr-1 text-gold" /> Online payments will activate once Zoho Payments is connected. Your order will be saved and we'll follow up with a secure payment link.
+                  <i className="fas fa-circle-info mr-1 text-gold" /> You'll be taken to a secure Razorpay checkout to pay via UPI, cards, or netbanking.
                 </p>
               )}
             </div>
@@ -257,6 +303,70 @@ function Checkout() {
       <Footer />
     </div>
   );
+}
+
+// ── Razorpay checkout helpers ──────────────────────────────────
+
+function loadRazorpayScript(): Promise<void> {
+  return new Promise((resolve, reject) => {
+    if ((window as any).Razorpay) return resolve();
+    const s = document.createElement("script");
+    s.src = "https://checkout.razorpay.com/v1/checkout.js";
+    s.onload = () => resolve();
+    s.onerror = () => reject(new Error("Could not load the payment gateway."));
+    document.head.appendChild(s);
+  });
+}
+
+type RazorpayCheckoutOptions = {
+  keyId: string;
+  razorpayOrderId: string;
+  amount: number; // in paise
+  customer: { name: string; email: string; phone: string };
+  onSuccess: (p: { razorpayPaymentId: string; razorpaySignature: string }) => Promise<void>;
+};
+
+function startRazorpayCheckout(
+  opts: RazorpayCheckoutOptions,
+): Promise<"paid" | "dismissed" | "failed"> {
+  return new Promise((resolve) => {
+    let settled = false;
+    const settle = (v: "paid" | "dismissed" | "failed") => {
+      if (!settled) {
+        settled = true;
+        resolve(v);
+      }
+    };
+
+    const rzp = new (window as any).Razorpay({
+      key: opts.keyId,
+      amount: opts.amount,
+      currency: "INR",
+      name: "Retro Natural Products",
+      description: `Order #${opts.razorpayOrderId.slice(-8)}`,
+      order_id: opts.razorpayOrderId,
+      prefill: {
+        name: opts.customer.name,
+        email: opts.customer.email,
+        contact: opts.customer.phone,
+      },
+      theme: { color: "#7a1f1f" },
+      handler: async (res: any) => {
+        try {
+          await opts.onSuccess({
+            razorpayPaymentId: res.razorpay_payment_id,
+            razorpaySignature: res.razorpay_signature,
+          });
+          settle("paid");
+        } catch {
+          settle("failed");
+        }
+      },
+      modal: { ondismiss: () => settle("dismissed") },
+    });
+    rzp.on("payment.failed", () => settle("failed"));
+    rzp.open();
+  });
 }
 
 const inputCls =

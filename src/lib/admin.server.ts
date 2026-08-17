@@ -148,6 +148,7 @@ export type OrderData = {
   items: { slug: string; name: string; price: number; qty: number }[];
   total: number;
   method: "cod" | "online";
+  notify?: boolean;
 };
 
 export const submitOrder = createServerFn({ method: "POST" })
@@ -174,22 +175,25 @@ export const submitOrder = createServerFn({ method: "POST" })
       .single();
     if (error) throw new Error(`Failed to save order: ${error.message}`);
 
-    // Send the customer a confirmation email. Never block or fail the order
-    // if the email can't be sent — just log it.
-    try {
-      await sendOrderConfirmationEmail({
-        orderId: order.id,
-        customerName: data.customer_name,
-        email: data.email,
-        phone: data.phone,
-        address: fullAddress,
-        notes: data.notes,
-        items: data.items,
-        total: data.total,
-        method: data.method ?? "cod",
-      });
-    } catch (err) {
-      console.error("Failed to send order confirmation email:", err);
+    // Send the customer a confirmation email. For online payments this is
+    // skipped here and sent after the payment is verified. Never block or
+    // fail the order if the email can't be sent — just log it.
+    if (data.notify !== false) {
+      try {
+        await sendOrderConfirmationEmail({
+          orderId: order.id,
+          customerName: data.customer_name,
+          email: data.email,
+          phone: data.phone,
+          address: fullAddress,
+          notes: data.notes,
+          items: data.items,
+          total: data.total,
+          method: data.method ?? "cod",
+        });
+      } catch (err) {
+        console.error("Failed to send order confirmation email:", err);
+      }
     }
 
     return { orderId: order.id };
@@ -197,7 +201,7 @@ export const submitOrder = createServerFn({ method: "POST" })
 
 // ── Order confirmation email (Resend) ──────────────────────────
 
-async function sendOrderConfirmationEmail(input: {
+export async function sendOrderConfirmationEmail(input: {
   orderId: string;
   customerName: string;
   email: string;

@@ -12,11 +12,12 @@ type ServerEntry = {
 function buildCspPolicy(): string {
   const directives = [
     `default-src 'self'`,
-    `script-src 'self' 'unsafe-inline' 'unsafe-eval'`,
+    `script-src 'self' 'unsafe-inline' 'unsafe-eval' https://checkout.razorpay.com`,
     `style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com`,
     `font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com`,
-    `img-src 'self' data: blob: https://*.supabase.co`,
-    `connect-src 'self' https://*.supabase.co`,
+    `img-src 'self' data: blob: https://*.supabase.co https://*.razorpay.com`,
+    `connect-src 'self' https://*.supabase.co https://*.razorpay.com`,
+    `frame-src https://*.razorpay.com`,
     `frame-ancestors 'none'`,
     `base-uri 'self'`,
     `form-action 'self'`,
