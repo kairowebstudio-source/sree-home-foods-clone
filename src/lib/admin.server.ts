@@ -300,12 +300,16 @@ export const migrateDataUrlImages = createServerFn({ method: "POST" }).handler(a
       continue;
     }
 
-    const { data: publicUrl } = client.storage
+    const { data: signed } = await client.storage
       .from("product-images")
-      .getPublicUrl(filename);
+      .createSignedUrl(filename, 60 * 60 * 24 * 365 * 10);
+    if (!signed?.signedUrl) {
+      failed++;
+      continue;
+    }
     const { error: updateError } = await client
       .from("products")
-      .update({ image: publicUrl.publicUrl, updated_at: new Date().toISOString() })
+      .update({ image: signed.signedUrl, updated_at: new Date().toISOString() })
       .eq("slug", row.slug);
     if (updateError) {
       failed++;
