@@ -16,7 +16,9 @@ export const getProducts = createServerFn({ method: "GET" }).handler(async () =>
       .select("*")
       .order("created_at", { ascending: true });
     if (error) throw new Error(error.message);
-    return (data as Product[]) || [];
+    const rows = (data as Product[]) || [];
+    // Empty catalog (fresh database) → show the built-in starter products
+    return rows.length ? rows : fallbackProducts;
   } catch {
     return fallbackProducts;
   }
