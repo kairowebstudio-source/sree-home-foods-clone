@@ -73,6 +73,7 @@ function Checkout() {
             qty: i.qty,
           })),
           total: total + shipping,
+          method: form.method,
         },
       });
 

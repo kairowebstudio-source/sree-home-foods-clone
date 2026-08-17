@@ -147,6 +147,7 @@ export type OrderData = {
   notes: string;
   items: { slug: string; name: string; price: number; qty: number }[];
   total: number;
+  method: "cod" | "online";
 };
 
 export const submitOrder = createServerFn({ method: "POST" })
@@ -172,8 +173,135 @@ export const submitOrder = createServerFn({ method: "POST" })
       .select("id")
       .single();
     if (error) throw new Error(`Failed to save order: ${error.message}`);
+
+    // Send the customer a confirmation email. Never block or fail the order
+    // if the email can't be sent — just log it.
+    try {
+      await sendOrderConfirmationEmail({
+        orderId: order.id,
+        customerName: data.customer_name,
+        email: data.email,
+        phone: data.phone,
+        address: fullAddress,
+        notes: data.notes,
+        items: data.items,
+        total: data.total,
+        method: data.method ?? "cod",
+      });
+    } catch (err) {
+      console.error("Failed to send order confirmation email:", err);
+    }
+
     return { orderId: order.id };
   });
+
+// ── Order confirmation email (Resend) ──────────────────────────
+
+async function sendOrderConfirmationEmail(input: {
+  orderId: string;
+  customerName: string;
+  email: string;
+  phone: string;
+  address: string;
+  notes: string;
+  items: { name: string; price: number; qty: number }[];
+  total: number;
+  method: "cod" | "online";
+}): Promise<void> {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) {
+    console.warn("RESEND_API_KEY not set — skipping order confirmation email.");
+    return;
+  }
+
+  const itemsSum = input.items.reduce((s, i) => s + i.price * i.qty, 0);
+  const shipping = Math.max(0, input.total - itemsSum);
+  const methodLabel =
+    input.method === "online"
+      ? "Pay Online — we'll follow up with a secure payment link"
+      : "Cash on Delivery — pay when your order arrives";
+
+  const itemRows = input.items
+    .map(
+      (i) => `
+        <tr>
+          <td style="padding:10px 12px;border-bottom:1px solid #eee;color:#333;">${escapeHtml(i.name)} × ${i.qty}</td>
+          <td style="padding:10px 12px;border-bottom:1px solid #eee;color:#333;text-align:right;">₹${(i.price * i.qty).toLocaleString("en-IN")}</td>
+        </tr>`,
+    )
+    .join("");
+
+  const html = `
+    <div style="font-family:Arial,Helvetica,sans-serif;max-width:600px;margin:0 auto;background:#faf7f0;border:1px solid #e8dcc3;border-radius:12px;overflow:hidden;">
+      <div style="background:#7a1f1f;padding:24px 28px;text-align:center;">
+        <h1 style="margin:0;color:#f5e9c9;font-size:22px;letter-spacing:0.5px;">Retro Natural Products</h1>
+        <p style="margin:6px 0 0;color:#e9d9a8;font-size:12px;">Order Confirmation</p>
+      </div>
+      <div style="padding:28px;">
+        <p style="color:#333;font-size:15px;">Dear <strong>${escapeHtml(input.customerName)}</strong>,</p>
+        <p style="color:#555;font-size:14px;line-height:1.6;">
+          Thank you for your order! It has been received and our team will reach out shortly with delivery details.
+        </p>
+        <table style="width:100%;background:#fff;border:1px solid #e8dcc3;border-radius:8px;margin:18px 0;font-size:13px;">
+          <tr>
+            <td style="padding:10px 12px;color:#777;">Order ID</td>
+            <td style="padding:10px 12px;text-align:right;font-family:monospace;color:#7a1f1f;font-weight:bold;">${escapeHtml(input.orderId)}</td>
+          </tr>
+          <tr>
+            <td style="padding:10px 12px;border-top:1px solid #f0e8d8;color:#777;">Payment</td>
+            <td style="padding:10px 12px;border-top:1px solid #f0e8d8;text-align:right;color:#333;">${methodLabel}</td>
+          </tr>
+        </table>
+        <h3 style="color:#7a1f1f;font-size:14px;margin:20px 0 8px;">Your Items</h3>
+        <table style="width:100%;background:#fff;border:1px solid #e8dcc3;border-radius:8px;border-collapse:collapse;font-size:13px;">
+          <thead>
+            <tr>
+              <th style="padding:10px 12px;text-align:left;color:#999;font-size:11px;text-transform:uppercase;">Item</th>
+              <th style="padding:10px 12px;text-align:right;color:#999;font-size:11px;text-transform:uppercase;">Amount</th>
+            </tr>
+          </thead>
+          <tbody>${itemRows}
+            <tr>
+              <td style="padding:10px 12px;color:#777;">Shipping</td>
+              <td style="padding:10px 12px;text-align:right;color:#333;">${shipping === 0 ? "Free" : `₹${shipping.toLocaleString("en-IN")}`}</td>
+            </tr>
+            <tr>
+              <td style="padding:12px;color:#7a1f1f;font-weight:bold;">Total</td>
+              <td style="padding:12px;text-align:right;color:#7a1f1f;font-weight:bold;">₹${input.total.toLocaleString("en-IN")}</td>
+            </tr>
+          </tbody>
+        </table>
+        <h3 style="color:#7a1f1f;font-size:14px;margin:20px 0 8px;">Delivery Address</h3>
+        <p style="color:#555;font-size:13px;line-height:1.6;background:#fff;border:1px solid #e8dcc3;border-radius:8px;padding:12px;">${escapeHtml(input.address)}<br/>Phone: ${escapeHtml(input.phone)}</p>
+        ${input.notes ? `<p style="color:#777;font-size:13px;"><strong>Notes:</strong> ${escapeHtml(input.notes)}</p>` : ""}
+        <p style="color:#999;font-size:12px;line-height:1.6;border-top:1px solid #e8dcc3;padding-top:14px;margin-top:22px;">
+          Questions about your order? Reply to this email or contact us via the website.<br/>
+          This is an automated message — please do not reply to this email address.
+        </p>
+      </div>
+    </div>`;
+
+  const { Resend } = await import("resend");
+  const resend = new Resend(apiKey);
+  const from = process.env.EMAIL_FROM || "Retro Natural Products <onboarding@resend.dev>";
+
+  const { error } = await resend.emails.send({
+    from,
+    to: input.email,
+    subject: `Order Confirmed — ${input.orderId.slice(0, 8).toUpperCase()}`,
+    html,
+  });
+  if (error) throw new Error(error.message);
+}
+
+function escapeHtml(s: string): string {
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
 
 export const getOrders = createServerFn({ method: "GET" }).handler(async () => {
   if (!supabaseEnabled()) return [];
