@@ -78,10 +78,11 @@ function Checkout() {
           notes: form.notes,
           items: items.map((i) => ({
             slug: i.slug,
-            name: i.name,
+            name: i.weight ? `${i.name} (${i.weight})` : i.name,
             price: i.price,
             qty: i.qty,
           })),
+
           total: total + shipping,
           method: form.method,
           notify: form.method === "cod",
