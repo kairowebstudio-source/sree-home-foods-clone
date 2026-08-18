@@ -48,6 +48,16 @@ type ProductInput = {
 
 const NEEDS_ENV_MSG = "Set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY in Vercel env vars to save products.";
 
+// PostgREST reports missing tables/columns as "... in the schema cache" errors
+// (e.g. PGRST204). They mean the database hasn't been migrated, not that the
+// code is wrong — surface an actionable hint instead of the cryptic message.
+function withSchemaHint(action: string, error: { message?: string }): string {
+  if (error?.message && error.message.includes("in the schema cache")) {
+    return `${action}: ${error.message} — the products table in your Supabase project is missing the 'variants' column (or the products/orders tables). Open the SQL Editor in Supabase and run the migrations in supabase/migrations/ (at minimum: ALTER TABLE public.products ADD COLUMN IF NOT EXISTS variants jsonb NOT NULL DEFAULT '[]'::jsonb;).`;
+  }
+  return `${action}: ${error?.message ?? "unknown error"}`;
+}
+
 export const addProduct = createServerFn({ method: "POST" })
   .validator((d: ProductInput) => d)
   .handler(async ({ data }) => {
@@ -70,7 +80,7 @@ export const addProduct = createServerFn({ method: "POST" })
       benefits: data.benefits,
     };
     const { error } = await client.from("products").insert(product);
-    if (error) throw new Error(`Failed to add product: ${error.message}`);
+    if (error) throw new Error(withSchemaHint("Failed to add product", error));
     return product as Product;
   });
 
@@ -125,7 +135,7 @@ export const updateProduct = createServerFn({ method: "POST" })
         updated_at: new Date().toISOString(),
       })
       .eq("slug", data.slug);
-    if (error) throw new Error(`Failed to update product: ${error.message}`);
+    if (error) throw new Error(withSchemaHint("Failed to update product", error));
     return data;
   });
 
