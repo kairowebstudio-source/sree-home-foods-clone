@@ -35,7 +35,7 @@ export function Footer() {
           <div>
             <h4 className="text-gold font-display text-lg mb-4">Reach Us</h4>
             <ul className="space-y-2 text-sm text-cream/80">
-              <li className="flex gap-2"><i className="fas fa-map-marker-alt text-gold mt-1" /> Andhra Pradesh, India</li>
+              <li className="flex gap-2"><i className="fas fa-building text-gold mt-1" /> <span><strong className="text-cream">'RETRO' Natural Products</strong><br />Shop G9, H.no 19, Eeco Valley Apartments, opposite Jana Priya Nile valley, PJR Layout, MADHAVAPURI HILLS, Ameenpur, Hyderabad-500050</span></li>
               <li className="flex gap-2"><i className="fas fa-phone text-gold mt-1" /> +91 81212 73912</li>
               <li className="flex gap-2"><i className="fas fa-envelope text-gold mt-1" /> retronaturalproducts@gmail.com</li>
             </ul>

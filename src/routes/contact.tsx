@@ -25,7 +25,7 @@ function Contact() {
         <div className="mx-auto max-w-5xl grid md:grid-cols-2 gap-10">
           <div className="space-y-6">
             {[
-              { i: "fa-map-marker-alt", t: "Visit", d: "Andhra Pradesh, India" },
+              { i: "fa-building", t: "Office", d: "'RETRO' Natural Products\nShop G9, H.no 19, Eeco Valley Apartments\nopposite Jana Priya Nile valley, PJR Layout\nMADHAVAPURI HILLS, Ameenpur\nHyderabad-500050" },
               { i: "fa-phone", t: "Call", d: "+91 81212 73912" },
               { i: "fa-envelope", t: "Email", d: "retronaturalproducts@gmail.com" },
               { i: "fa-clock", t: "Hours", d: "Mon–Sat · 9:00 AM – 7:00 PM" },
