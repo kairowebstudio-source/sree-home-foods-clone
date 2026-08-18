@@ -40,10 +40,10 @@ function Home() {
           </div>
           <div className="mb-2 text-cream/90 text-sm md:text-base tracking-[0.25em] uppercase font-semibold">Welcome to</div>
           <h1 className="font-display font-bold leading-[0.95] text-center">
-            <span className="block text-6xl sm:text-7xl md:text-8xl lg:text-9xl bg-gradient-to-r from-gold via-[#ffdf6b] to-gold bg-clip-text text-transparent drop-shadow-[0_4px_24px_rgba(212,161,42,0.55)]">
+            <span className="block text-6xl sm:text-7xl md:text-8xl lg:text-9xl bg-gradient-to-b from-[#b03a2e] via-[#8a1e1e] to-[#5f1212] bg-clip-text text-transparent drop-shadow-[0_4px_20px_rgba(138,30,30,0.55)]">
               RETRO
             </span>
-            <span className="block mt-2 md:mt-3 text-2xl sm:text-3xl md:text-4xl lg:text-5xl tracking-[0.12em] text-cream/95 drop-shadow-md">
+            <span className="block mt-2 md:mt-3 text-2xl sm:text-3xl md:text-4xl lg:text-5xl tracking-[0.12em] bg-gradient-to-r from-[#a3e635] via-[#22c55e] to-[#059669] bg-clip-text text-transparent drop-shadow-[0_4px_18px_rgba(34,197,94,0.4)]">
               NATURAL PRODUCTS
             </span>
           </h1>
