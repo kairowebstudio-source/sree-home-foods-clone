@@ -78,10 +78,11 @@ function Checkout() {
           notes: form.notes,
           items: items.map((i) => ({
             slug: i.slug,
-            name: i.name,
+            name: i.weight ? `${i.name} (${i.weight})` : i.name,
             price: i.price,
             qty: i.qty,
           })),
+
           total: total + shipping,
           method: form.method,
           notify: form.method === "cod",
@@ -242,7 +243,7 @@ function Checkout() {
 
             <ul className="mt-5 space-y-4 max-h-80 overflow-y-auto pr-1">
               {items.map((i) => (
-                <li key={i.slug} className="flex gap-3 bg-white/70 backdrop-blur rounded-xl p-2.5 border border-gold/20">
+                <li key={i.key} className="flex gap-3 bg-white/70 backdrop-blur rounded-xl p-2.5 border border-gold/20">
                   <div className="h-16 w-16 shrink-0 rounded-lg bg-white overflow-hidden border border-border">
                     <img src={i.image} alt={i.name} className="w-full h-full object-contain p-1" />
                   </div>
@@ -251,15 +252,15 @@ function Checkout() {
                     <p className="text-[11px] text-muted-foreground">{i.weight} · {formatPrice(i.price)}</p>
                     <div className="mt-1.5 flex items-center justify-between">
                       <div className="inline-flex items-center border border-border rounded-full bg-cream">
-                        <button type="button" onClick={() => setQty(i.slug, i.qty - 1)} className="h-6 w-6 grid place-items-center text-brand hover:bg-brand/10 rounded-l-full" aria-label="Decrease">
+                        <button type="button" onClick={() => setQty(i.key, i.qty - 1)} className="h-6 w-6 grid place-items-center text-brand hover:bg-brand/10 rounded-l-full" aria-label="Decrease">
                           <i className="fas fa-minus text-[9px]" />
                         </button>
                         <span className="w-7 text-center text-xs font-semibold">{i.qty}</span>
-                        <button type="button" onClick={() => setQty(i.slug, i.qty + 1)} className="h-6 w-6 grid place-items-center text-brand hover:bg-brand/10 rounded-r-full" aria-label="Increase">
+                        <button type="button" onClick={() => setQty(i.key, i.qty + 1)} className="h-6 w-6 grid place-items-center text-brand hover:bg-brand/10 rounded-r-full" aria-label="Increase">
                           <i className="fas fa-plus text-[9px]" />
                         </button>
                       </div>
-                      <button type="button" onClick={() => remove(i.slug)} className="text-[11px] text-brand/70 hover:text-brand" aria-label={`Remove ${i.name}`}>
+                      <button type="button" onClick={() => remove(i.key)} className="text-[11px] text-brand/70 hover:text-brand" aria-label={`Remove ${i.name}`}>
                         <i className="fas fa-trash-can" />
                       </button>
                     </div>

@@ -40,6 +40,7 @@ type ProductInput = {
   weight: string;
   price: number;
   mrp?: number;
+  variants?: { weight: string; price: number; mrp?: number }[];
   image: string;
   description: string;
   benefits: string[];
@@ -63,6 +64,7 @@ export const addProduct = createServerFn({ method: "POST" })
       weight: data.weight,
       price: data.price,
       mrp: data.mrp || null,
+      variants: data.variants ?? [],
       image: data.image || "/placeholder.svg",
       description: data.description,
       benefits: data.benefits,
@@ -116,6 +118,7 @@ export const updateProduct = createServerFn({ method: "POST" })
         weight: data.weight,
         price: data.price,
         mrp: data.mrp || null,
+        variants: data.variants ?? [],
         ...(imagePatch !== undefined ? { image: imagePatch } : {}),
         description: data.description,
         benefits: data.benefits,

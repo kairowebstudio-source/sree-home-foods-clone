@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { Marquee } from "@/components/site/Marquee";
-import { formatPrice, type Product } from "@/lib/products";
+import { type Product, formatPrice, getVariants } from "@/lib/products";
 import { useCart } from "@/lib/cart";
 import { getProducts } from "@/lib/admin.server";
 
@@ -246,6 +246,9 @@ function Home() {
 function ProductCard({ product: p }: { product: Product }) {
   const { add } = useCart();
   const [qty, setQty] = useState(1);
+  const variants = getVariants(p);
+  const [vIdx, setVIdx] = useState(0);
+  const variant = variants[Math.min(vIdx, variants.length - 1)];
   const dec = () => setQty((q) => Math.max(1, q - 1));
   const inc = () => setQty((q) => Math.min(99, q + 1));
   return (
@@ -273,15 +276,34 @@ function ProductCard({ product: p }: { product: Product }) {
           >
             {p.name}
           </Link>
-          <p className="text-[10px] sm:text-[11px] text-foreground/60 mt-0.5">{p.weight}</p>
+          {variants.length > 1 ? (
+            <div className="mt-1.5 flex flex-wrap gap-1">
+              {variants.map((v, i) => (
+                <button
+                  key={`${v.weight}-${i}`}
+                  type="button"
+                  onClick={() => setVIdx(i)}
+                  className={`px-2 py-0.5 rounded-full border text-[9px] sm:text-[10px] font-semibold transition ${
+                    i === vIdx
+                      ? "bg-brand text-cream border-brand"
+                      : "bg-white/70 text-brand border-brand/30 hover:border-brand"
+                  }`}
+                >
+                  {v.weight}
+                </button>
+              ))}
+            </div>
+          ) : (
+            <p className="text-[10px] sm:text-[11px] text-foreground/60 mt-0.5">{variant.weight}</p>
+          )}
         </div>
         <div className="flex items-baseline gap-1.5">
           <span className="font-display text-brand text-base sm:text-lg font-bold">
-            {formatPrice(p.price)}
+            {formatPrice(variant.price)}
           </span>
-          {p.mrp && p.mrp > p.price && (
+          {variant.mrp && variant.mrp > variant.price && (
             <span className="text-[10px] sm:text-xs text-foreground/50 line-through">
-              {formatPrice(p.mrp)}
+              {formatPrice(variant.mrp)}
             </span>
           )}
         </div>
@@ -307,7 +329,7 @@ function ProductCard({ product: p }: { product: Product }) {
           </div>
           <button
             type="button"
-            onClick={() => add(p, qty)}
+            onClick={() => add(p, qty, variant)}
             className="flex-1 min-w-0 inline-flex items-center justify-center gap-1 rounded-full bg-brand text-cream px-2 py-1.5 sm:py-2 font-bold uppercase tracking-wider text-[10px] sm:text-[11px] hover:opacity-90 transition"
           >
             <i className="fas fa-basket-shopping text-[10px]" />

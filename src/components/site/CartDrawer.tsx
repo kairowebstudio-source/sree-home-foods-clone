@@ -65,7 +65,7 @@ export function CartDrawer() {
           ) : (
             <ul className="space-y-4">
               {items.map((i) => (
-                <li key={i.slug} className="flex gap-4 bg-white/70 backdrop-blur rounded-xl p-3 border border-gold/20">
+                <li key={i.key} className="flex gap-4 bg-white/70 backdrop-blur rounded-xl p-3 border border-gold/20">
                   <div className="h-20 w-20 shrink-0 rounded-lg bg-white overflow-hidden border border-border">
                     <img src={i.image} alt={i.name} className="w-full h-full object-contain p-1" />
                   </div>
@@ -83,7 +83,7 @@ export function CartDrawer() {
                     <div className="mt-2 flex items-center justify-between">
                       <div className="inline-flex items-center border border-border rounded-full bg-cream">
                         <button
-                          onClick={() => setQty(i.slug, i.qty - 1)}
+                          onClick={() => setQty(i.key, i.qty - 1)}
                           className="h-7 w-7 grid place-items-center text-brand hover:bg-brand/10 rounded-l-full"
                           aria-label="Decrease"
                         >
@@ -91,7 +91,7 @@ export function CartDrawer() {
                         </button>
                         <span className="w-8 text-center text-sm font-semibold">{i.qty}</span>
                         <button
-                          onClick={() => setQty(i.slug, i.qty + 1)}
+                          onClick={() => setQty(i.key, i.qty + 1)}
                           className="h-7 w-7 grid place-items-center text-brand hover:bg-brand/10 rounded-r-full"
                           aria-label="Increase"
                         >
@@ -99,7 +99,7 @@ export function CartDrawer() {
                         </button>
                       </div>
                       <button
-                        onClick={() => remove(i.slug)}
+                        onClick={() => remove(i.key)}
                         className="text-xs text-brand/70 hover:text-brand"
                         aria-label={`Remove ${i.name}`}
                       >

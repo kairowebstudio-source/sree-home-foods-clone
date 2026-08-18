@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
-import { type Product, categories } from "@/lib/products";
+import { type Product, categories, priceRange, getVariants } from "@/lib/products";
 import { getProducts } from "@/lib/admin.server";
 
 export const Route = createFileRoute("/shop/")({
@@ -61,7 +61,11 @@ function Shop() {
                   <h3 className="mt-1 font-display text-xl text-brand">{p.name}</h3>
                   <p className="text-sm text-muted-foreground mt-1">{p.tagline}</p>
                   <div className="mt-4 flex items-center justify-between">
-                    <span className="text-xs text-foreground/60">{p.weight}</span>
+                    <span className="text-xs text-foreground/60">
+                      {getVariants(p).length > 1
+                        ? `${getVariants(p).length} sizes · ${priceRange(p)}`
+                        : `${p.weight} · ${priceRange(p)}`}
+                    </span>
                     <span className="text-sm font-semibold text-brand">View →</span>
                   </div>
                 </div>

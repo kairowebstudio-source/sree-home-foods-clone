@@ -3,7 +3,8 @@ import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { useCart } from "@/lib/cart";
 import { useState, useEffect } from "react";
-import type { Product } from "@/lib/products";
+import type { Product, Variant } from "@/lib/products";
+import { getVariants, formatPrice } from "@/lib/products";
 import { getProducts } from "@/lib/admin.server";
 
 
@@ -46,7 +47,11 @@ function ProductPage() {
   const related = (allProducts || []).filter((p: Product) => p.slug !== product.slug).slice(0, 3);
   const { add } = useCart();
   const [qty, setQty] = useState(1);
-  const waMsg = encodeURIComponent(`Hi! I'd like to order ${product.name} (${product.weight}) from Retro Natural Products.`);
+  const variants: Variant[] = getVariants(product);
+  const [vIdx, setVIdx] = useState(0);
+  useEffect(() => { setVIdx(0); setQty(1); }, [product.slug]);
+  const variant = variants[Math.min(vIdx, variants.length - 1)];
+  const waMsg = encodeURIComponent(`Hi! I'd like to order ${product.name} (${variant.weight}) from Retro Natural Products.`);
 
   return (
     <div className="min-h-screen bg-background">
@@ -77,8 +82,37 @@ function ProductPage() {
               ))}
             </div>
             <div className="mt-6 flex items-center gap-4 text-sm text-foreground/70">
-              <span><i className="fas fa-weight-hanging text-gold mr-2" />{product.weight}</span>
               <span><i className="fas fa-shield-heart text-gold mr-2" />100% Natural</span>
+            </div>
+
+            {/* Size / weight options */}
+            <div className="mt-6">
+              <span className="block text-xs uppercase tracking-[0.25em] text-foreground/60 font-bold mb-2">
+                {variants.length > 1 ? "Choose a size" : "Size"}
+              </span>
+              <div className="flex flex-wrap gap-2">
+                {variants.map((v, i) => (
+                  <button
+                    key={`${v.weight}-${i}`}
+                    type="button"
+                    onClick={() => setVIdx(i)}
+                    className={`px-4 py-2 rounded-full border-2 text-sm font-semibold transition ${
+                      i === vIdx
+                        ? "bg-brand text-cream border-brand"
+                        : "bg-cream/70 text-brand border-brand/30 hover:border-brand"
+                    }`}
+                  >
+                    {v.weight} · {formatPrice(v.price)}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="mt-5 flex items-baseline gap-3">
+              <span className="font-display text-3xl text-brand font-bold">{formatPrice(variant.price)}</span>
+              {variant.mrp && variant.mrp > variant.price && (
+                <span className="text-base text-foreground/50 line-through">{formatPrice(variant.mrp)}</span>
+              )}
             </div>
             <div className="mt-8 flex flex-wrap items-center gap-3">
               <div className="inline-flex items-center border-2 border-brand/30 rounded-full bg-cream/70 backdrop-blur">
@@ -91,7 +125,7 @@ function ProductPage() {
                 </button>
               </div>
               <button
-                onClick={() => add(product, qty)}
+                onClick={() => add(product, qty, variant)}
                 className="inline-flex items-center gap-2 rounded-full bg-brand text-brand-foreground px-7 py-3 font-bold uppercase tracking-wider text-sm hover:opacity-90 transition"
               >
                 <i className="fas fa-basket-shopping" /> Add to Cart
