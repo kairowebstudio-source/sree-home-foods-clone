@@ -73,6 +73,7 @@ export type Database = {
           slug: string
           tagline: string
           updated_at: string
+          variants: Json
           weight: string
         }
         Insert: {
@@ -88,6 +89,7 @@ export type Database = {
           slug: string
           tagline?: string
           updated_at?: string
+          variants?: Json
           weight?: string
         }
         Update: {
@@ -103,6 +105,7 @@ export type Database = {
           slug?: string
           tagline?: string
           updated_at?: string
+          variants?: Json
           weight?: string
         }
         Relationships: []
