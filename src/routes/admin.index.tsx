@@ -1,8 +1,8 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { useEffect, useState, useCallback, useRef } from "react";
 import { getProducts, getOrders, addProduct, updateProduct, deleteProduct, adminLogin, uploadProductImage, migrateDataUrlImages } from "@/lib/admin.server";
-import { categories } from "@/lib/products";
-import type { Product } from "@/lib/products";
+import { categories, getVariants } from "@/lib/products";
+import type { Product, Variant } from "@/lib/products";
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString("en-IN", {
@@ -162,9 +162,21 @@ function ProductForm({
   const [name, setName] = useState(initial?.name ?? "");
   const [tagline, setTagline] = useState(initial?.tagline ?? "");
   const [category, setCategory] = useState<string>(initial?.category ?? "Powders");
-  const [weight, setWeight] = useState(initial?.weight ?? "");
-  const [price, setPrice] = useState(String(initial?.price ?? ""));
-  const [mrp, setMrp] = useState(String(initial?.mrp ?? ""));
+  const [rows, setRows] = useState<{ weight: string; price: string; mrp: string }[]>(
+    initial
+      ? getVariants(initial).map((v) => ({
+          weight: v.weight ?? "",
+          price: String(v.price ?? ""),
+          mrp: v.mrp ? String(v.mrp) : "",
+        }))
+      : [{ weight: "", price: "", mrp: "" }],
+  );
+
+  const updateRow = (idx: number, patch: Partial<{ weight: string; price: string; mrp: string }>) =>
+    setRows((prev) => prev.map((r, i) => (i === idx ? { ...r, ...patch } : r)));
+  const addRow = () => setRows((prev) => [...prev, { weight: "", price: "", mrp: "" }]);
+  const removeRow = (idx: number) =>
+    setRows((prev) => (prev.length === 1 ? prev : prev.filter((_, i) => i !== idx)));
   const [imageUrl, setImageUrl] = useState(initial?.image ?? "");
   const [description, setDescription] = useState(initial?.description ?? "");
   const [benefitsStr, setBenefitsStr] = useState(initial?.benefits.join(", ") ?? "");
@@ -252,14 +264,28 @@ function ProductForm({
       finalImage = "";
     }
 
+    const variants: Variant[] = rows
+      .filter((r) => r.weight.trim() && Number(r.price) > 0)
+      .map((r) => ({
+        weight: r.weight.trim(),
+        price: Number(r.price),
+        ...(r.mrp ? { mrp: Number(r.mrp) } : {}),
+      }));
+
+    if (variants.length === 0) {
+      alert("Add at least one size with a weight and price.");
+      return;
+    }
+
     onSave({
       slug: slug.toLowerCase().replace(/\s+/g, "-"),
       name,
       tagline,
       category: category as Product["category"],
-      weight,
-      price: Number(price),
-      mrp: mrp ? Number(mrp) : undefined,
+      weight: variants[0].weight,
+      price: variants[0].price,
+      mrp: variants[0].mrp,
+      variants,
       image: finalImage,
       description,
       benefits,
@@ -299,22 +325,35 @@ function ProductForm({
           className="w-full rounded-lg border border-border bg-white px-3 py-2.5 text-sm focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand/30" />
       </div>
 
-      <div className="grid sm:grid-cols-3 gap-4">
-        <div>
-          <label className="block text-xs uppercase tracking-wider font-semibold text-foreground/70 mb-1">Weight</label>
-          <input required value={weight} onChange={(e) => setWeight(e.target.value)} placeholder="170g"
-            className="w-full rounded-lg border border-border bg-white px-3 py-2.5 text-sm focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand/30" />
+      {/* Sizes / prices */}
+      <div>
+        <div className="flex items-center justify-between mb-2">
+          <label className="block text-xs uppercase tracking-wider font-semibold text-foreground/70">
+            Sizes & Prices
+          </label>
+          <button type="button" onClick={addRow}
+            className="text-xs font-bold text-brand hover:underline inline-flex items-center gap-1">
+            <i className="fas fa-plus" /> Add size
+          </button>
         </div>
-        <div>
-          <label className="block text-xs uppercase tracking-wider font-semibold text-foreground/70 mb-1">Price (₹)</label>
-          <input required type="number" min={0} value={price} onChange={(e) => setPrice(e.target.value)} placeholder="349"
-            className="w-full rounded-lg border border-border bg-white px-3 py-2.5 text-sm focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand/30" />
+        <div className="space-y-2">
+          {rows.map((r, idx) => (
+            <div key={idx} className="grid grid-cols-[1fr_1fr_1fr_auto] gap-2 items-center">
+              <input required={idx === 0} value={r.weight} onChange={(e) => updateRow(idx, { weight: e.target.value })} placeholder="Weight e.g. 170g"
+                className="w-full rounded-lg border border-border bg-white px-3 py-2.5 text-sm focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand/30" />
+              <input required={idx === 0} type="number" min={0} value={r.price} onChange={(e) => updateRow(idx, { price: e.target.value })} placeholder="Price ₹"
+                className="w-full rounded-lg border border-border bg-white px-3 py-2.5 text-sm focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand/30" />
+              <input type="number" min={0} value={r.mrp} onChange={(e) => updateRow(idx, { mrp: e.target.value })} placeholder="MRP ₹"
+                className="w-full rounded-lg border border-border bg-white px-3 py-2.5 text-sm focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand/30" />
+              <button type="button" onClick={() => removeRow(idx)} disabled={rows.length === 1}
+                aria-label="Remove size"
+                className="h-9 w-9 grid place-items-center rounded-full text-foreground/50 hover:text-brand hover:bg-brand/10 transition disabled:opacity-30">
+                <i className="fas fa-trash text-xs" />
+              </button>
+            </div>
+          ))}
         </div>
-        <div>
-          <label className="block text-xs uppercase tracking-wider font-semibold text-foreground/70 mb-1">MRP (₹)</label>
-          <input type="number" min={0} value={mrp} onChange={(e) => setMrp(e.target.value)} placeholder="449"
-            className="w-full rounded-lg border border-border bg-white px-3 py-2.5 text-sm focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand/30" />
-        </div>
+        <p className="text-[11px] text-foreground/50 mt-2">The first size is shown as the default on the website.</p>
       </div>
 
       {/* Image Upload */}
