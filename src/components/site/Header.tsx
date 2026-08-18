@@ -48,7 +48,7 @@ export function Header({ variant }: { variant?: "transparent" | "solid" }) {
         </nav>
         <div className="flex items-center gap-2">
           <a
-            href="https://wa.me/919999999999"
+            href="https://wa.me/918121273912"
             target="_blank"
             rel="noreferrer"
             className="hidden md:inline-flex items-center gap-2 rounded-full bg-brand text-brand-foreground px-4 py-2 text-sm font-semibold hover:opacity-90 transition"

@@ -38,10 +38,14 @@ function Home() {
           <div className="inline-block px-4 py-1 rounded-full border border-gold/60 text-gold text-xs tracking-[0.3em] uppercase mb-6">
             ✦ Authentic · Natural · Timeless ✦
           </div>
-          <h1 className="font-display text-4xl md:text-7xl font-bold leading-tight">
-            <span className="block">Welcome to</span>
-            <span className="block text-gold">Retro Natural</span>
-            <span className="block font-script text-3xl md:text-5xl text-cream/90 mt-2">Products</span>
+          <div className="mb-2 text-cream/90 text-sm md:text-base tracking-[0.25em] uppercase font-semibold">Welcome to</div>
+          <h1 className="font-display font-bold leading-[0.95] text-center">
+            <span className="block text-6xl sm:text-7xl md:text-8xl lg:text-9xl bg-gradient-to-r from-gold via-[#ffdf6b] to-gold bg-clip-text text-transparent drop-shadow-[0_4px_24px_rgba(212,161,42,0.55)]">
+              RETRO
+            </span>
+            <span className="block mt-2 md:mt-3 text-2xl sm:text-3xl md:text-4xl lg:text-5xl tracking-[0.12em] text-cream/95 drop-shadow-md">
+              NATURAL PRODUCTS
+            </span>
           </h1>
           <div className="flex items-center justify-center gap-3 my-6">
             <span className="h-px w-16 bg-gold" />
