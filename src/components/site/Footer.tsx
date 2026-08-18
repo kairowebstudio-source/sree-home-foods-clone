@@ -36,8 +36,8 @@ export function Footer() {
             <h4 className="text-gold font-display text-lg mb-4">Reach Us</h4>
             <ul className="space-y-2 text-sm text-cream/80">
               <li className="flex gap-2"><i className="fas fa-map-marker-alt text-gold mt-1" /> Andhra Pradesh, India</li>
-              <li className="flex gap-2"><i className="fas fa-phone text-gold mt-1" /> +91 99999 99999</li>
-              <li className="flex gap-2"><i className="fas fa-envelope text-gold mt-1" /> hello@retronaturalproducts.com</li>
+              <li className="flex gap-2"><i className="fas fa-phone text-gold mt-1" /> +91 81212 73912</li>
+              <li className="flex gap-2"><i className="fas fa-envelope text-gold mt-1" /> retronaturalproducts@gmail.com</li>
             </ul>
             <div className="flex gap-3 mt-4">
               <a href="#" className="h-9 w-9 grid place-items-center rounded-full border border-gold/40 hover:bg-gold hover:text-brand transition"><i className="fab fa-instagram" /></a>

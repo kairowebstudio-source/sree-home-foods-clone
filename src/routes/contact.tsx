@@ -26,8 +26,8 @@ function Contact() {
           <div className="space-y-6">
             {[
               { i: "fa-map-marker-alt", t: "Visit", d: "Andhra Pradesh, India" },
-              { i: "fa-phone", t: "Call", d: "+91 99999 99999" },
-              { i: "fa-envelope", t: "Email", d: "hello@retronaturalproducts.com" },
+              { i: "fa-phone", t: "Call", d: "+91 81212 73912" },
+              { i: "fa-envelope", t: "Email", d: "retronaturalproducts@gmail.com" },
               { i: "fa-clock", t: "Hours", d: "Mon–Sat · 9:00 AM – 7:00 PM" },
             ].map((c) => (
               <div key={c.t} className="flex gap-4 items-start bg-cream rounded-xl p-5 border border-border">
