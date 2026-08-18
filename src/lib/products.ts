@@ -5,6 +5,12 @@ import chilli from "@/assets/p-chilli.jpeg";
 import honey from "@/assets/p-honey.jpeg";
 import junnu from "@/assets/p-junnu.jpeg";
 
+export type Variant = {
+  weight: string;
+  price: number;
+  mrp?: number;
+};
+
 export type Product = {
   slug: string;
   name: string;
@@ -13,6 +19,8 @@ export type Product = {
   weight: string;
   price: number;
   mrp?: number;
+  /** Optional multiple size/price options. First one is the default. */
+  variants?: Variant[];
   image: string;
   description: string;
   benefits: string[];
@@ -20,6 +28,22 @@ export type Product = {
 
 export const formatPrice = (n: number) =>
   `₹${n.toLocaleString("en-IN", { maximumFractionDigits: 0 })}`;
+
+/** All purchasable options for a product — falls back to the base weight/price. */
+export function getVariants(p: Product): Variant[] {
+  const list = (p.variants ?? []).filter((v) => v && v.weight && Number(v.price) > 0);
+  if (list.length) return list;
+  return [{ weight: p.weight, price: p.price, ...(p.mrp ? { mrp: p.mrp } : {}) }];
+}
+
+/** "₹299" or "₹299 – ₹749" when a product has multiple options. */
+export function priceRange(p: Product): string {
+  const prices = getVariants(p).map((v) => Number(v.price));
+  const min = Math.min(...prices);
+  const max = Math.max(...prices);
+  return min === max ? formatPrice(min) : `${formatPrice(min)} – ${formatPrice(max)}`;
+}
+
 
 export const products: Product[] = [
   {
