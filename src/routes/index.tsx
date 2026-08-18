@@ -43,7 +43,7 @@ function Home() {
             <span className="block text-6xl sm:text-7xl md:text-8xl lg:text-9xl bg-gradient-to-b from-[#b03a2e] via-[#8a1e1e] to-[#5f1212] bg-clip-text text-transparent drop-shadow-[0_4px_20px_rgba(138,30,30,0.55)]">
               RETRO
             </span>
-            <span className="block mt-2 md:mt-3 text-2xl sm:text-3xl md:text-4xl lg:text-5xl tracking-[0.12em] bg-gradient-to-r from-[#a3e635] via-[#22c55e] to-[#059669] bg-clip-text text-transparent drop-shadow-[0_4px_18px_rgba(34,197,94,0.4)]">
+            <span className="block mt-2 md:mt-3 text-2xl sm:text-3xl md:text-4xl lg:text-5xl tracking-[0.12em] bg-gradient-to-r from-[#d9f99d] via-[#4ade80] to-[#10b981] bg-clip-text text-transparent drop-shadow-[0_0_14px_rgba(163,230,53,0.75)] drop-shadow-[0_0_38px_rgba(16,185,129,0.55)] drop-shadow-[0_4px_20px_rgba(5,150,105,0.45)]">
               NATURAL PRODUCTS
             </span>
           </h1>
