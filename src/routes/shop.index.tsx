@@ -26,7 +26,7 @@ function Shop() {
     <div className="min-h-screen bg-background">
       <Header variant="solid" />
       <section className="bg-brand text-cream py-16 px-4 text-center">
-        <span className="text-gold text-xs tracking-[0.3em] uppercase">Our Shop</span>
+        <span className="text-gold text-xs tracking-[0.3em] uppercase">Our Store</span>
         <h1 className="font-display text-5xl mt-2">The Full Collection</h1>
         <p className="text-cream/80 mt-3 max-w-xl mx-auto">Everything we make — natural, honest, and shipped fresh to your door.</p>
       </section>
@@ -66,7 +66,7 @@ function Shop() {
                         ? `${getVariants(p).length} sizes · ${priceRange(p)}`
                         : `${p.weight} · ${priceRange(p)}`}
                     </span>
-                    <span className="text-sm font-semibold text-brand">View →</span>
+                    <span className="text-sm font-semibold text-brand">Buy →</span>
                   </div>
                 </div>
               </Link>

@@ -36,6 +36,9 @@ function Home() {
         <div className="absolute inset-0 bg-gradient-to-b from-[#1a0d0d]/20 via-transparent to-[#1a0d0d]/40" />
         <div className="relative mx-auto max-w-7xl px-4 py-24 md:py-36 text-cream text-center">
           <h1 className="font-display font-bold leading-[0.95] text-center">
+            <span className="block mb-2 md:mb-3 text-lg sm:text-xl md:text-2xl lg:text-3xl tracking-[0.25em] uppercase text-gold font-bold drop-shadow-[0_2px_12px_rgba(212,161,42,0.7)]">
+              Welcome to
+            </span>
             <span className="block text-6xl sm:text-7xl md:text-8xl lg:text-9xl bg-gradient-to-b from-[#b03a2e] via-[#8a1e1e] to-[#5f1212] bg-clip-text text-transparent drop-shadow-[0_4px_20px_rgba(138,30,30,0.55)]">
               RETRO
             </span>
@@ -133,7 +136,7 @@ function Home() {
             <i className="fas fa-seedling text-leaf-dark" />
             <span className="h-px w-16 bg-gold" />
           </div>
-          <p className="text-foreground/80 md:text-lg leading-relaxed">
+          <p className="text-black md:text-lg leading-relaxed">
             Rooted in the fertile soils of the Godavari delta, Retro Natural Products is a small
             family workshop dedicated to keeping traditional recipes alive. From single-origin
             spice powders to raw wild honey and slow-milled superfoods — every product is
@@ -151,7 +154,7 @@ function Home() {
                   <i className={`fas ${b.i}`} />
                 </div>
                 <h3 className="font-display text-lg text-brand mt-4">{b.t}</h3>
-                <p className="text-sm text-muted-foreground mt-1">{b.d}</p>
+                <p className="text-sm text-black/80 mt-1">{b.d}</p>
               </div>
             ))}
           </div>
@@ -170,9 +173,9 @@ function Home() {
             </p>
             <div className="mt-6 flex items-center gap-3 bg-cream/10 border border-gold/30 rounded-full px-5 py-3 w-fit">
               <i className="fas fa-phone-alt text-gold" />
-              <span className="text-sm">Bulk orders · <strong>+91 99999 99999</strong></span>
+              <span className="text-sm">Bulk orders · <strong>+91 81212 73912</strong></span>
             </div>
-            <a href="https://wa.me/919999999999" target="_blank" rel="noreferrer" className="mt-5 inline-flex items-center gap-2 rounded-full bg-gold text-brand px-6 py-3 font-bold uppercase tracking-wider text-sm hover:bg-gold/90 transition">
+            <a href="https://wa.me/918121273912" target="_blank" rel="noreferrer" className="mt-5 inline-flex items-center gap-2 rounded-full bg-gold text-brand px-6 py-3 font-bold uppercase tracking-wider text-sm hover:bg-gold/90 transition">
               <i className="fab fa-whatsapp" /> DM us for bulk orders
             </a>
           </div>

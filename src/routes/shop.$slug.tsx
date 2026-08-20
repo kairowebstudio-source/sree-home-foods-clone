@@ -130,7 +130,7 @@ function ProductPage() {
               >
                 <i className="fas fa-basket-shopping" /> Add to Cart
               </button>
-              <a href={`https://wa.me/919999999999?text=${waMsg}`} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-full border-2 border-brand text-brand px-7 py-3 font-bold uppercase tracking-wider text-sm hover:bg-brand hover:text-cream transition">
+              <a href={`https://wa.me/918121273912?text=${waMsg}`} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-full border-2 border-brand text-brand px-7 py-3 font-bold uppercase tracking-wider text-sm hover:bg-brand hover:text-cream transition">
                 <i className="fab fa-whatsapp" /> WhatsApp
               </a>
             </div>
@@ -141,7 +141,7 @@ function ProductPage() {
 
       <section className="py-16 px-4 bg-brand text-cream text-center">
         <span className="text-gold text-xs tracking-[0.3em] uppercase">You might also love</span>
-        <h2 className="font-display text-3xl md:text-4xl mt-2">More From Our Kitchen</h2>
+        <h2 className="font-display text-3xl md:text-4xl mt-2">More From Our Store</h2>
         <div className="mt-10 mx-auto max-w-6xl grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {related.map((p) => (
             <Link key={p.slug} to="/shop/$slug" params={{ slug: p.slug }} className="group bg-cream text-foreground rounded-2xl overflow-hidden hover:-translate-y-1 transition-transform">
