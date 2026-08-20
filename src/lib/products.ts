@@ -15,7 +15,7 @@ export type Product = {
   slug: string;
   name: string;
   tagline: string;
-  category: "Powders" | "Spices" | "Honey" | "Traditional";
+  category: string;
   weight: string;
   price: number;
   mrp?: number;
