@@ -36,7 +36,7 @@ type ProductInput = {
   slug: string;
   name: string;
   tagline: string;
-  category: "Powders" | "Spices" | "Honey" | "Traditional";
+  category: string;
   weight: string;
   price: number;
   mrp?: number;
@@ -466,3 +466,47 @@ export const migrateDataUrlImages = createServerFn({ method: "POST" }).handler(a
 
   return { migrated, failed };
 });
+
+
+// ── Categories ─────────────────────────────────────────────────
+
+const DEFAULT_CATEGORIES = ["Superfoods", "Spices", "Honey", "Dairy Foods", "Traditional"];
+
+export const getCategories = createServerFn({ method: "GET" }).handler(async () => {
+  if (!supabaseEnabled()) return DEFAULT_CATEGORIES;
+  try {
+    const client = supabaseAdmin();
+    const { data, error } = await client
+      .from("categories")
+      .select("name, sort_order, created_at")
+      .order("sort_order", { ascending: true })
+      .order("created_at", { ascending: true });
+    if (error) throw new Error(error.message);
+    const names = ((data as { name: string }[]) || []).map((c) => c.name);
+    return names.length ? names : DEFAULT_CATEGORIES;
+  } catch {
+    return DEFAULT_CATEGORIES;
+  }
+});
+
+export const addCategory = createServerFn({ method: "POST" })
+  .validator((d: string) => d)
+  .handler(async ({ data }) => {
+    if (!supabaseEnabled()) throw new Error(NEEDS_ENV_MSG);
+    const name = data.trim();
+    if (!name) throw new Error("Category name is required");
+    const client = supabaseAdmin();
+    const { error } = await client.from("categories").insert({ name, sort_order: 100 });
+    if (error) throw new Error(withSchemaHint("Failed to add category", error));
+    return { name };
+  });
+
+export const deleteCategory = createServerFn({ method: "POST" })
+  .validator((d: string) => d)
+  .handler(async ({ data }) => {
+    if (!supabaseEnabled()) throw new Error(NEEDS_ENV_MSG);
+    const client = supabaseAdmin();
+    const { error } = await client.from("categories").delete().eq("name", data);
+    if (error) throw new Error(`Failed to delete category: ${error.message}`);
+    return { success: true };
+  });

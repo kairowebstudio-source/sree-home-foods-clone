@@ -50,7 +50,7 @@ export const products: Product[] = [
     slug: "ashwagandha-powder",
     name: "Ashwagandha Powder",
     tagline: "A nutritional powerhouse",
-    category: "Powders",
+    category: "Superfoods",
     weight: "170g",
     price: 349,
     mrp: 449,
@@ -63,7 +63,7 @@ export const products: Product[] = [
     slug: "amla-powder",
     name: "Amla Powder",
     tagline: "Vitamin C rich superfruit",
-    category: "Powders",
+    category: "Superfoods",
     weight: "200g",
     price: 299,
     mrp: 379,
@@ -76,7 +76,7 @@ export const products: Product[] = [
     slug: "abc-powder",
     name: "ABC Powder",
     tagline: "Apple + Beetroot + Carrot",
-    category: "Powders",
+    category: "Superfoods",
     weight: "200g",
     price: 399,
     mrp: 499,
@@ -127,4 +127,4 @@ export const products: Product[] = [
 
 ];
 
-export const categories = ["All", "Powders", "Spices", "Honey", "Traditional"] as const;
+export const categories = ["All", "Superfoods", "Spices", "Honey", "Dairy Foods", "Traditional"] as const;
