@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { useEffect, useState, useCallback, useRef } from "react";
-import { getProducts, getOrders, addProduct, updateProduct, deleteProduct, adminLogin, uploadProductImage, migrateDataUrlImages } from "@/lib/admin.server";
-import { categories, getVariants } from "@/lib/products";
+import { getProducts, getOrders, addProduct, updateProduct, deleteProduct, adminLogin, uploadProductImage, migrateDataUrlImages, getCategories, addCategory, deleteCategory } from "@/lib/admin.server";
+import { getVariants } from "@/lib/products";
 import type { Product, Variant } from "@/lib/products";
 
 function formatDate(iso: string) {
@@ -150,10 +150,12 @@ function Modal({
 
 function ProductForm({
   initial,
+  categoryList,
   onSave,
   onCancel,
 }: {
   initial?: Product;
+  categoryList: string[];
   onSave: (data: Product | Omit<Product, "image"> & { image: string }) => void;
   onCancel: () => void;
 }) {
@@ -161,7 +163,8 @@ function ProductForm({
   const [slug, setSlug] = useState(initial?.slug ?? "");
   const [name, setName] = useState(initial?.name ?? "");
   const [tagline, setTagline] = useState(initial?.tagline ?? "");
-  const [category, setCategory] = useState<string>(initial?.category ?? "Powders");
+  const [category, setCategory] = useState<string>(initial?.category ?? categoryList[0] ?? "Superfoods");
+  const options = Array.from(new Set([...categoryList, ...(initial?.category ? [initial.category] : [])]));
   const [rows, setRows] = useState<{ weight: string; price: string; mrp: string }[]>(
     initial
       ? getVariants(initial).map((v) => ({
@@ -281,7 +284,7 @@ function ProductForm({
       slug: slug.toLowerCase().replace(/\s+/g, "-"),
       name,
       tagline,
-      category: category as Product["category"],
+      category,
       weight: variants[0].weight,
       price: variants[0].price,
       mrp: variants[0].mrp,
@@ -306,7 +309,7 @@ function ProductForm({
           <label className="block text-xs uppercase tracking-wider font-semibold text-foreground/70 mb-1">Category</label>
           <select value={category} onChange={(e) => setCategory(e.target.value)}
             className="w-full rounded-lg border border-border bg-white px-3 py-2.5 text-sm focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand/30">
-            {categories.filter((c) => c !== "All").map((c) => (
+            {options.map((c) => (
               <option key={c} value={c}>{c}</option>
             ))}
           </select>
@@ -438,7 +441,12 @@ function AdminPage() {
   const [loggingIn, setLoggingIn] = useState(false);
 
   // Tab state
-  const [tab, setTab] = useState<"products" | "orders">("products");
+  const [tab, setTab] = useState<"products" | "orders" | "categories">("products");
+
+  // Category state
+  const [categoryList, setCategoryList] = useState<string[]>([]);
+  const [newCategory, setNewCategory] = useState("");
+  const [catBusy, setCatBusy] = useState(false);
 
   // Product state
   const [products, setProducts] = useState<Product[]>([]);
@@ -480,6 +488,43 @@ function AdminPage() {
       }
     })();
   }, [authed, showToast]);
+
+  // Load categories when authed
+  useEffect(() => {
+    if (!authed) return;
+    getCategories().then(setCategoryList).catch(() => {});
+  }, [authed]);
+
+  const handleAddCategory = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const name = newCategory.trim();
+    if (!name) return;
+    setCatBusy(true);
+    try {
+      await addCategory({ data: name });
+      setCategoryList((prev) => [...prev, name]);
+      setNewCategory("");
+      showToast(`Category "${name}" added`);
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : "Failed to add category", false);
+    } finally {
+      setCatBusy(false);
+    }
+  };
+
+  const handleDeleteCategory = async (name: string) => {
+    if (!confirm(`Delete the category "${name}"? Products already using it keep their label.`)) return;
+    setCatBusy(true);
+    try {
+      await deleteCategory({ data: name });
+      setCategoryList((prev) => prev.filter((c) => c !== name));
+      showToast(`Category "${name}" deleted`);
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : "Failed to delete category", false);
+    } finally {
+      setCatBusy(false);
+    }
+  };
 
   // Load orders when tab switches to orders
   useEffect(() => {
@@ -709,13 +754,23 @@ function AdminPage() {
           >
             <i className="fas fa-truck mr-1.5" /> Orders
           </button>
+          <button
+            onClick={() => setTab("categories")}
+            className={`px-5 py-2 rounded-lg text-sm font-semibold uppercase tracking-wider transition ${
+              tab === "categories"
+                ? "bg-brand text-cream shadow-sm"
+                : "text-foreground/60 hover:text-brand hover:bg-brand/5"
+            }`}
+          >
+            <i className="fas fa-tags mr-1.5" /> Categories
+          </button>
         </div>
 
         {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           {[
             { label: "Total Products", value: products.length, icon: "fa-box", color: "bg-brand" },
-            { label: "Categories", value: categories.length - 1, icon: "fa-tags", color: "bg-gold text-brand" },
+            { label: "Categories", value: categoryList.length, icon: "fa-tags", color: "bg-gold text-brand" },
             { label: "Lowest Price", value: products.length ? `₹${Math.min(...products.map((p) => p.price))}` : "—", icon: "fa-indian-rupee-sign", color: "bg-leaf" },
             { label: "Highest Price", value: products.length ? `₹${Math.max(...products.map((p) => p.price))}` : "—", icon: "fa-arrow-up", color: "bg-secondary" },
           ].map((s) => (
@@ -824,6 +879,51 @@ function AdminPage() {
               </table>
             </div>
           )}
+        </div>)}
+
+        {/* ── Categories Section ── */}
+        {tab === "categories" && (
+        <div className="bg-cream rounded-2xl border border-border shadow-sm overflow-hidden">
+          <div className="px-6 py-5 border-b border-border">
+            <h2 className="font-display text-xl text-brand">Categories</h2>
+            <p className="text-xs text-foreground/60 mt-0.5">Create the categories products can be grouped under</p>
+          </div>
+          <div className="p-6 space-y-6">
+            <form onSubmit={handleAddCategory} className="flex flex-wrap gap-3">
+              <input
+                value={newCategory}
+                onChange={(e) => setNewCategory(e.target.value)}
+                placeholder="New category name (e.g. Dairy Foods)"
+                className="flex-1 min-w-[220px] rounded-lg border border-border bg-white px-3 py-2.5 text-sm focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand/30"
+              />
+              <button type="submit" disabled={catBusy}
+                className="rounded-full bg-brand text-brand-foreground px-5 py-2.5 font-bold uppercase tracking-wider text-xs hover:opacity-90 transition disabled:opacity-50 flex items-center gap-2">
+                <i className="fas fa-plus" /> Add Category
+              </button>
+            </form>
+
+            {categoryList.length === 0 ? (
+              <p className="text-sm text-foreground/60">No categories yet.</p>
+            ) : (
+              <ul className="divide-y divide-border/60 rounded-xl border border-border bg-white">
+                {categoryList.map((c) => (
+                  <li key={c} className="flex items-center justify-between px-4 py-3">
+                    <span className="text-sm font-semibold text-foreground">{c}</span>
+                    <span className="flex items-center gap-3">
+                      <span className="text-xs text-foreground/50">
+                        {products.filter((p) => p.category === c).length} product(s)
+                      </span>
+                      <button onClick={() => handleDeleteCategory(c)} disabled={catBusy}
+                        className="h-8 w-8 rounded-lg hover:bg-red-50 grid place-items-center text-foreground/60 hover:text-red-600 transition disabled:opacity-50"
+                        title="Delete">
+                        <i className="fas fa-trash-can text-xs" />
+                      </button>
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
         </div>)}
 
         {/* ── Orders Section ── */}
