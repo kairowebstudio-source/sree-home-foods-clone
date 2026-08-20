@@ -37,7 +37,7 @@ function Wholesale() {
           ))}
         </div>
         <div className="mt-12 text-center">
-          <a href="https://wa.me/919999999999?text=Hi,%20I'm%20interested%20in%20wholesale%20orders%20from%20Retro%20Natural%20Products." target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-full bg-brand text-cream px-8 py-4 font-bold uppercase tracking-wider hover:opacity-90 transition">
+          <a href="https://wa.me/918121273912?text=Hi,%20I'm%20interested%20in%20wholesale%20orders%20from%20Retro%20Natural%20Products." target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-full bg-brand text-cream px-8 py-4 font-bold uppercase tracking-wider hover:opacity-90 transition">
             <i className="fab fa-whatsapp" /> Message us for bulk orders
           </a>
         </div>
