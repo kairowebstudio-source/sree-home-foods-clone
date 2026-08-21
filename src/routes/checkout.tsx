@@ -10,7 +10,7 @@ import { createRazorpayOrder, verifyRazorpayPayment } from "@/lib/razorpay.serve
 export const Route = createFileRoute("/checkout")({
   head: () => ({
     meta: [
-      { title: "Checkout — Retro Natural Products" },
+      { title: "Checkout — Sree Home Foods" },
       { name: "description", content: "Complete your order of handcrafted natural foods." },
       { name: "robots", content: "noindex" },
     ],
@@ -33,27 +33,13 @@ type Form = {
 function Checkout() {
   const { items, count, setQty, remove, clear } = useCart();
   const navigate = useNavigate();
-  const [form, setForm] = useState<Form>({
-    name: "",
-    email: "",
-    phone: "",
-    address: "",
-    city: "",
-    state: "",
-    pincode: "",
-    notes: "",
-    method: "cod",
-  });
+  const [form, setForm] = useState<Form>({ name: "", email: "", phone: "", address: "", city: "", state: "", pincode: "", notes: "", method: "cod" });
   const [submitting, setSubmitting] = useState(false);
-
   const set = <K extends keyof Form>(k: K, v: Form[K]) => setForm((f) => ({ ...f, [k]: v }));
 
   const saveLastOrder = (orderId: string) => {
     try {
-      sessionStorage.setItem(
-        "retro-last-order",
-        JSON.stringify({ orderId, form, items, count, placedAt: new Date().toISOString() }),
-      );
+      sessionStorage.setItem("sree-last-order", JSON.stringify({ orderId, form, items, count, placedAt: new Date().toISOString() }));
     } catch {}
   };
 
@@ -66,7 +52,7 @@ function Checkout() {
     const shipping = total >= 999 ? 0 : total > 0 ? 60 : 0;
 
     try {
-      const { orderId } = await submitOrder({
+      const { orderId, total: serverTotal } = await submitOrder({
         data: {
           customer_name: form.name,
           phone: form.phone,
@@ -78,11 +64,11 @@ function Checkout() {
           notes: form.notes,
           items: items.map((i) => ({
             slug: i.slug,
-            name: i.weight ? `${i.name} (${i.weight})` : i.name,
+            name: i.name,
+            weight: i.weight,
             price: i.price,
             qty: i.qty,
           })),
-
           total: total + shipping,
           method: form.method,
           notify: form.method === "cod",
@@ -94,26 +80,16 @@ function Checkout() {
         clear();
         navigate({ to: "/checkout/success", search: { id: orderId } });
       } else {
-        // Online payment via Razorpay
         try {
           await loadRazorpayScript();
-          const rzp = await createRazorpayOrder({
-            data: { orderId, amount: total + shipping },
-          });
+          const rzp = await createRazorpayOrder({ data: { orderId, amount: serverTotal } });
           const outcome = await startRazorpayCheckout({
             keyId: rzp.keyId,
             razorpayOrderId: rzp.razorpayOrderId,
             amount: rzp.amount,
             customer: { name: form.name, email: form.email, phone: form.phone },
             onSuccess: async ({ razorpayPaymentId, razorpaySignature }) => {
-              await verifyRazorpayPayment({
-                data: {
-                  orderId,
-                  razorpayOrderId: rzp.razorpayOrderId,
-                  razorpayPaymentId,
-                  razorpaySignature,
-                },
-              });
+              await verifyRazorpayPayment({ data: { orderId, razorpayOrderId: rzp.razorpayOrderId, razorpayPaymentId, razorpaySignature } });
             },
           });
 
@@ -122,15 +98,11 @@ function Checkout() {
             clear();
             navigate({ to: "/checkout/success", search: { id: orderId } });
           } else {
-            alert(
-              "Payment was not completed. Your order is saved — our team will follow up with a payment link, or you can try again.",
-            );
+            alert("Payment was not completed. Your order is saved as pending. You can retry or contact us for help.");
           }
         } catch (err) {
           console.error("Razorpay checkout failed:", err);
-          alert(
-            "We couldn't start the payment. Your order is saved — our team will contact you with a payment link, or you can retry.",
-          );
+          alert("We couldn't start the payment. Your order is saved as pending. Please retry or contact us.");
         }
       }
     } catch (err) {
@@ -143,272 +115,81 @@ function Checkout() {
 
   if (items.length === 0) {
     return (
-      <div className="min-h-screen bg-background">
-        <Header variant="solid" />
-        <section className="py-24 px-4 text-center">
-          <div className="mx-auto max-w-lg bg-cream/80 backdrop-blur border border-gold/30 rounded-3xl p-10 shadow-sm">
-            <div className="mx-auto h-20 w-20 rounded-full bg-brand/10 text-brand grid place-items-center text-3xl">
-              <i className="fas fa-basket-shopping" />
-            </div>
-            <h1 className="font-display text-3xl text-brand mt-4">Your basket is empty</h1>
-            <p className="text-muted-foreground mt-2">Add a few jars from our collection to check out.</p>
-            <Link
-              to="/shop"
-              className="mt-6 inline-flex items-center gap-2 rounded-full bg-brand text-cream px-6 py-3 font-bold uppercase tracking-wider text-xs hover:opacity-90"
-            >
-              <i className="fas fa-shopping-bag" /> Browse the Shop
-            </Link>
-          </div>
-        </section>
-        <Footer />
-      </div>
+      <div className="min-h-screen bg-background"><Header variant="solid" /><section className="py-24 px-4 text-center"><div className="mx-auto max-w-lg bg-cream/80 backdrop-blur border border-gold/30 rounded-3xl p-10 shadow-sm"><div className="mx-auto h-20 w-20 rounded-full bg-brand/10 text-brand grid place-items-center text-3xl"><i className="fas fa-basket-shopping" /></div><h1 className="font-display text-3xl text-brand mt-4">Your basket is empty</h1><p className="text-muted-foreground mt-2">Add a few jars from our collection to check out.</p><Link to="/shop" className="mt-6 inline-flex items-center gap-2 rounded-full bg-brand text-cream px-6 py-3 font-bold uppercase tracking-wider text-xs hover:opacity-90"><i className="fas fa-shopping-bag" /> Browse the Shop</Link></div></section><Footer /></div>
     );
   }
 
   return (
     <div className="min-h-screen bg-background">
       <Header variant="solid" />
-
-      <section className="bg-brand text-cream py-10 px-4 text-center">
-        <span className="text-gold text-xs tracking-[0.3em] uppercase">Almost There</span>
-        <h1 className="font-display text-4xl mt-2">Checkout</h1>
-      </section>
-
+      <section className="bg-brand text-cream py-10 px-4 text-center"><span className="text-gold text-xs tracking-[0.3em] uppercase">Almost There</span><h1 className="font-display text-4xl mt-2">Checkout</h1></section>
       <section className="py-12 px-4">
         <form onSubmit={onSubmit} className="mx-auto max-w-6xl grid lg:grid-cols-[1.4fr_1fr] gap-8">
-          {/* Details */}
           <div className="bg-cream/80 backdrop-blur border border-gold/30 rounded-2xl p-6 md:p-8 shadow-sm space-y-6">
-            <div>
-              <h2 className="font-display text-2xl text-brand">Delivery Details</h2>
-              <p className="text-xs text-muted-foreground mt-1">We'll only use this to ship your order.</p>
-            </div>
-
+            <div><h2 className="font-display text-2xl text-brand">Delivery Details</h2><p className="text-xs text-muted-foreground mt-1">We'll only use this to ship your order.</p></div>
             <div className="grid sm:grid-cols-2 gap-4">
-              <Field label="Full name" required>
-                <input required value={form.name} onChange={(e) => set("name", e.target.value)} className={inputCls} />
-              </Field>
-              <Field label="Phone" required>
-                <input required type="tel" value={form.phone} onChange={(e) => set("phone", e.target.value)} className={inputCls} />
-              </Field>
-              <Field label="Email" required className="sm:col-span-2">
-                <input required type="email" value={form.email} onChange={(e) => set("email", e.target.value)} className={inputCls} />
-              </Field>
-              <Field label="Address" required className="sm:col-span-2">
-                <textarea required rows={3} value={form.address} onChange={(e) => set("address", e.target.value)} className={inputCls} />
-              </Field>
-              <Field label="City" required>
-                <input required value={form.city} onChange={(e) => set("city", e.target.value)} className={inputCls} />
-              </Field>
-              <Field label="State" required>
-                <input required value={form.state} onChange={(e) => set("state", e.target.value)} className={inputCls} />
-              </Field>
-              <Field label="PIN code" required>
-                <input required inputMode="numeric" pattern="[0-9]{6}" value={form.pincode} onChange={(e) => set("pincode", e.target.value)} className={inputCls} />
-              </Field>
-              <Field label="Order notes (optional)" className="sm:col-span-2">
-                <textarea rows={2} value={form.notes} onChange={(e) => set("notes", e.target.value)} className={inputCls} />
-              </Field>
+              <Field label="Full name" required><input required value={form.name} onChange={(e) => set("name", e.target.value)} className={inputCls} /></Field>
+              <Field label="Phone" required><input required type="tel" value={form.phone} onChange={(e) => set("phone", e.target.value)} className={inputCls} /></Field>
+              <Field label="Email" required className="sm:col-span-2"><input required type="email" value={form.email} onChange={(e) => set("email", e.target.value)} className={inputCls} /></Field>
+              <Field label="Address" required className="sm:col-span-2"><textarea required rows={3} value={form.address} onChange={(e) => set("address", e.target.value)} className={inputCls} /></Field>
+              <Field label="City" required><input required value={form.city} onChange={(e) => set("city", e.target.value)} className={inputCls} /></Field>
+              <Field label="State" required><input required value={form.state} onChange={(e) => set("state", e.target.value)} className={inputCls} /></Field>
+              <Field label="PIN code" required><input required inputMode="numeric" pattern="[0-9]{6}" value={form.pincode} onChange={(e) => set("pincode", e.target.value)} className={inputCls} /></Field>
+              <Field label="Order notes (optional)" className="sm:col-span-2"><textarea rows={2} value={form.notes} onChange={(e) => set("notes", e.target.value)} className={inputCls} /></Field>
             </div>
-
-            <div>
-              <h3 className="font-display text-xl text-brand mb-3">Payment Method</h3>
-              <div className="grid sm:grid-cols-2 gap-3">
-                <PayOption
-                  active={form.method === "online"}
-                  onClick={() => set("method", "online")}
-                  icon="fa-credit-card"
-                  title="Pay Online"
-                  desc="UPI / Cards / Netbanking · Secure Razorpay checkout"
-                />
-                <PayOption
-                  active={form.method === "cod"}
-                  onClick={() => set("method", "cod")}
-                  icon="fa-money-bill-wave"
-                  title="Cash on Delivery"
-                  desc="Pay when your order arrives at your doorstep."
-                />
-              </div>
-              {form.method === "online" && (
-                <p className="text-[11px] text-brand/80 mt-3 bg-gold/15 border border-gold/40 rounded-lg px-3 py-2">
-                  <i className="fas fa-circle-info mr-1 text-gold" /> You'll be taken to a secure Razorpay checkout to pay via UPI, cards, or netbanking.
-                </p>
-              )}
-            </div>
+            <div><h3 className="font-display text-xl text-brand mb-3">Payment Method</h3><div className="grid sm:grid-cols-2 gap-3"><PayOption active={form.method === "online"} onClick={() => set("method", "online")} icon="fa-credit-card" title="Pay Online" desc="UPI / Cards / Netbanking · Secure Razorpay checkout" /><PayOption active={form.method === "cod"} onClick={() => set("method", "cod")} icon="fa-money-bill-wave" title="Cash on Delivery" desc="Pay when your order arrives at your doorstep." /></div>{form.method === "online" && <p className="text-[11px] text-brand/80 mt-3 bg-gold/15 border border-gold/40 rounded-lg px-3 py-2"><i className="fas fa-circle-info mr-1 text-gold" /> You'll be taken to a secure Razorpay checkout to pay via UPI, cards, or netbanking.</p>}</div>
           </div>
-
-          {/* Summary */}
           <aside className="lg:sticky lg:top-28 h-fit bg-cream/80 backdrop-blur border border-gold/30 rounded-2xl p-6 shadow-sm">
-            <h2 className="font-display text-2xl text-brand">Order Summary</h2>
-            <p className="text-xs text-muted-foreground mt-1">{count} {count === 1 ? "item" : "items"}</p>
-
-            <ul className="mt-5 space-y-4 max-h-80 overflow-y-auto pr-1">
-              {items.map((i) => (
-                <li key={i.key} className="flex gap-3 bg-white/70 backdrop-blur rounded-xl p-2.5 border border-gold/20">
-                  <div className="h-16 w-16 shrink-0 rounded-lg bg-white overflow-hidden border border-border">
-                    <img src={i.image} alt={i.name} className="w-full h-full object-contain p-1" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-display text-brand text-sm leading-tight line-clamp-2">{i.name}</p>
-                    <p className="text-[11px] text-muted-foreground">{i.weight} · {formatPrice(i.price)}</p>
-                    <div className="mt-1.5 flex items-center justify-between">
-                      <div className="inline-flex items-center border border-border rounded-full bg-cream">
-                        <button type="button" onClick={() => setQty(i.key, i.qty - 1)} className="h-6 w-6 grid place-items-center text-brand hover:bg-brand/10 rounded-l-full" aria-label="Decrease">
-                          <i className="fas fa-minus text-[9px]" />
-                        </button>
-                        <span className="w-7 text-center text-xs font-semibold">{i.qty}</span>
-                        <button type="button" onClick={() => setQty(i.key, i.qty + 1)} className="h-6 w-6 grid place-items-center text-brand hover:bg-brand/10 rounded-r-full" aria-label="Increase">
-                          <i className="fas fa-plus text-[9px]" />
-                        </button>
-                      </div>
-                      <button type="button" onClick={() => remove(i.key)} className="text-[11px] text-brand/70 hover:text-brand" aria-label={`Remove ${i.name}`}>
-                        <i className="fas fa-trash-can" />
-                      </button>
-                    </div>
-                  </div>
-                </li>
-              ))}
-            </ul>
-
-            <div className="mt-5 pt-4 border-t border-gold/30 space-y-2 text-sm">
-              {(() => {
-                const subtotal = items.reduce((s, i) => s + i.price * i.qty, 0);
-                const shipping = subtotal >= 999 ? 0 : subtotal > 0 ? 60 : 0;
-                return (
-                  <>
-                    <Row label={`Items (${count})`} value={formatPrice(subtotal)} />
-                    <Row label="Shipping" value={shipping === 0 ? "Free" : formatPrice(shipping)} />
-                    <Row label="Total" value={formatPrice(subtotal + shipping)} bold />
-                  </>
-                );
-              })()}
-            </div>
-
-            <button
-              type="submit"
-              disabled={submitting}
-              className="mt-5 w-full inline-flex items-center justify-center gap-2 rounded-full bg-brand text-cream px-5 py-3 font-bold uppercase tracking-wider text-xs hover:opacity-90 transition disabled:opacity-60"
-            >
-              {submitting ? (
-                <><i className="fas fa-circle-notch fa-spin" /> Placing…</>
-              ) : (
-                <><i className="fas fa-lock" /> Place Order</>
-              )}
-            </button>
-            <p className="text-[10px] text-muted-foreground text-center mt-2">
-              By placing this order you agree to our <Link to="/terms" className="underline hover:text-brand">Terms</Link> and <Link to="/privacy" className="underline hover:text-brand">Privacy</Link>.
-            </p>
+            <h2 className="font-display text-2xl text-brand">Order Summary</h2><p className="text-xs text-muted-foreground mt-1">{count} {count === 1 ? "item" : "items"}</p>
+            <ul className="mt-5 space-y-4 max-h-80 overflow-y-auto pr-1">{items.map((i) => <li key={i.key} className="flex gap-3 bg-white/70 backdrop-blur rounded-xl p-2.5 border border-gold/20"><div className="h-16 w-16 shrink-0 rounded-lg bg-white overflow-hidden border border-border"><img src={i.image} alt={i.name} className="w-full h-full object-contain p-1" /></div><div className="flex-1 min-w-0"><p className="font-display text-brand text-sm leading-tight line-clamp-2">{i.name}</p><p className="text-[11px] text-muted-foreground">{i.weight} · {formatPrice(i.price)}</p><div className="mt-1.5 flex items-center justify-between"><div className="inline-flex items-center border border-border rounded-full bg-cream"><button type="button" onClick={() => setQty(i.key, i.qty - 1)} className="h-6 w-6 grid place-items-center text-brand hover:bg-brand/10 rounded-l-full" aria-label="Decrease"><i className="fas fa-minus text-[9px]" /></button><span className="w-7 text-center text-xs font-semibold">{i.qty}</span><button type="button" onClick={() => setQty(i.key, i.qty + 1)} className="h-6 w-6 grid place-items-center text-brand hover:bg-brand/10 rounded-r-full" aria-label="Increase"><i className="fas fa-plus text-[9px]" /></button></div><button type="button" onClick={() => remove(i.key)} className="text-[11px] text-brand/70 hover:text-brand" aria-label={`Remove ${i.name}`}><i className="fas fa-trash-can" /></button></div></div></li>)}</ul>
+            <div className="mt-5 pt-4 border-t border-gold/30 space-y-2 text-sm">{(() => { const subtotal = items.reduce((s, i) => s + i.price * i.qty, 0); const shipping = subtotal >= 999 ? 0 : subtotal > 0 ? 60 : 0; return <><Row label={`Items (${count})`} value={formatPrice(subtotal)} /><Row label="Shipping" value={shipping === 0 ? "Free" : formatPrice(shipping)} /><Row label="Total" value={formatPrice(subtotal + shipping)} bold /></>; })()}</div>
+            <button type="submit" disabled={submitting} className="mt-5 w-full inline-flex items-center justify-center gap-2 rounded-full bg-brand text-cream px-5 py-3 font-bold uppercase tracking-wider text-xs hover:opacity-90 transition disabled:opacity-60">{submitting ? <><i className="fas fa-circle-notch fa-spin" /> Placing…</> : <><i className="fas fa-lock" /> Place Order</>}</button>
+            <p className="text-[10px] text-muted-foreground text-center mt-2">By placing this order you agree to our <Link to="/terms" className="underline hover:text-brand">Terms</Link> and <Link to="/privacy" className="underline hover:text-brand">Privacy</Link>.</p>
           </aside>
         </form>
-      </section>
-
-      <Footer />
+      </section><Footer />
     </div>
   );
 }
-
-// ── Razorpay checkout helpers ──────────────────────────────────
 
 function loadRazorpayScript(): Promise<void> {
   return new Promise((resolve, reject) => {
     if ((window as any).Razorpay) return resolve();
-    const s = document.createElement("script");
-    s.src = "https://checkout.razorpay.com/v1/checkout.js";
-    s.onload = () => resolve();
-    s.onerror = () => reject(new Error("Could not load the payment gateway."));
-    document.head.appendChild(s);
+    const s = document.createElement("script"); s.src = "https://checkout.razorpay.com/v1/checkout.js"; s.onload = () => resolve(); s.onerror = () => reject(new Error("Could not load the payment gateway.")); document.head.appendChild(s);
   });
 }
 
-type RazorpayCheckoutOptions = {
-  keyId: string;
-  razorpayOrderId: string;
-  amount: number; // in paise
-  customer: { name: string; email: string; phone: string };
-  onSuccess: (p: { razorpayPaymentId: string; razorpaySignature: string }) => Promise<void>;
-};
+type RazorpayCheckoutOptions = { keyId: string; razorpayOrderId: string; amount: number; customer: { name: string; email: string; phone: string }; onSuccess: (p: { razorpayPaymentId: string; razorpaySignature: string }) => Promise<void> };
 
-function startRazorpayCheckout(
-  opts: RazorpayCheckoutOptions,
-): Promise<"paid" | "dismissed" | "failed"> {
+function startRazorpayCheckout(opts: RazorpayCheckoutOptions): Promise<"paid" | "dismissed" | "failed"> {
   return new Promise((resolve) => {
-    let settled = false;
-    const settle = (v: "paid" | "dismissed" | "failed") => {
-      if (!settled) {
-        settled = true;
-        resolve(v);
-      }
-    };
-
+    let settled = false; const settle = (v: "paid" | "dismissed" | "failed") => { if (!settled) { settled = true; resolve(v); } };
     const rzp = new (window as any).Razorpay({
       key: opts.keyId,
       amount: opts.amount,
       currency: "INR",
-      name: "Retro Natural Products",
+      name: "Sree Home Foods",
       description: `Order #${opts.razorpayOrderId.slice(-8)}`,
       order_id: opts.razorpayOrderId,
-      prefill: {
-        name: opts.customer.name,
-        email: opts.customer.email,
-        contact: opts.customer.phone,
-      },
+      prefill: { name: opts.customer.name, email: opts.customer.email, contact: opts.customer.phone },
       theme: { color: "#7a1f1f" },
-      handler: async (res: any) => {
-        try {
-          await opts.onSuccess({
-            razorpayPaymentId: res.razorpay_payment_id,
-            razorpaySignature: res.razorpay_signature,
-          });
-          settle("paid");
-        } catch {
-          settle("failed");
-        }
-      },
+      handler: async (res: any) => { try { await opts.onSuccess({ razorpayPaymentId: res.razorpay_payment_id, razorpaySignature: res.razorpay_signature }); settle("paid"); } catch { settle("failed"); } },
       modal: { ondismiss: () => settle("dismissed") },
     });
-    rzp.on("payment.failed", () => settle("failed"));
-    rzp.open();
+    rzp.on("payment.failed", () => settle("failed")); rzp.open();
   });
 }
 
-const inputCls =
-  "w-full rounded-lg border border-border bg-white/80 px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-gold/60 focus:border-gold transition";
+const inputCls = "w-full rounded-lg border border-border bg-white/80 px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-gold/60 focus:border-gold transition";
 
 function Field({ label, required, className, children }: { label: string; required?: boolean; className?: string; children: React.ReactNode }) {
-  return (
-    <label className={`block ${className ?? ""}`}>
-      <span className="block text-xs font-semibold uppercase tracking-wider text-brand/80 mb-1.5">
-        {label}{required && <span className="text-brand ml-0.5">*</span>}
-      </span>
-      {children}
-    </label>
-  );
+  return <label className={`block ${className ?? ""}`}><span className="block text-xs font-semibold uppercase tracking-wider text-brand/80 mb-1.5">{label}{required && <span className="text-brand ml-0.5">*</span>}</span>{children}</label>;
 }
 
 function PayOption({ active, onClick, icon, title, desc }: { active: boolean; onClick: () => void; icon: string; title: string; desc: string }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`text-left rounded-xl border-2 p-4 transition ${
-        active ? "border-brand bg-brand/5" : "border-border bg-white/60 hover:border-gold"
-      }`}
-    >
-      <div className="flex items-center gap-3">
-        <div className={`h-9 w-9 rounded-full grid place-items-center ${active ? "bg-brand text-cream" : "bg-gold/20 text-brand"}`}>
-          <i className={`fas ${icon}`} />
-        </div>
-        <span className="font-display text-brand">{title}</span>
-      </div>
-      <p className="text-[11px] text-muted-foreground mt-2 leading-relaxed">{desc}</p>
-    </button>
-  );
+  return <button type="button" onClick={onClick} className={`text-left rounded-xl border-2 p-4 transition ${active ? "border-brand bg-brand/5" : "border-border bg-white/60 hover:border-gold"}`}><div className="flex items-center gap-3"><div className={`h-9 w-9 rounded-full grid place-items-center ${active ? "bg-brand text-cream" : "bg-gold/20 text-brand"}`}><i className={`fas ${icon}`} /></div><span className="font-display text-brand">{title}</span></div><p className="text-[11px] text-muted-foreground mt-2 leading-relaxed">{desc}</p></button>;
 }
 
 function Row({ label, value, bold }: { label: string; value: string; bold?: boolean }) {
-  return (
-    <div className={`flex items-center justify-between ${bold ? "text-brand font-semibold" : "text-foreground/70"}`}>
-      <span>{label}</span>
-      <span>{value}</span>
-    </div>
-  );
+  return <div className={`flex items-center justify-between ${bold ? "text-brand font-semibold" : "text-foreground/70"}`}><span>{label}</span><span>{value}</span></div>;
 }
