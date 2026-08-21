@@ -1,0 +1,1 @@
+Product display diagnosis: storefront product loading is being hardened so the bundled Retro Natural Products catalogue remains visible when the remote product source is unavailable.
