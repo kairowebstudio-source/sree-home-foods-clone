@@ -6,31 +6,31 @@ import { type Product, categories, priceRange, getVariants, products as fallback
 import { getProducts } from "@/lib/admin.server";
 
 export const Route = createFileRoute("/shop/")({
-  head: () => ({
-    meta: [
-      { title: "Shop — Retro Natural Products" },
-      { name: "description", content: "Browse our full range of natural powders, spices, raw honey and traditional Andhra foods." },
-    ],
-  }),
+  head: () => ({ meta: [{ title: "Shop — Retro Natural Products" }, { name: "description", content: "Browse our full range of natural powders, spices, raw honey and traditional Andhra foods." }] }),
   component: Shop,
 });
 
+function mergeProducts(remote: Product[]): Product[] {
+  // Always keep the original bundled catalogue. Admin/Supabase products override by slug.
+  const bySlug = new Map<string, Product>();
+  for (const p of fallbackProducts) bySlug.set(p.slug, p);
+  for (const p of remote) if (p?.slug) bySlug.set(p.slug, p);
+  return Array.from(bySlug.values());
+}
+
 function Shop() {
-  // Start with the bundled catalogue so a backend/Supabase problem never makes the shop empty.
   const [productList, setProductList] = useState<Product[]>(fallbackProducts);
   useEffect(() => {
     let active = true;
-    getProducts()
-      .then((remoteProducts) => {
-        if (active && Array.isArray(remoteProducts) && remoteProducts.length > 0) {
-          setProductList(remoteProducts);
-        }
-      })
-      .catch((error) => console.error("Product API unavailable; using bundled catalogue:", error));
+    getProducts().then((remoteProducts) => {
+      if (active && Array.isArray(remoteProducts)) setProductList(mergeProducts(remoteProducts));
+    }).catch((error) => console.error("Product API unavailable; using bundled catalogue:", error));
     return () => { active = false; };
   }, []);
+
   const [cat, setCat] = useState<(typeof categories)[number]>("All");
   const filtered = cat === "All" ? productList : productList.filter((p) => p.category === cat);
+
   return (
     <div className="min-h-screen bg-background">
       <Header variant="solid" />
@@ -43,9 +43,7 @@ function Shop() {
         <div className="mx-auto max-w-7xl">
           <div className="flex flex-wrap justify-center gap-2 mb-10">
             {categories.map((c) => (
-              <button key={c} onClick={() => setCat(c)} className={`px-5 py-2 rounded-full text-sm font-semibold uppercase tracking-wide border transition ${cat === c ? "bg-brand text-cream border-brand" : "bg-cream text-brand border-border hover:border-brand"}`}>
-                {c}
-              </button>
+              <button key={c} onClick={() => setCat(c)} className={`px-5 py-2 rounded-full text-sm font-semibold uppercase tracking-wide border transition ${cat === c ? "bg-brand text-cream border-brand" : "bg-cream text-brand border-border hover:border-brand"}`}>{c}</button>
             ))}
           </div>
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
