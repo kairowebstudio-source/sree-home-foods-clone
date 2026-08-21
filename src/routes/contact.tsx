@@ -17,25 +17,29 @@ const teamMembers = [
     name: "Mrs Sai Sri Vidya",
     role: "Quality Assurance Lead",
     location: "Sydney, Australia",
-    image: "/__l5e/assets-v1/486a73b4-a6a0-4095-bffd-cdf469253c54/team-saisrividya.jpg",
+    image: "/media/team-saisrividya.jpg",
+    initials: "SSV",
   },
   {
     name: "Mr Kiran Babu Arigela",
     role: "Business Strategist & Market Analysis Lead",
     location: null,
-    image: "/__l5e/assets-v1/63869967-eabf-415d-9fbb-81c0a6e111ff/team-kiran.jpg",
+    image: "/media/team-kiran.jpg",
+    initials: "KBA",
   },
   {
     name: "Mr Ganesh Gollapothu",
     role: "Hyderabad Unit Manager and Distribution Lead",
     location: null,
-    image: "/__l5e/assets-v1/b88861c1-c2d9-4511-b4ea-4bb2b86e86a1/team-ganesh.jpg",
+    image: "/media/team-ganesh.jpg",
+    initials: "GG",
   },
   {
     name: "Miss Cathy",
     role: "Chief Financial Officer & International Business Expansion Lead",
     location: "UK",
-    image: "/__l5e/assets-v1/4fc77597-9544-445a-9572-7b67b53f2263/team-cathy.jpg",
+    image: "/media/team-cathy.jpg",
+    initials: "C",
   },
 ];
 
@@ -121,11 +125,23 @@ function Contact() {
                   key={member.name}
                   className="group bg-white rounded-2xl border border-border overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
                 >
-                  <div className="relative overflow-hidden">
+                  <div className="relative overflow-hidden bg-brand/10">
                     <img
                       src={member.image}
                       alt={member.name}
                       className="w-full aspect-[3/4] object-cover group-hover:scale-105 transition-transform duration-500"
+                      onError={(e) => {
+                        // Fallback to initials if image fails to load
+                        const target = e.target as HTMLImageElement;
+                        target.style.display = 'none';
+                        const parent = target.parentElement;
+                        if (parent) {
+                          const fallback = document.createElement('div');
+                          fallback.className = 'w-full aspect-[3/4] flex items-center justify-center bg-brand text-gold';
+                          fallback.innerHTML = `<span class="text-4xl font-display">${member.initials}</span>`;
+                          parent.appendChild(fallback);
+                        }
+                      }}
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-brand/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                   </div>
