@@ -12,6 +12,33 @@ export const Route = createFileRoute("/contact")({
   component: Contact,
 });
 
+const teamMembers = [
+  {
+    name: "Mrs Sai Sri Vidya",
+    role: "Quality Assurance Lead",
+    location: "Sydney, Australia",
+    image: "/__l5e/assets-v1/486a73b4-a6a0-4095-bffd-cdf469253c54/team-saisrividya.jpg",
+  },
+  {
+    name: "Mr Kiran Babu Arigela",
+    role: "Business Strategist & Market Analysis Lead",
+    location: null,
+    image: "/__l5e/assets-v1/63869967-eabf-415d-9fbb-81c0a6e111ff/team-kiran.jpg",
+  },
+  {
+    name: "Mr Ganesh Gollapothu",
+    role: "Hyderabad Unit Manager and Distribution Lead",
+    location: null,
+    image: "/__l5e/assets-v1/b88861c1-c2d9-4511-b4ea-4bb2b86e86a1/team-ganesh.jpg",
+  },
+  {
+    name: "Miss Cathy",
+    role: "Chief Financial Officer & International Business Expansion Lead",
+    location: "UK",
+    image: "/__l5e/assets-v1/4fc77597-9544-445a-9572-7b67b53f2263/team-cathy.jpg",
+  },
+];
+
 function Contact() {
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -71,6 +98,49 @@ function Contact() {
                   </p>
                 </div>
               </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Our Team Section */}
+        <section className="py-16 px-4 bg-cream/50">
+          <div className="mx-auto max-w-6xl">
+            <div className="text-center mb-10">
+              <span className="text-gold text-xs tracking-[0.3em] font-bold uppercase">The People Behind</span>
+              <h2 className="mt-2 font-display text-3xl md:text-4xl text-brand">Our Team</h2>
+              <div className="flex items-center justify-center gap-3 mt-3">
+                <span className="h-px w-12 bg-gold" />
+                <i className="fas fa-leaf text-leaf" />
+                <span className="h-px w-12 bg-gold" />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {teamMembers.map((member) => (
+                <div
+                  key={member.name}
+                  className="group bg-white rounded-2xl border border-border overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+                >
+                  <div className="relative overflow-hidden">
+                    <img
+                      src={member.image}
+                      alt={member.name}
+                      className="w-full aspect-[3/4] object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-brand/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  </div>
+                  <div className="p-4 text-center">
+                    <h3 className="font-display text-lg text-brand">{member.name}</h3>
+                    <p className="text-gold text-xs font-semibold uppercase tracking-wider mt-1">{member.role}</p>
+                    {member.location && (
+                      <p className="text-foreground/60 text-xs mt-1 flex items-center justify-center gap-1">
+                        <i className="fas fa-map-marker-alt text-gold/60" />
+                        {member.location}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </section>
