@@ -17,28 +17,28 @@ const teamMembers = [
     name: "Mrs Sai Sri Vidya",
     role: "Quality Assurance Lead",
     location: "Sydney, Australia",
-    image: "/media/team-saisrividya.jpg",
+    image: "/media/IMG-20260819-WA0003.jpg",
     initials: "SSV",
   },
   {
     name: "Mr Kiran Babu Arigela",
     role: "Business Strategist & Market Analysis Lead",
     location: null,
-    image: "/media/team-kiran.jpg",
+    image: "/media/IMG-20260819-WA0002.jpg",
     initials: "KBA",
   },
   {
     name: "Mr Ganesh Gollapothu",
     role: "Hyderabad Unit Manager and Distribution Lead",
     location: null,
-    image: "/media/team-ganesh.jpg",
+    image: "/media/IMG-20260819-WA0004.jpg",
     initials: "GG",
   },
   {
     name: "Miss Cathy",
     role: "Chief Financial Officer & International Business Expansion Lead",
     location: "UK",
-    image: "/media/team-cathy.jpg",
+    image: "/media/IMG-20260819-WA0013.jpg",
     initials: "C",
   },
 ];
@@ -72,7 +72,7 @@ function Contact() {
               <div className="relative">
                 <div className="relative rounded-2xl overflow-hidden border-4 border-gold/30 shadow-xl">
                   <img
-                    src="/media/founder-raviraja.jpg"
+                    src="/media/IMG-20260819-WA0014.jpg"
                     alt="Dr. Raviraja - Founder & Director"
                     className="w-full aspect-[4/5] object-cover"
                   />
