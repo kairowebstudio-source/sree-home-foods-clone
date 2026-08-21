@@ -49,6 +49,79 @@ function Contact() {
           </form>
         </div>
       </section>
+
+      {/* Founder & Director Section */}
+      <section className="py-16 px-4 bg-cream/50">
+        <div className="mx-auto max-w-5xl">
+          <div className="text-center mb-10">
+            <span className="text-gold text-xs tracking-[0.3em] font-bold uppercase">Leadership</span>
+            <h2 className="mt-2 font-display text-3xl md:text-4xl text-brand">Meet Our Founder</h2>
+            <div className="flex items-center justify-center gap-3 mt-3">
+              <span className="h-px w-12 bg-gold" />
+              <i className="fas fa-leaf text-leaf" />
+              <span className="h-px w-12 bg-gold" />
+            </div>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-10 items-center">
+            {/* Founder Image */}
+            <div className="relative">
+              <div className="relative rounded-2xl overflow-hidden border-4 border-gold/30 shadow-xl">
+                <img
+                  src="/media/founder-raviraja.jpg"
+                  alt="Dr. Raviraja - Founder & Director"
+                  className="w-full aspect-[4/5] object-cover"
+                />
+              </div>
+              {/* Decorative corner */}
+              <div className="absolute -bottom-4 -right-4 h-24 w-24 bg-gold/20 rounded-full blur-2xl" />
+              <div className="absolute -top-4 -left-4 h-16 w-16 bg-brand/10 rounded-full blur-xl" />
+            </div>
+
+            {/* Founder Info */}
+            <div className="space-y-6">
+              <div>
+                <h3 className="font-display text-2xl text-brand">Dr. Raviraja</h3>
+                <p className="text-gold font-semibold text-sm tracking-wider uppercase mt-1">Founder & Director | UK</p>
+              </div>
+
+              <div className="space-y-4">
+                <h4 className="font-display text-lg text-brand">About Dr. Raviraja</h4>
+                <p className="text-foreground/80 leading-relaxed">
+                  Dr. Raviraja is the Founder and Director of Retro Natural Products, driven by a strong passion for natural, quality-focused products and a commitment to bringing trusted solutions to customers.
+                </p>
+                <p className="text-foreground/80 leading-relaxed">
+                  With a vision of building a reliable and customer-focused natural products brand, he plays a key role in guiding the company's direction, product standards, and long-term growth.
+                </p>
+                <p className="text-foreground/80 leading-relaxed">
+                  His approach combines a focus on quality, authenticity, customer trust, and responsible business practices, with the aim of making natural products more accessible and dependable for customers.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Founder's Vision Section */}
+      <section className="py-16 px-4 bg-brand text-cream">
+        <div className="mx-auto max-w-4xl text-center">
+          <span className="text-gold text-xs tracking-[0.3em] font-bold uppercase">Our Founder's Vision</span>
+          <div className="mt-8 relative">
+            {/* Quote marks */}
+            <div className="absolute -top-6 left-1/2 -translate-x-1/2 text-gold/30 text-8xl font-serif leading-none">"</div>
+            <blockquote className="relative z-10 font-display text-2xl md:text-3xl lg:text-4xl leading-relaxed px-8 md:px-16 py-4">
+              "Our vision is to build a trusted natural products brand where quality, authenticity and customer satisfaction always come first."
+            </blockquote>
+            <div className="mt-8 flex items-center justify-center gap-3">
+              <span className="h-px w-16 bg-gold/50" />
+              <i className="fas fa-leaf text-gold" />
+              <span className="h-px w-16 bg-gold/50" />
+            </div>
+            <p className="mt-4 text-cream/80 font-semibold">— Dr. Raviraja</p>
+          </div>
+        </div>
+      </section>
+
       </main>
       <Footer />
     </div>
