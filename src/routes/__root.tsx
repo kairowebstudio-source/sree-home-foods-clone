@@ -14,7 +14,6 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { CartProvider } from "../lib/cart";
 import { CartDrawer } from "../components/site/CartDrawer";
 
-
 function NotFoundComponent() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
@@ -80,12 +79,19 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Retro Natural Products — Authentic Traditional Foods & Natural Goodness" },
-      { name: "description", content: "Retro Natural Products brings you handcrafted powders, spices, honey and traditional foods. Pure, natural, and delivered to your door." },
-      { name: "author", content: "Retro Natural Products" },
+      { title: "Sree Home Foods — Authentic Traditional Foods & Natural Goodness" },
+      {
+        name: "description",
+        content:
+          "Sree Home Foods brings you handcrafted powders, spices, honey and traditional foods. Pure, natural, and delivered to your door.",
+      },
+      { name: "author", content: "Sree Home Foods" },
       { name: "theme-color", content: "#8a1e1e" },
-      { property: "og:title", content: "Retro Natural Products — Authentic Traditional Foods" },
-      { property: "og:description", content: "Handcrafted powders, spices, honey and traditional foods — pure and natural." },
+      { property: "og:title", content: "Sree Home Foods — Authentic Traditional Foods" },
+      {
+        property: "og:description",
+        content: "Handcrafted powders, spices, honey and traditional foods — pure and natural.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -94,8 +100,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "icon", href: "/media/33191-removebg-preview.png", type: "image/png" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
-      { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Great+Vibes&family=Poppins:wght@300;400;500;600;700&display=swap" },
-      { rel: "stylesheet", href: "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" },
+      {
+        rel: "stylesheet",
+        href: "https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Great+Vibes&family=Poppins:wght@300;400;500;600;700&display=swap",
+      },
+      {
+        rel: "stylesheet",
+        href: "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css",
+      },
     ],
   }),
   shellComponent: RootShell,
@@ -124,11 +136,9 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <CartProvider>
-        {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
         <Outlet />
         <CartDrawer />
       </CartProvider>
     </QueryClientProvider>
   );
 }
-
