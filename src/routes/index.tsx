@@ -36,7 +36,7 @@ function Home() {
         <div className="absolute inset-0 bg-gradient-to-b from-[#1a0d0d]/20 via-transparent to-[#1a0d0d]/40" />
         <div className="relative mx-auto max-w-7xl px-4 py-24 md:py-36 text-cream text-center">
           <h1 className="font-display font-bold leading-[0.95] text-center">
-            <span className="block mb-2 md:mb-3 text-lg sm:text-xl md:text-2xl lg:text-3xl tracking-[0.25em] uppercase text-gold font-bold drop-shadow-[0_2px_12px_rgba(212,161,42,0.7)]">
+            <span className="block mb-2 md:mb-3 text-lg sm:text-xl md:text-2xl lg:text-3xl tracking-[0.25em] uppercase text-white font-bold drop-shadow-[0_2px_12px_rgba(255,255,255,0.7)]">
               Welcome to
             </span>
             <span className="block text-6xl sm:text-7xl md:text-8xl lg:text-9xl bg-gradient-to-b from-[#b03a2e] via-[#8a1e1e] to-[#5f1212] bg-clip-text text-transparent drop-shadow-[0_4px_20px_rgba(138,30,30,0.55)]">

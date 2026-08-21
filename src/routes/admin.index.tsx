@@ -1033,6 +1033,7 @@ function AdminPage() {
       {/* ── Add Product Modal ── */}
       <Modal open={addOpen} onClose={() => !saving && setAddOpen(false)} title="Add New Product">
         <ProductForm
+          categoryList={categoryList}
           onSave={(data) => handleAdd(data as Product)}
           onCancel={() => !saving && setAddOpen(false)}
         />
@@ -1043,6 +1044,7 @@ function AdminPage() {
         {editTarget && (
           <ProductForm
             initial={editTarget}
+            categoryList={categoryList}
             onSave={(data) => handleEdit(data as Product)}
             onCancel={() => setEditTarget(null)}
           />
