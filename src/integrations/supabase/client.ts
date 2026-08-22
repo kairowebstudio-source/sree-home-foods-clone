@@ -26,19 +26,21 @@ function createSupabaseFetch(supabaseKey: string): typeof fetch {
   };
 }
 
-
 function createSupabaseClient() {
-  // Use import.meta.env for client-side (Vite build-time replacement)
-  // Fall back to process.env for SSR (server-side rendering)
-  const SUPABASE_URL = import.meta.env['VITE_SUPABASE_URL'] || process.env['SUPABASE_URL'];
-  const SUPABASE_PUBLISHABLE_KEY = import.meta.env['VITE_SUPABASE_PUBLISHABLE_KEY'] || process.env['SUPABASE_PUBLISHABLE_KEY'];
+  // Vercel/Vite exposes browser-safe variables through VITE_*. Keep the
+  // server-side names as a fallback for SSR, but never expose the service role key.
+  // The project URL is public and is safe to use as a fallback for this project.
+  const SUPABASE_URL =
+    import.meta.env['VITE_SUPABASE_URL'] ||
+    process.env['SUPABASE_URL'] ||
+    'https://iifwenfyqgpurohobsbq.supabase.co';
+  const SUPABASE_PUBLISHABLE_KEY =
+    import.meta.env['VITE_SUPABASE_PUBLISHABLE_KEY'] ||
+    process.env['SUPABASE_PUBLISHABLE_KEY'];
 
-  if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
-    const missing = [
-      ...(!SUPABASE_URL ? ['SUPABASE_URL'] : []),
-      ...(!SUPABASE_PUBLISHABLE_KEY ? ['SUPABASE_PUBLISHABLE_KEY'] : []),
-    ];
-    const message = `Missing Supabase environment variable(s): ${missing.join(', ')}. Connect Supabase in Lovable Cloud.`;
+  if (!SUPABASE_PUBLISHABLE_KEY) {
+    const message =
+      'Supabase is not configured for the browser. Add VITE_SUPABASE_PUBLISHABLE_KEY to the Vercel Production environment and redeploy.';
     console.error(`[Supabase] ${message}`);
     throw new Error(message);
   }
@@ -65,4 +67,3 @@ export const supabase = new Proxy({} as ReturnType<typeof createSupabaseClient>,
     return Reflect.get(_supabase, prop, receiver);
   },
 });
-
