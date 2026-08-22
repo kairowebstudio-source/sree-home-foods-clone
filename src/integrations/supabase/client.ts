@@ -17,42 +17,62 @@ const client = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
   },
 });
 
-// Some networks can block direct browser access to *.supabase.co. The admin
-// login is therefore proxied through the same-origin TanStack Start server,
-// while the resulting Supabase session is still stored in the normal client.
-const originalSignInWithPassword = client.auth.signInWithPassword.bind(client.auth);
-client.auth.signInWithPassword = (async (credentials, options) => {
-  if (typeof window === 'undefined') return originalSignInWithPassword(credentials, options);
+// Admin login is routed through the same-origin Vercel server so the browser
+// never has to call Supabase Auth directly for the password sign-in request.
+// The server endpoint authenticates with Supabase and returns the normal
+// Supabase session, which we then store in the browser client.
+const authProxy = new Proxy(client.auth, {
+  get(target, property, receiver) {
+    if (property === 'signInWithPassword') {
+      return async (credentials: { email: string; password: string }, options?: unknown) => {
+        if (typeof window === 'undefined') {
+          return target.signInWithPassword(credentials, options as never);
+        }
 
-  try {
-    const response = await fetch('/api/admin-auth', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'same-origin',
-      body: JSON.stringify({
-        email: credentials.email,
-        password: credentials.password,
-      }),
-    });
+        try {
+          const response = await fetch('/api/admin-auth', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'same-origin',
+            body: JSON.stringify({
+              email: credentials.email,
+              password: credentials.password,
+            }),
+          });
 
-    const payload = await response.json().catch(() => ({}));
-    if (!response.ok || !payload.session) {
-      return {
-        data: { user: null, session: null },
-        error: new Error(payload.error || `Sign in failed (${response.status})`) as any,
+          const payload = await response.json().catch(() => ({}));
+          if (!response.ok || !payload?.session) {
+            return {
+              data: { user: null, session: null },
+              error: new Error(payload?.error || `Sign in failed (${response.status})`),
+            };
+          }
+
+          return target.setSession({
+            access_token: payload.session.access_token,
+            refresh_token: payload.session.refresh_token,
+          });
+        } catch (error) {
+          return {
+            data: { user: null, session: null },
+            error: new Error(
+              error instanceof Error ? error.message : 'Unable to reach the login service.',
+            ),
+          };
+        }
       };
     }
 
-    return client.auth.setSession({
-      access_token: payload.session.access_token,
-      refresh_token: payload.session.refresh_token,
-    });
-  } catch (error) {
-    return {
-      data: { user: null, session: null },
-      error: new Error(error instanceof Error ? error.message : 'Unable to sign in right now.') as any,
-    };
-  }
-}) as typeof client.auth.signInWithPassword;
+    const value = Reflect.get(target, property, receiver);
+    return typeof value === 'function' ? value.bind(target) : value;
+  },
+});
 
-export const supabase = client;
+// Expose the real client with only its Auth interface proxied. All database,
+// storage, and other Supabase functionality remains unchanged.
+export const supabase = new Proxy(client, {
+  get(target, property, receiver) {
+    if (property === 'auth') return authProxy;
+    return Reflect.get(target, property, receiver);
+  },
+});
