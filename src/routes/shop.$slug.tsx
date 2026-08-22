@@ -5,14 +5,22 @@ import { useCart } from "@/lib/cart";
 import { useState, useEffect } from "react";
 import type { Product, Variant } from "@/lib/products";
 import { getVariants, formatPrice, products as fallbackProducts } from "@/lib/products";
-import { supabase } from "@/integrations/supabase/client";
+
+const SUPABASE_PRODUCTS_URL = "https://iifwenfvggpurohobsbq.supabase.co/rest/v1/products?select=*&order=created_at.asc";
 
 export const Route = createFileRoute("/shop/$slug")({
   loader: async ({ params }) => {
     let remoteProducts: Product[] = [];
     try {
-      const { data } = await supabase.from("products").select("*").order("created_at", { ascending: true });
-      remoteProducts = (data ?? []) as Product[];
+      const publishableKey = typeof import.meta !== "undefined" && import.meta.env?.VITE_SUPABASE_PUBLISHABLE_KEY;
+      if (publishableKey) {
+        const response = await fetch(SUPABASE_PRODUCTS_URL, {
+          headers: { apikey: publishableKey },
+        });
+        if (response.ok) {
+          remoteProducts = (await response.json()) as Product[];
+        }
+      }
     } catch {
       // Keep the bundled catalogue available if Supabase is temporarily unavailable.
     }
