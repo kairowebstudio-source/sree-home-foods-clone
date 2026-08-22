@@ -105,6 +105,31 @@ function escapeHtml(s: string): string { return s.replace(/&/g, "&amp;").replace
 
 export const getOrders = createServerFn({ method: "GET" }).handler(async () => { await requireAdmin(); if (!supabaseEnabled()) return []; const client = supabaseAdmin(); const { data, error } = await client.from("orders").select("*").order("created_at", { ascending: false }); if (error) throw new Error(`Failed to load orders: ${error.message}`); return data || []; });
 
+export const updateOrderStatus = createServerFn({ method: "POST" })
+  .validator((d: { orderId: string; status: string }) => d)
+  .handler(async ({ data }) => {
+    await requireAdmin();
+    if (!supabaseEnabled()) throw new Error(NEEDS_ENV_MSG);
+    const client = supabaseAdmin();
+    const { error } = await client
+      .from("orders")
+      .update({ status: data.status, updated_at: new Date().toISOString() })
+      .eq("id", data.orderId);
+    if (error) throw new Error(`Failed to update order status: ${error.message}`);
+    return { success: true };
+  });
+
+export const deleteOrder = createServerFn({ method: "POST" })
+  .validator((d: string) => d)
+  .handler(async ({ data }) => {
+    await requireAdmin();
+    if (!supabaseEnabled()) throw new Error(NEEDS_ENV_MSG);
+    const client = supabaseAdmin();
+    const { error } = await client.from("orders").delete().eq("id", data);
+    if (error) throw new Error(`Failed to delete order: ${error.message}`);
+    return { success: true };
+  });
+
 // ── Image upload ───────────────────────────────────────────────
 
 export const uploadProductImage = createServerFn({ method: "POST" }).validator((d: { base64: string; filename: string; contentType: string }) => d).handler(async ({ data }) => { await requireAdmin(); if (data.base64.length > 3_000_000) throw new Error("Image is still too large after compression. Please use a JPG or PNG under 2MB."); if (!supabaseEnabled()) return { url: `data:${data.contentType};base64,${data.base64}` }; const client = supabaseAdmin(); const bucketName = "product-images"; const { data: buckets } = await client.storage.listBuckets(); const exists = buckets?.some((b) => b.name === bucketName); if (!exists) { const { error } = await client.storage.createBucket(bucketName, { public: false, fileSizeLimit: 5 * 1024 * 1024 }); if (error && !/already exists/i.test(error.message)) throw new Error(`Could not create image bucket: ${error.message}`); } const buffer = Buffer.from(data.base64, "base64"); const { error: uploadError } = await client.storage.from(bucketName).upload(data.filename, buffer, { contentType: data.contentType, upsert: true }); if (uploadError) throw new Error(`Storage rejected the upload: ${uploadError.message}`); const { data: signed, error: signError } = await client.storage.from(bucketName).createSignedUrl(data.filename, 60 * 60 * 24 * 365 * 10); if (signError || !signed?.signedUrl) throw new Error(`Could not create image URL: ${signError?.message ?? "unknown error"}`); return { url: signed.signedUrl }; });

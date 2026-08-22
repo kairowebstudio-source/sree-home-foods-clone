@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { useEffect, useState, useCallback, useRef } from "react";
-import { getProducts, getOrders, addProduct, updateProduct, deleteProduct, uploadProductImage, migrateDataUrlImages, getCategories, addCategory, deleteCategory, adminLogin, validateAdminSession } from "@/lib/admin.server";
+import { getProducts, getOrders, addProduct, updateProduct, deleteProduct, uploadProductImage, migrateDataUrlImages, getCategories, addCategory, deleteCategory, adminLogin, validateAdminSession, updateOrderStatus, deleteOrder } from "@/lib/admin.server";
 import { getVariants } from "@/lib/products";
 import type { Product, Variant } from "@/lib/products";
 
@@ -461,6 +461,10 @@ function AdminPage() {
   const [deleting, setDeleting] = useState(false);
   const [migrating, setMigrating] = useState(false);
 
+  // Order management
+  const [orderStatusBusy, setOrderStatusBusy] = useState<string | null>(null);
+  const [deleteOrderTarget, setDeleteOrderTarget] = useState<any | null>(null);
+
   // Toast
   const [toast, setToast] = useState<{ msg: string; ok: boolean } | null>(null);
 
@@ -636,6 +640,35 @@ function AdminPage() {
       showToast(e instanceof Error ? e.message : "Failed to fix images", false);
     } finally {
       setMigrating(false);
+    }
+  };
+
+  // ── Order management handlers ──
+
+  const handleUpdateOrderStatus = async (orderId: string, newStatus: string) => {
+    setOrderStatusBusy(orderId);
+    try {
+      await updateOrderStatus({ data: { orderId, status: newStatus } });
+      setOrders((prev) => prev.map((o) => o.id === orderId ? { ...o, status: newStatus } : o));
+      if (viewOrder?.id === orderId) setViewOrder((prev: any) => prev ? { ...prev, status: newStatus } : null);
+      showToast(`Order status updated to "${newStatus}"`);
+    } catch (e) {
+      showToast(e instanceof Error ? e.message : "Failed to update status", false);
+    } finally {
+      setOrderStatusBusy(null);
+    }
+  };
+
+  const handleDeleteOrder = async () => {
+    if (!deleteOrderTarget) return;
+    try {
+      await deleteOrder({ data: deleteOrderTarget.id });
+      setOrders((prev) => prev.filter((o) => o.id !== deleteOrderTarget.id));
+      setDeleteOrderTarget(null);
+      setViewOrder(null);
+      showToast("Order deleted");
+    } catch (e) {
+      showToast(e instanceof Error ? e.message : "Failed to delete order", false);
     }
   };
 
@@ -1009,36 +1042,50 @@ function AdminPage() {
                           {formatDate(o.created_at)}
                         </td>
                         <td className="px-4 py-4">
-                          <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-                            o.status === "paid"
-                              ? "bg-leaf/15 text-leaf-dark border border-leaf/30"
-                              : o.status === "pending"
-                              ? "bg-amber-50 text-amber-700 border border-amber-200"
-                              : o.status === "shipped"
-                              ? "bg-blue-50 text-blue-700 border border-blue-200"
-                              : o.status === "delivered"
-                              ? "bg-leaf/15 text-leaf-dark border border-leaf/30"
-                              : "bg-red-50 text-red-700 border border-red-200"
-                          }`}>
-                            {o.status === "paid" && <i className="fas fa-credit-card" />}
-                            {o.status === "pending" && <i className="fas fa-clock" />}
-                            {o.status === "shipped" && <i className="fas fa-shipping-fast" />}
-                            {o.status === "delivered" && <i className="fas fa-check-circle" />}
-                            {o.status === "cancelled" && <i className="fas fa-ban" />}
-                            {o.status || "pending"}
-                          </span>
+                          <select
+                            value={o.status || "pending"}
+                            onChange={(e) => handleUpdateOrderStatus(o.id, e.target.value)}
+                            disabled={orderStatusBusy === o.id}
+                            className={`rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider border appearance-none cursor-pointer focus:outline-none focus:ring-1 focus:ring-brand/30 ${
+                              o.status === "paid" || o.status === "delivered"
+                                ? "bg-leaf/15 text-leaf-dark border-leaf/30"
+                                : o.status === "pending"
+                                ? "bg-amber-50 text-amber-700 border-amber-200"
+                                : o.status === "shipped"
+                                ? "bg-blue-50 text-blue-700 border-blue-200"
+                                : o.status === "cancelled"
+                                ? "bg-red-50 text-red-700 border-red-200"
+                                : "bg-gray-50 text-gray-700 border-gray-200"
+                            }`}
+                          >
+                            <option value="pending">Pending</option>
+                            <option value="confirmed">Confirmed</option>
+                            <option value="shipped">Shipped</option>
+                            <option value="delivered">Delivered</option>
+                            <option value="cancelled">Cancelled</option>
+                            <option value="paid">Paid</option>
+                          </select>
                         </td>
                         <td className="px-4 py-4 text-right font-semibold text-foreground">
                           {formatPrice(o.total)}
                         </td>
                         <td className="px-4 py-4 text-right">
-                          <button
-                            onClick={() => setViewOrder(o)}
-                            className="h-8 w-8 rounded-lg hover:bg-brand/10 grid place-items-center text-foreground/60 hover:text-brand transition"
-                            title="View details"
-                          >
-                            <i className="fas fa-eye text-xs" />
-                          </button>
+                          <div className="flex items-center justify-end gap-1">
+                            <button
+                              onClick={() => setViewOrder(o)}
+                              className="h-8 w-8 rounded-lg hover:bg-brand/10 grid place-items-center text-foreground/60 hover:text-brand transition"
+                              title="View details"
+                            >
+                              <i className="fas fa-eye text-xs" />
+                            </button>
+                            <button
+                              onClick={() => setDeleteOrderTarget(o)}
+                              className="h-8 w-8 rounded-lg hover:bg-red-50 grid place-items-center text-foreground/60 hover:text-red-600 transition"
+                              title="Delete order"
+                            >
+                              <i className="fas fa-trash-can text-xs" />
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     );
@@ -1112,20 +1159,30 @@ function AdminPage() {
                 <h3 className="font-display text-lg text-brand">Order</h3>
                 <span className="font-mono text-xs text-foreground/50">ID: {viewOrder.id}</span>
               </div>
-              <div className="flex items-center gap-2 mb-4">
-                <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-                  viewOrder.status === "paid"
-                    ? "bg-leaf/15 text-leaf-dark border border-leaf/30"
-                    : viewOrder.status === "pending"
-                    ? "bg-amber-50 text-amber-700 border border-amber-200"
-                    : viewOrder.status === "shipped"
-                    ? "bg-blue-50 text-blue-700 border border-blue-200"
-                    : viewOrder.status === "delivered"
-                    ? "bg-leaf/15 text-leaf-dark border border-leaf/30"
-                    : "bg-red-50 text-red-700 border border-red-200"
-                }`}>
-                  {viewOrder.status || "pending"}
-                </span>
+              <div className="flex items-center gap-3 mb-4">
+                <select
+                  value={viewOrder.status || "pending"}
+                  onChange={(e) => handleUpdateOrderStatus(viewOrder.id, e.target.value)}
+                  disabled={orderStatusBusy === viewOrder.id}
+                  className={`rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider border appearance-none cursor-pointer focus:outline-none focus:ring-1 focus:ring-brand/30 ${
+                    viewOrder.status === "paid" || viewOrder.status === "delivered"
+                      ? "bg-leaf/15 text-leaf-dark border-leaf/30"
+                      : viewOrder.status === "pending"
+                      ? "bg-amber-50 text-amber-700 border-amber-200"
+                      : viewOrder.status === "shipped"
+                      ? "bg-blue-50 text-blue-700 border-blue-200"
+                      : viewOrder.status === "cancelled"
+                      ? "bg-red-50 text-red-700 border-red-200"
+                      : "bg-gray-50 text-gray-700 border-gray-200"
+                  }`}
+                >
+                  <option value="pending">Pending</option>
+                  <option value="confirmed">Confirmed</option>
+                  <option value="shipped">Shipped</option>
+                  <option value="delivered">Delivered</option>
+                  <option value="cancelled">Cancelled</option>
+                  <option value="paid">Paid</option>
+                </select>
                 <span className="text-xs text-foreground/50">{formatDate(viewOrder.created_at)}</span>
               </div>
 
@@ -1159,10 +1216,16 @@ function AdminPage() {
               )}
             </div>
 
-            <button onClick={() => setViewOrder(null)}
-              className="w-full rounded-full border border-border px-6 py-2.5 font-semibold text-sm text-foreground/70 hover:bg-accent/30 transition">
-              Close
-            </button>
+            <div className="flex items-center justify-between">
+              <button onClick={() => setDeleteOrderTarget(viewOrder)}
+                className="rounded-full border border-red-200 text-red-600 px-5 py-2.5 font-semibold text-sm hover:bg-red-50 transition flex items-center gap-2">
+                <i className="fas fa-trash-can" /> Delete Order
+              </button>
+              <button onClick={() => setViewOrder(null)}
+                className="rounded-full border border-border px-6 py-2.5 font-semibold text-sm text-foreground/70 hover:bg-accent/30 transition">
+                Close
+              </button>
+            </div>
           </div>
         )}
       </Modal>
@@ -1189,6 +1252,35 @@ function AdminPage() {
                 {deleting ? "Deleting..." : "Delete Product"}
               </button>
               <button onClick={() => setDeleteTarget(null)} disabled={deleting}
+                className="rounded-full border border-border px-6 py-2.5 font-semibold text-sm text-foreground/70 hover:bg-accent/30 transition">
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
+      </Modal>
+
+      {/* ── Delete Order Confirm Modal ── */}
+      <Modal open={!!deleteOrderTarget} onClose={() => setDeleteOrderTarget(null)} title="Delete Order">
+        {deleteOrderTarget && (
+          <div className="space-y-6">
+            <div className="flex items-center gap-4 p-4 bg-red-50 rounded-xl border border-red-200">
+              <div className="h-12 w-12 rounded-full bg-red-100 text-red-600 grid place-items-center shrink-0">
+                <i className="fas fa-triangle-exclamation text-xl" />
+              </div>
+              <div>
+                <p className="font-semibold text-red-800">Are you sure?</p>
+                <p className="text-sm text-red-600 mt-0.5">
+                  This will permanently delete order <strong>#{deleteOrderTarget.id?.slice(0, 8)}</strong> from <strong>{deleteOrderTarget.customer_name}</strong>. This action cannot be undone.
+                </p>
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <button onClick={handleDeleteOrder}
+                className="rounded-full bg-red-600 text-white px-6 py-2.5 font-bold uppercase tracking-wider text-sm hover:bg-red-700 transition flex items-center gap-2">
+                <i className="fas fa-trash-can" /> Delete Order
+              </button>
+              <button onClick={() => setDeleteOrderTarget(null)}
                 className="rounded-full border border-border px-6 py-2.5 font-semibold text-sm text-foreground/70 hover:bg-accent/30 transition">
                 Cancel
               </button>
