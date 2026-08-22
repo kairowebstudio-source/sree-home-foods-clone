@@ -14,11 +14,11 @@ export const Route = createFileRoute("/about")({
 
 const teamMembers = [
   {
-    name: "Mrs Sai Sri Vidya",
-    role: "Quality Assurance Lead",
-    location: "Sydney, Australia",
-    image: "/media/IMG-20260819-WA0003.jpg",
-    initials: "SSV",
+    name: "Miss Cathy",
+    role: "Chief Financial Officer & International Business Expansion Lead",
+    location: "UK",
+    image: "/media/IMG-20260819-WA0013.jpg",
+    initials: "C",
   },
   {
     name: "Mr Kiran Babu Arigela",
@@ -35,11 +35,11 @@ const teamMembers = [
     initials: "GG",
   },
   {
-    name: "Miss Cathy",
-    role: "Chief Financial Officer & International Business Expansion Lead",
-    location: "UK",
-    image: "/media/IMG-20260819-WA0013.jpg",
-    initials: "C",
+    name: "Mrs Sai Sri Vidya",
+    role: "Quality Assurance Lead",
+    location: "Sydney, Australia",
+    image: "/media/IMG-20260819-WA0003.jpg",
+    initials: "SSV",
   },
 ];
 
@@ -63,7 +63,7 @@ function About() {
               <h2 className="mt-2 font-display text-3xl md:text-4xl text-brand">Meet Our Founder</h2>
               <div className="flex items-center justify-center gap-3 mt-3">
                 <span className="h-px w-12 bg-gold" />
-                <i className="fas fa-leaf text-leaf" />
+                <i className="fas fa-leaf text-gold" />
                 <span className="h-px w-12 bg-gold" />
               </div>
             </div>
@@ -115,7 +115,7 @@ function About() {
               <h2 className="mt-2 font-display text-3xl md:text-4xl text-brand">Our Team</h2>
               <div className="flex items-center justify-center gap-3 mt-3">
                 <span className="h-px w-12 bg-gold" />
-                <i className="fas fa-leaf text-leaf" />
+                <i className="fas fa-leaf text-gold" />
                 <span className="h-px w-12 bg-gold" />
               </div>
             </div>
