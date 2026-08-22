@@ -17,10 +17,12 @@ const client = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
   },
 });
 
-// Admin login is routed through the same-origin Vercel server so the browser
-// never has to call Supabase Auth directly for the password sign-in request.
-// The server endpoint authenticates with Supabase and returns the normal
-// Supabase session, which we then store in the browser client.
+// Admin password sign-in is routed through the same-origin server endpoint.
+// IMPORTANT: after the server verifies the password, do not immediately call
+// auth.getUser() over the network. That was the source of the misleading
+// "Failed to fetch" error for valid passwords in this deployment.
+let proxyUser: Awaited<ReturnType<typeof client.auth.getUser>>['data']['user'] = null;
+
 const authProxy = new Proxy(client.auth, {
   get(target, property, receiver) {
     if (property === 'signInWithPassword') {
@@ -48,10 +50,15 @@ const authProxy = new Proxy(client.auth, {
             };
           }
 
-          return target.setSession({
+          // Store the verified Supabase session locally. setSession itself does
+          // not need a second password-auth request. Cache the verified user so
+          // the admin page does not immediately make a failing getUser request.
+          const result = await target.setSession({
             access_token: payload.session.access_token,
             refresh_token: payload.session.refresh_token,
           });
+          proxyUser = result.data.user ?? payload.session.user ?? null;
+          return result;
         } catch (error) {
           return {
             data: { user: null, session: null },
@@ -60,6 +67,22 @@ const authProxy = new Proxy(client.auth, {
             ),
           };
         }
+      };
+    }
+
+    if (property === 'getUser') {
+      return async (...args: Parameters<typeof target.getUser>) => {
+        if (proxyUser) {
+          return { data: { user: proxyUser }, error: null };
+        }
+        return target.getUser(...args);
+      };
+    }
+
+    if (property === 'signOut') {
+      return async (...args: Parameters<typeof target.signOut>) => {
+        proxyUser = null;
+        return target.signOut(...args);
       };
     }
 
