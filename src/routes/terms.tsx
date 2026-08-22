@@ -9,7 +9,7 @@ export const Route = createFileRoute("/terms")({
       <Header />
       <section className="py-16 px-4 mx-auto max-w-3xl">
         <h1 className="font-display text-4xl text-brand">Terms & Conditions</h1>
-        <div className="mt-6 space-y-4 text-foreground/80 leading-relaxed">
+        <div className="mt-6 space-y-4 text-foreground/80 leading-relaxed text-left">
           <p>By using this website you agree to our terms of use. All product images and content on this site are owned by Retro Natural Products and may not be reproduced without permission.</p>
           <p>Prices are subject to change. We reserve the right to cancel orders in case of pricing errors or stock unavailability, with a full refund.</p>
         </div>

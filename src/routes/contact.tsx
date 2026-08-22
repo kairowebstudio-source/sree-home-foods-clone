@@ -42,7 +42,7 @@ function Contact() {
                   { i: "fa-building", t: "Office", d: "'RETRO' Natural Products\nShop G9, H.no 19, Eeco Valley Apartments\nopposite Jana Priya Nile valley, PJR Layout\nMADHAVAPURI HILLS, Ameenpur\nHyderabad-500050" },
                   { i: "fa-phone", t: "Call", d: "+91 81212 73912" },
                   { i: "fa-envelope", t: "Email", d: "retronaturalproducts@gmail.com" },
-                  { i: "fa-clock", t: "Hours", d: "Mon–Sun · 9:20 AM – 8:00 PM" },
+                  { i: "fa-clock", t: "Hours", d: "Mon–Sun · 9:30 AM – 8:00 PM" },
                 ].map((c) => (
                   <div key={c.t} className="flex gap-4 items-start bg-cream rounded-xl p-5 border border-border">
                     <div className="h-12 w-12 rounded-full bg-brand text-gold grid place-items-center shrink-0"><i className={`fas ${c.i}`} /></div>
