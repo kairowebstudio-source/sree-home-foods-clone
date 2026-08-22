@@ -5,14 +5,20 @@ import { useCart } from "@/lib/cart";
 import { useState, useEffect } from "react";
 import type { Product, Variant } from "@/lib/products";
 import { getVariants, formatPrice, products as fallbackProducts } from "@/lib/products";
-import { getProducts } from "@/lib/admin.server";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/shop/$slug")({
   loader: async ({ params }) => {
-    const remoteProducts = await getProducts();
+    let remoteProducts: Product[] = [];
+    try {
+      const { data } = await supabase.from("products").select("*").order("created_at", { ascending: true });
+      remoteProducts = (data ?? []) as Product[];
+    } catch {
+      // Keep the bundled catalogue available if Supabase is temporarily unavailable.
+    }
     const bySlug = new Map<string, Product>();
     for (const p of fallbackProducts) bySlug.set(p.slug, p);
-    if (Array.isArray(remoteProducts)) for (const p of remoteProducts) if (p?.slug) bySlug.set(p.slug, p);
+    for (const p of remoteProducts) if (p?.slug) bySlug.set(p.slug, p);
     const allProducts = Array.from(bySlug.values());
     const product = allProducts.find((p) => p.slug === params.slug);
     if (!product) throw notFound();
