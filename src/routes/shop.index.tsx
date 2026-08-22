@@ -34,15 +34,14 @@ function Shop() {
       }
 
       try {
-        // Read products directly from the public Supabase REST endpoint.
-        // The products table has a public SELECT RLS policy, so no service-role
-        // key or admin authentication is required for the storefront.
+        // Publishable keys are sent as the apikey header. Do not send the
+        // publishable key as a Bearer token; Supabase's newer sb_publishable_
+        // keys are not JWT access tokens.
         const response = await fetch(
           `${supabaseUrl}/rest/v1/products?select=*&order=created_at.asc`,
           {
             headers: {
               apikey: publishableKey,
-              Authorization: `Bearer ${publishableKey}`,
             },
           },
         );
