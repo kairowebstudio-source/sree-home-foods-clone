@@ -7,7 +7,7 @@ export const Route = createFileRoute("/checkout/success")({
   validateSearch: z.object({ id: z.string().optional() }),
   head: () => ({
     meta: [
-      { title: "Order Confirmed — Sree Home Foods" },
+      { title: "Order Confirmed — Retro Natural Products" },
       { name: "robots", content: "noindex" },
     ],
   }),

@@ -10,7 +10,7 @@ import { createRazorpayOrder, verifyRazorpayPayment } from "@/lib/razorpay.serve
 export const Route = createFileRoute("/checkout")({
   head: () => ({
     meta: [
-      { title: "Checkout — Sree Home Foods" },
+      { title: "Checkout — Retro Natural Products" },
       { name: "description", content: "Complete your order of handcrafted natural foods." },
       { name: "robots", content: "noindex" },
     ],
@@ -169,7 +169,7 @@ function startRazorpayCheckout(opts: RazorpayCheckoutOptions): Promise<"paid" | 
       key: opts.keyId,
       amount: opts.amount,
       currency: "INR",
-      name: "Sree Home Foods",
+      name: "Retro Natural Products",
       description: `Order #${opts.razorpayOrderId.slice(-8)}`,
       order_id: opts.razorpayOrderId,
       prefill: { name: opts.customer.name, email: opts.customer.email, contact: opts.customer.phone },

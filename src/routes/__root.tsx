@@ -79,15 +79,15 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Sree Home Foods — Authentic Traditional Foods & Natural Goodness" },
+      { title: "Retro Natural Products — Authentic Traditional Foods & Natural Goodness" },
       {
         name: "description",
         content:
-          "Sree Home Foods brings you handcrafted powders, spices, honey and traditional foods. Pure, natural, and delivered to your door.",
+          "Retro Natural Products brings you handcrafted powders, spices, honey and traditional foods. Pure, natural, and delivered to your door.",
       },
-      { name: "author", content: "Sree Home Foods" },
+      { name: "author", content: "Retro Natural Products" },
       { name: "theme-color", content: "#8a1e1e" },
-      { property: "og:title", content: "Sree Home Foods — Authentic Traditional Foods" },
+      { property: "og:title", content: "Retro Natural Products — Authentic Traditional Foods" },
       {
         property: "og:description",
         content: "Handcrafted powders, spices, honey and traditional foods — pure and natural.",
