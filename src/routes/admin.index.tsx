@@ -445,20 +445,24 @@ function AdminPage() {
     let mounted = true;
     let unsub: (() => void) | undefined;
     (async () => {
-      const sb = await loadSupabase();
-      if (!sb || !mounted) { setAuthChecking(false); return; }
-      const { data } = await sb.auth.getSession();
-      if (!mounted) return;
-      const user = data.session?.user;
-      if (user && ALLOWED_ADMIN_EMAILS.has((user.email ?? "").toLowerCase())) {
-        setAuthed(true);
+      try {
+        const sb = await loadSupabase();
+        if (!sb || !mounted) { setAuthChecking(false); return; }
+        const { data } = await sb.auth.getSession();
+        if (!mounted) return;
+        const user = data.session?.user;
+        if (user && ALLOWED_ADMIN_EMAILS.has((user.email ?? "").toLowerCase())) {
+          setAuthed(true);
+        }
+        setAuthChecking(false);
+        const { data: { subscription } } = sb.auth.onAuthStateChange((_event, session) => {
+          const user = session?.user;
+          setAuthed(!!(user && ALLOWED_ADMIN_EMAILS.has((user.email ?? "").toLowerCase())));
+        });
+        unsub = () => subscription.unsubscribe();
+      } catch {
+        setAuthChecking(false);
       }
-      setAuthChecking(false);
-      const { data: { subscription } } = sb.auth.onAuthStateChange((_event, session) => {
-        const user = session?.user;
-        setAuthed(!!(user && ALLOWED_ADMIN_EMAILS.has((user.email ?? "").toLowerCase())));
-      });
-      unsub = () => subscription.unsubscribe();
     })();
     return () => { mounted = false; unsub?.(); };
   }, []);
