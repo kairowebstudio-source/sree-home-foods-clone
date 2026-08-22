@@ -1,7 +1,8 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { useEffect, useState, useCallback, useRef } from "react";
 import { getProducts, getOrders, addProduct, updateProduct, deleteProduct, uploadProductImage, migrateDataUrlImages, getCategories, addCategory, deleteCategory } from "@/lib/admin.server";
-import { supabase } from "@/integrations/supabase/client";
+import type { SupabaseClient } from "@supabase/supabase-js";
+import type { Session } from "@supabase/supabase-js";
 import { getVariants } from "@/lib/products";
 import type { Product, Variant } from "@/lib/products";
 
@@ -10,6 +11,19 @@ const ALLOWED_ADMIN_EMAILS = new Set([
   "retronaturalproducts@gmail.com",
   "msantureddy177@gmail.com",
 ]);
+
+// Lazy-init supabase client — avoids crashing during SSR when env vars are missing.
+let _supabaseMod: { supabase: SupabaseClient } | null = null;
+async function loadSupabase(): Promise<SupabaseClient | null> {
+  if (_supabaseMod) return _supabaseMod.supabase;
+  if (typeof window === "undefined") return null;
+  try {
+    _supabaseMod = await import("@/integrations/supabase/client");
+    return _supabaseMod.supabase;
+  } catch {
+    return null;
+  }
+}
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString("en-IN", {
@@ -429,20 +443,24 @@ function AdminPage() {
   // Check Supabase auth session on mount
   useEffect(() => {
     let mounted = true;
+    let unsub: (() => void) | undefined;
     (async () => {
-      const { data } = await supabase.auth.getSession();
+      const sb = await loadSupabase();
+      if (!sb || !mounted) { setAuthChecking(false); return; }
+      const { data } = await sb.auth.getSession();
       if (!mounted) return;
       const user = data.session?.user;
       if (user && ALLOWED_ADMIN_EMAILS.has((user.email ?? "").toLowerCase())) {
         setAuthed(true);
       }
       setAuthChecking(false);
+      const { data: { subscription } } = sb.auth.onAuthStateChange((_event, session) => {
+        const user = session?.user;
+        setAuthed(!!(user && ALLOWED_ADMIN_EMAILS.has((user.email ?? "").toLowerCase())));
+      });
+      unsub = () => subscription.unsubscribe();
     })();
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      const user = session?.user;
-      setAuthed(!!(user && ALLOWED_ADMIN_EMAILS.has((user.email ?? "").toLowerCase())));
-    });
-    return () => { mounted = false; subscription.unsubscribe(); };
+    return () => { mounted = false; unsub?.(); };
   }, []);
 
   // Tab state
@@ -553,7 +571,12 @@ function AdminPage() {
     setLoggingIn(true);
     setLoginError("");
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const sb = await loadSupabase();
+      if (!sb) {
+        setLoginError("Supabase is not configured. Check environment variables.");
+        return;
+      }
+      const { error } = await sb.auth.signInWithPassword({
         email: email.trim().toLowerCase(),
         password,
       });
@@ -562,9 +585,9 @@ function AdminPage() {
         return;
       }
       // Verify the signed-in email is in the allowed list
-      const user = (await supabase.auth.getUser()).data.user;
+      const user = (await sb.auth.getUser()).data.user;
       if (!user || !ALLOWED_ADMIN_EMAILS.has((user.email ?? "").toLowerCase())) {
-        await supabase.auth.signOut();
+        await sb.auth.signOut();
         setLoginError("Access denied. This email is not authorized for admin access.");
         return;
       }
@@ -582,7 +605,12 @@ function AdminPage() {
     setResetLoading(true);
     setLoginError("");
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email.trim().toLowerCase(), {
+      const sb2 = await loadSupabase();
+      if (!sb2) {
+        setLoginError("Supabase is not configured. Check environment variables.");
+        return;
+      }
+      const { error } = await sb2.auth.resetPasswordForEmail(email.trim().toLowerCase(), {
         redirectTo: `${window.location.origin}/admin`,
       });
       if (error) {
@@ -598,7 +626,8 @@ function AdminPage() {
   };
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
+    const sb = await loadSupabase();
+    await sb?.auth.signOut();
     setAuthed(false);
     router.invalidate();
   };
