@@ -4,6 +4,8 @@ import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { type Product, categories, priceRange, getVariants, products as fallbackProducts } from "@/lib/products";
 
+const SUPABASE_PRODUCTS_URL = "https://iifwenfvggpurohobsbq.supabase.co/rest/v1/products?select=*&order=created_at.asc";
+
 export const Route = createFileRoute("/shop/")({
   head: () => ({ meta: [{ title: "Shop — Retro Natural Products" }, { name: "description", content: "Browse our full range of natural powders, spices, raw honey and traditional Andhra foods." }] }),
   component: Shop,
@@ -23,9 +25,8 @@ function Shop() {
     let active = true;
 
     async function loadSupabaseProducts() {
-      // This is the actual Supabase project URL. Vercel's environment variable
-      // remains preferred, but the fallback must point to the real project.
-      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || "https://iifwenfvggpurohobsbq.supabase.co";
+      // Use the actual project URL directly here. Vercel had an old
+      // VITE_SUPABASE_URL value, which caused the browser to query the wrong project.
       const publishableKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
       if (!publishableKey) {
@@ -34,10 +35,9 @@ function Shop() {
       }
 
       try {
-        const response = await fetch(
-          `${supabaseUrl}/rest/v1/products?select=*&order=created_at.asc`,
-          { headers: { apikey: publishableKey } },
-        );
+        const response = await fetch(SUPABASE_PRODUCTS_URL, {
+          headers: { apikey: publishableKey },
+        });
 
         if (!response.ok) {
           const body = await response.text().catch(() => "");
