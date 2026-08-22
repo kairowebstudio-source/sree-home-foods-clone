@@ -3,7 +3,6 @@ import { useState, useEffect } from "react";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { type Product, categories, priceRange, getVariants, products as fallbackProducts } from "@/lib/products";
-import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/shop/")({
   head: () => ({ meta: [{ title: "Shop — Retro Natural Products" }, { name: "description", content: "Browse our full range of natural powders, spices, raw honey and traditional Andhra foods." }] }),
@@ -11,8 +10,8 @@ export const Route = createFileRoute("/shop/")({
 });
 
 function mergeProducts(remote: Product[]): Product[] {
-  // Always keep the original bundled catalogue. Supabase products override by slug,
-  // while products that exist only in Supabase are added to the storefront too.
+  // Keep the original catalogue as a fallback, while Supabase is the source
+  // of truth for products that have the same slug or exist only in Supabase.
   const bySlug = new Map<string, Product>();
   for (const p of fallbackProducts) bySlug.set(p.slug, p);
   for (const p of remote) if (p?.slug) bySlug.set(p.slug, p);
@@ -21,21 +20,47 @@ function mergeProducts(remote: Product[]): Product[] {
 
 function Shop() {
   const [productList, setProductList] = useState<Product[]>(fallbackProducts);
+
   useEffect(() => {
     let active = true;
+
     async function loadSupabaseProducts() {
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || "https://ilfwenfvgqpuronobsbq.supabase.co";
+      const publishableKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+
+      if (!publishableKey) {
+        console.error("Supabase products: missing VITE_SUPABASE_PUBLISHABLE_KEY");
+        return;
+      }
+
       try {
-        const { data, error } = await supabase
-          .from("products")
-          .select("*")
-          .order("created_at", { ascending: true });
-        if (error) throw error;
-        const remoteProducts = (data ?? []) as Product[];
-        if (active && remoteProducts.length) setProductList(mergeProducts(remoteProducts));
+        // Read products directly from the public Supabase REST endpoint.
+        // The products table has a public SELECT RLS policy, so no service-role
+        // key or admin authentication is required for the storefront.
+        const response = await fetch(
+          `${supabaseUrl}/rest/v1/products?select=*&order=created_at.asc`,
+          {
+            headers: {
+              apikey: publishableKey,
+              Authorization: `Bearer ${publishableKey}`,
+            },
+          },
+        );
+
+        if (!response.ok) {
+          const body = await response.text().catch(() => "");
+          throw new Error(`Supabase products request failed (${response.status}): ${body}`);
+        }
+
+        const remoteProducts = (await response.json()) as Product[];
+        if (active && Array.isArray(remoteProducts)) {
+          setProductList(mergeProducts(remoteProducts));
+        }
       } catch (error) {
         console.error("Supabase products unavailable; using bundled catalogue:", error);
       }
     }
+
     loadSupabaseProducts();
     return () => { active = false; };
   }, []);
