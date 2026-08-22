@@ -40,9 +40,9 @@ export function Footer() {
               <li className="flex gap-2"><i className="fas fa-envelope text-gold mt-1" /> retronaturalproducts@gmail.com</li>
             </ul>
             <div className="flex gap-3 mt-4">
-              <a href="#" className="h-9 w-9 grid place-items-center rounded-full border border-gold/40 hover:bg-gold hover:text-brand transition"><i className="fab fa-instagram" /></a>
+              <a href="https://www.instagram.com/retro.natural.products?igsi=MXhjdGljdDY1dmhuaw==" target="_blank" rel="noreferrer" className="h-9 w-9 grid place-items-center rounded-full border border-gold/40 hover:bg-gold hover:text-brand transition"><i className="fab fa-instagram" /></a>
               <a href="#" className="h-9 w-9 grid place-items-center rounded-full border border-gold/40 hover:bg-gold hover:text-brand transition"><i className="fab fa-facebook-f" /></a>
-              <a href="#" className="h-9 w-9 grid place-items-center rounded-full border border-gold/40 hover:bg-gold hover:text-brand transition"><i className="fab fa-whatsapp" /></a>
+              <a href="https://wa.me/918121273912" target="_blank" rel="noreferrer" className="h-9 w-9 grid place-items-center rounded-full border border-gold/40 hover:bg-gold hover:text-brand transition"><i className="fab fa-whatsapp" /></a>
             </div>
           </div>
         </div>
