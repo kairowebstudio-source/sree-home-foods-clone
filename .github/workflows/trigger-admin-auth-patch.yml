@@ -1,0 +1,238 @@
+name: Trigger Admin Auth Patch
+
+# Admin authentication migration workflow. Runs on main pushes and applies the
+# Supabase email/password admin setup without touching products, payments, or images.
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: ${{ !startsWith(github.event.head_commit.message, '[admin-auth-setup]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Wait for earlier bootstrap workflow
+        run: sleep 45
+      - name: Apply admin authentication
+        run: |
+          python3 <<'PY'
+          from pathlib import Path
+          import re
+
+          # Restore the repository's existing Supabase middleware configuration.
+          Path('src/start.ts').write_text('''import { createStart, createMiddleware } from "@tanstack/react-start";
+
+          import { renderErrorPage } from "./lib/error-page";
+          import { attachSupabaseAuth } from "@/integrations/supabase/auth-attacher";
+
+          const errorMiddleware = createMiddleware().server(async ({ next }) => {
+            try { return await next(); }
+            catch (error) {
+              if (error != null && typeof error === "object" && "statusCode" in error) throw error;
+              console.error(error);
+              return new Response(renderErrorPage(), { status: 500, headers: { "content-type": "text/html; charset=utf-8" } });
+            }
+          });
+
+          export const startInstance = createStart(() => ({
+            functionMiddleware: [attachSupabaseAuth],
+            requestMiddleware: [errorMiddleware],
+          }));
+          ''')
+
+          # Secure all admin server functions with the already-attached Supabase bearer token.
+          f = Path('src/lib/admin.server.ts')
+          p = f.read_text()
+          if 'getRequestHeader' not in p:
+              p = p.replace('import { createServerFn } from "@tanstack/react-start";\n', 'import { createServerFn } from "@tanstack/react-start";\nimport { getRequestHeader } from "@tanstack/react-start/server";\n', 1)
+          if 'const ADMIN_EMAILS = new Set' not in p:
+              legacy = '''export const adminLogin = createServerFn({ method: "POST" })
+            .validator((d: string) => d)
+            .handler(async ({ data }) => {
+              const expected = process.env.ADMIN_PASSWORD || "admin123";
+              if (data === expected) return { success: true as const };
+              return { success: false as const, error: "Invalid password" };
+            });
+          '''
+              guard = '''const ADMIN_EMAILS = new Set(["retronaturalproducts@gmail.com", "msantureddy177@gmail.com"]);
+
+          async function requireAdmin() {
+            const header = getRequestHeader("authorization");
+            if (!header?.startsWith("Bearer ")) throw new Error("Unauthorized");
+            const token = header.slice("Bearer ".length).trim();
+            const { data, error } = await supabaseAdmin().auth.getUser(token);
+            const email = data.user?.email?.trim().toLowerCase();
+            if (error || !email || !ADMIN_EMAILS.has(email)) throw new Error("Unauthorized");
+            return data.user;
+          }
+          '''
+              if legacy not in p: raise SystemExit('legacy adminLogin block not found')
+              p = p.replace(legacy, guard, 1)
+          guards = {
+            'export const getProducts = createServerFn({ method: "GET" }).handler(async () => {\n':'  await requireAdmin();\n',
+            'export const addProduct = createServerFn({ method: "POST" })\n  .validator((d: ProductInput) => d)\n  .handler(async ({ data }) => {\n':'    await requireAdmin();\n',
+            'export const updateProduct = createServerFn({ method: "POST" })\n  .validator((d: Product) => d)\n  .handler(async ({ data }) => {\n':'    await requireAdmin();\n',
+            'export const deleteProduct = createServerFn({ method: "POST" })\n  .validator((d: string) => d)\n  .handler(async ({ data }) => {\n':'    await requireAdmin();\n',
+            'export const getOrders = createServerFn({ method: "GET" }).handler(async () => {\n':'  await requireAdmin();\n',
+            'export const uploadProductImage = createServerFn({ method: "POST" })\n  .validator((d: { base64: string; filename: string; contentType: string }) => d)\n  .handler(async ({ data }) => {\n':'    await requireAdmin();\n',
+            'export const migrateDataUrlImages = createServerFn({ method: "POST" }).handler(async () => {\n':'  await requireAdmin();\n',
+            'export const getCategories = createServerFn({ method: "GET" }).handler(async () => {\n':'  await requireAdmin();\n',
+            'export const addCategory = createServerFn({ method: "POST" })\n  .validator((d: string) => d)\n  .handler(async ({ data }) => {\n':'    await requireAdmin();\n',
+            'export const deleteCategory = createServerFn({ method: "POST" })\n  .validator((d: string) => d)\n  .handler(async ({ data }) => {\n':'    await requireAdmin();\n',
+          }
+          for marker, guard in guards.items():
+              if marker in p and guard not in p[p.find(marker):p.find(marker)+len(marker)+50]: p = p.replace(marker, marker+guard, 1)
+          f.write_text(p)
+
+          # Replace legacy password-only login with Supabase Auth email/password and reset link.
+          f = Path('src/routes/admin.index.tsx')
+          p = f.read_text()
+          p = p.replace('import { getProducts, getOrders, addProduct, updateProduct, deleteProduct, adminLogin, uploadProductImage, migrateDataUrlImages, getCategories, addCategory, deleteCategory } from "@/lib/admin.server";', 'import { getProducts, getOrders, addProduct, updateProduct, deleteProduct, uploadProductImage, migrateDataUrlImages, getCategories, addCategory, deleteCategory } from "@/lib/admin.server";\nimport { supabase } from "@/integrations/supabase/client";', 1)
+          p = re.sub(r'const SESSION_KEY = "retro-admin-auth";\n\ntype Session = \{ authed: true; at: number \};\n\nfunction getSession\(\): Session \| null \{.*?\nfunction clearSession\(\) \{.*?\n\}\n\n', '', p, count=1, flags=re.S)
+
+          old = '''  const [authed, setAuthed] = useState(!!getSession());
+          const [password, setPassword] = useState("");
+          const [loginError, setLoginError] = useState("");
+          const [loggingIn, setLoggingIn] = useState(false);
+          '''
+          new = '''  const ADMIN_EMAILS = ["retronaturalproducts@gmail.com", "msantureddy177@gmail.com"];
+          const [authed, setAuthed] = useState(false);
+          const [authReady, setAuthReady] = useState(false);
+          const [email, setEmail] = useState("");
+          const [password, setPassword] = useState("");
+          const [loginError, setLoginError] = useState("");
+          const [loggingIn, setLoggingIn] = useState(false);
+          '''
+          if old not in p: raise SystemExit('legacy admin state not found')
+          p = p.replace(old, new, 1)
+
+          marker = '  // Load products when authed\n'
+          effect = '''  useEffect(() => {
+            let mounted = true;
+            const check = async () => {
+              const { data } = await supabase.auth.getSession();
+              const e = data.session?.user?.email?.toLowerCase();
+              if (!mounted) return;
+              if (e && ADMIN_EMAILS.includes(e)) setAuthed(true);
+              else if (data.session) await supabase.auth.signOut();
+              setAuthReady(true);
+            };
+            check();
+            const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
+              const e = session?.user?.email?.toLowerCase();
+              if (event === "PASSWORD_RECOVERY") {
+                const next = window.prompt("Enter your new admin password (8+ characters):");
+                if (next && next.length >= 8) supabase.auth.updateUser({ password: next }).then(({ error }) => {
+                  if (error) setLoginError(error.message); else setAuthed(true);
+                });
+              } else if (session && e && ADMIN_EMAILS.includes(e)) setAuthed(true);
+              else if (!session) setAuthed(false);
+              setAuthReady(true);
+            });
+            return () => { mounted = false; listener.subscription.unsubscribe(); };
+          }, []);
+
+          // Load products when authed
+'''
+          if marker not in p: raise SystemExit('load marker missing')
+          p = p.replace(marker, effect, 1)
+
+          old_handlers = '''  // Login handler
+          const handleLogin = async (e: React.FormEvent) => {
+            e.preventDefault();
+            setLoggingIn(true);
+            setLoginError("");
+            try {
+              const res = await adminLogin({ data: password });
+              if (res.success) {
+                setSession();
+                setAuthed(true);
+              } else {
+                setLoginError("Incorrect password. Try again.");
+              }
+            } catch {
+              setLoginError("Something went wrong. Try again.");
+            } finally {
+              setLoggingIn(false);
+            }
+          };
+
+          const handleLogout = () => {
+            clearSession();
+            setAuthed(false);
+            router.invalidate();
+          };
+'''
+          handlers = '''  const handleLogin = async (e: React.FormEvent) => {
+            e.preventDefault(); setLoggingIn(true); setLoginError("");
+            try {
+              const normalizedEmail = email.trim().toLowerCase();
+              if (!ADMIN_EMAILS.includes(normalizedEmail)) throw new Error("This email is not authorized for admin access.");
+              const { data, error } = await supabase.auth.signInWithPassword({ email: normalizedEmail, password });
+              if (error || !data.user) throw new Error(error?.message || "Invalid email or password.");
+              if (!data.user.email || !ADMIN_EMAILS.includes(data.user.email.toLowerCase())) { await supabase.auth.signOut(); throw new Error("This email is not authorized for admin access."); }
+              setAuthed(true); setPassword("");
+            } catch (err) { setLoginError(err instanceof Error ? err.message : "Unable to sign in."); }
+            finally { setLoggingIn(false); }
+          };
+
+          const handleForgotPassword = async () => {
+            setLoginError("");
+            try {
+              const normalizedEmail = email.trim().toLowerCase();
+              if (!ADMIN_EMAILS.includes(normalizedEmail)) throw new Error("Enter an authorized admin email address first.");
+              const { error } = await supabase.auth.resetPasswordForEmail(normalizedEmail, { redirectTo: `${window.location.origin}/admin` });
+              if (error) throw error;
+              alert("Password reset link sent. Check the admin email inbox.");
+            } catch (err) { setLoginError(err instanceof Error ? err.message : "Unable to send reset email."); }
+          };
+
+          const handleLogout = async () => { await supabase.auth.signOut(); setAuthed(false); router.invalidate(); };
+'''
+          if old_handlers not in p: raise SystemExit('legacy handlers missing')
+          p = p.replace(old_handlers, handlers, 1)
+
+          start = p.find('  // ── Login Screen ──\n\n  if (!authed) {')
+          end = p.find('  // ── Dashboard ──', start)
+          if start < 0 or end < 0: raise SystemExit('login screen bounds missing')
+          ui = '''  // ── Login Screen ──
+          if (!authReady) return <div className="min-h-screen bg-background grid place-items-center"><i className="fas fa-spinner fa-spin text-brand" /></div>;
+          if (!authed) return (
+            <div className="min-h-screen bg-background grid place-items-center p-4"><div className="w-full max-w-sm">
+              <form onSubmit={handleLogin} className="bg-cream rounded-2xl border border-gold/30 shadow-xl p-8 space-y-6">
+                <div className="text-center"><Link to="/" className="inline-block mb-4"><img src="/media/33191-removebg-preview.png" alt="Retro Natural Products" className="h-16 w-auto mx-auto" /></Link><h1 className="font-display text-2xl text-brand">Admin Access</h1><p className="text-sm text-foreground/60 mt-1">Sign in with your authorized admin account.</p></div>
+                {loginError && <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg px-4 py-3 text-sm"><i className="fas fa-exclamation-circle mr-2" />{loginError}</div>}
+                <div><label className="block text-xs uppercase tracking-wider font-semibold text-foreground/70 mb-1.5">Admin Email</label><input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="retronaturalproducts@gmail.com" autoComplete="username" className="w-full rounded-lg border border-border bg-white px-4 py-3 text-sm" autoFocus /></div>
+                <div><label className="block text-xs uppercase tracking-wider font-semibold text-foreground/70 mb-1.5">Password</label><input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Enter admin password" autoComplete="current-password" className="w-full rounded-lg border border-border bg-white px-4 py-3 text-sm" /></div>
+                <button type="submit" disabled={loggingIn} className="w-full rounded-full bg-brand text-brand-foreground py-3 font-bold uppercase tracking-wider text-sm disabled:opacity-50">{loggingIn ? "Signing in..." : "Sign In"}</button>
+                <button type="button" onClick={handleForgotPassword} className="w-full text-xs text-brand font-semibold hover:underline">Forgot password? Send reset link</button>
+                <div className="text-center"><Link to="/" className="text-xs text-foreground/50 hover:text-brand"><i className="fas fa-arrow-left mr-1" />Back to site</Link></div>
+              </form>
+            </div></div>
+          );
+
+'''
+          p = p[:start] + ui + p[end:]
+          f.write_text(p)
+          PY
+
+      - name: Verify
+        run: |
+          grep -q 'attachSupabaseAuth' src/start.ts
+          grep -q 'ADMIN_EMAILS' src/lib/admin.server.ts
+          grep -q 'signInWithPassword' src/routes/admin.index.tsx
+          grep -q 'resetPasswordForEmail' src/routes/admin.index.tsx
+          ! grep -q 'adminLogin' src/routes/admin.index.tsx
+
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/start.ts src/lib/admin.server.ts src/routes/admin.index.tsx
+          git diff --cached --quiet || git commit -m "[admin-auth-setup] Apply Supabase email admin login"
+          git push
