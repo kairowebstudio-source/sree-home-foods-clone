@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { type Product, categories, priceRange, getVariants, products as fallbackProducts } from "@/lib/products";
-import { getProducts } from "@/lib/admin.server";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/shop/")({
   head: () => ({ meta: [{ title: "Shop — Retro Natural Products" }, { name: "description", content: "Browse our full range of natural powders, spices, raw honey and traditional Andhra foods." }] }),
@@ -11,7 +11,8 @@ export const Route = createFileRoute("/shop/")({
 });
 
 function mergeProducts(remote: Product[]): Product[] {
-  // Always keep the original bundled catalogue. Admin/Supabase products override by slug.
+  // Always keep the original bundled catalogue. Supabase products override by slug,
+  // while products that exist only in Supabase are added to the storefront too.
   const bySlug = new Map<string, Product>();
   for (const p of fallbackProducts) bySlug.set(p.slug, p);
   for (const p of remote) if (p?.slug) bySlug.set(p.slug, p);
@@ -22,9 +23,20 @@ function Shop() {
   const [productList, setProductList] = useState<Product[]>(fallbackProducts);
   useEffect(() => {
     let active = true;
-    getProducts().then((remoteProducts) => {
-      if (active && Array.isArray(remoteProducts)) setProductList(mergeProducts(remoteProducts));
-    }).catch((error) => console.error("Product API unavailable; using bundled catalogue:", error));
+    async function loadSupabaseProducts() {
+      try {
+        const { data, error } = await supabase
+          .from("products")
+          .select("*")
+          .order("created_at", { ascending: true });
+        if (error) throw error;
+        const remoteProducts = (data ?? []) as Product[];
+        if (active && remoteProducts.length) setProductList(mergeProducts(remoteProducts));
+      } catch (error) {
+        console.error("Supabase products unavailable; using bundled catalogue:", error);
+      }
+    }
+    loadSupabaseProducts();
     return () => { active = false; };
   }, []);
 
