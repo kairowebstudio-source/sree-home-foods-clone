@@ -63,7 +63,7 @@ function Home() {
               <i className="fas fa-shopping-bag" /> Shop Now
             </Link>
             <Link
-              to="/contact"
+              to="/about"
               className="inline-flex items-center gap-2 rounded-full border-2 border-cream/60 text-cream px-7 py-3 font-bold uppercase tracking-wider text-sm hover:bg-cream hover:text-brand transition"
             >
               <i className="fas fa-play-circle" /> Our Story
