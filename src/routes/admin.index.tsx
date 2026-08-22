@@ -596,8 +596,9 @@ function AdminPage() {
         return;
       }
       setAuthed(true);
-    } catch {
-      setLoginError("Something went wrong. Try again.");
+    } catch (err) {
+      console.error("Admin login error:", err);
+      setLoginError(err instanceof Error ? err.message : "Something went wrong. Try again.");
     } finally {
       setLoggingIn(false);
     }
