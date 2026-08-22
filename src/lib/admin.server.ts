@@ -1,5 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
-import { timingSafeEqual } from "node:crypto";
+import { timingSafeEqual, createHash } from "node:crypto";
 import type { Product } from "./products";
 import { products as fallbackProducts } from "./products";
 import { supabaseAdmin, supabaseEnabled } from "./supabase.server";
@@ -30,7 +30,6 @@ export const adminLogin = createServerFn({ method: "POST" })
       return { success: false as const, error: "Invalid email or password." };
     }
     // Generate a session token from the credentials.
-    const { createHash } = await import("node:crypto");
     const token = createHash("sha256").update(`${ADMIN_EMAIL}:${ADMIN_PASSWORD}:retro-session`).digest("hex");
     return { success: true as const, token };
   });
@@ -49,7 +48,6 @@ export const adminLogout = createServerFn({ method: "POST" }).handler(async () =
 // ── requireAdmin() — validates server session for admin operations ──
 // Reads the admin token from the cookie (automatically sent by the browser).
 function getExpectedToken(): string {
-  const { createHash } = require("node:crypto");
   return createHash("sha256").update(`${ADMIN_EMAIL}:${ADMIN_PASSWORD}:retro-session`).digest("hex");
 }
 
