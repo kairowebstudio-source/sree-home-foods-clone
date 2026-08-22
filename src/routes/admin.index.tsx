@@ -580,7 +580,7 @@ function AdminPage() {
         setLoginError("Supabase is not configured. Check environment variables.");
         return;
       }
-      const { error } = await sb.auth.signInWithPassword({
+      const { data, error } = await sb.auth.signInWithPassword({
         email: email.trim().toLowerCase(),
         password,
       });
@@ -588,8 +588,8 @@ function AdminPage() {
         setLoginError(error.message || "Invalid email or password. Try again.");
         return;
       }
-      // Verify the signed-in email is in the allowed list
-      const user = (await sb.auth.getUser()).data.user;
+      // Use the user returned directly from signInWithPassword — no extra request.
+      const user = data.user;
       if (!user || !ALLOWED_ADMIN_EMAILS.has((user.email ?? "").toLowerCase())) {
         await sb.auth.signOut();
         setLoginError("Access denied. This email is not authorized for admin access.");
