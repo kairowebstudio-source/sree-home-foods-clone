@@ -1,31 +1,27 @@
 import { createServerFn } from "@tanstack/react-start";
-import { useSession } from "@tanstack/react-start/server";
-import { timingSafeEqual } from "node:crypto";
+import { getRequest } from "@tanstack/react-start/server";
 import type { Product } from "./products";
 import { products as fallbackProducts } from "./products";
 import { supabaseAdmin, supabaseEnabled } from "./supabase.server";
 
-type AdminSession = { isAdmin?: boolean };
-const DEFAULT_ADMIN_PASSWORD = "admin123";
-const DEFAULT_ADMIN_SESSION_SECRET = "retro-natural-products-admin-session-2026-7f3c9a2d-change-this-later";
-
-function adminSessionConfig() {
-  return {
-    password: process.env.ADMIN_SESSION_SECRET || DEFAULT_ADMIN_SESSION_SECRET,
-    name: "__Host-sree-admin",
-    maxAge: 60 * 60 * 8,
-    cookie: { httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: "lax" as const, path: "/" },
-  };
-}
+// Only these email addresses are allowed to access the admin dashboard.
+const ALLOWED_ADMIN_EMAILS = new Set([
+  "retronaturalproducts@gmail.com",
+  "msantureddy177@gmail.com",
+]);
 
 async function requireAdmin(): Promise<void> {
-  const session = await useSession<AdminSession>(adminSessionConfig());
-  if (session.data.isAdmin !== true) throw new Error("Unauthorized");
-}
-
-function safePasswordEqual(input: string, expected: string): boolean {
-  const a = Buffer.from(input, "utf8"); const b = Buffer.from(expected, "utf8");
-  return a.length === b.length && timingSafeEqual(a, b);
+  if (!supabaseEnabled()) throw new Error("Supabase is not configured.");
+  const request = getRequest();
+  const authHeader = request?.headers?.get("authorization");
+  if (!authHeader?.startsWith("Bearer ")) throw new Error("Unauthorized — no Supabase session");
+  const token = authHeader.slice(7);
+  if (!token) throw new Error("Unauthorized — empty token");
+  const client = supabaseAdmin();
+  const { data, error } = await client.auth.getUser(token);
+  if (error || !data?.user) throw new Error("Unauthorized — invalid token");
+  const email = (data.user.email ?? "").toLowerCase();
+  if (!ALLOWED_ADMIN_EMAILS.has(email)) throw new Error("Access denied — not an admin account");
 }
 
 export const getProducts = createServerFn({ method: "GET" }).handler(async () => {
@@ -40,16 +36,13 @@ export const getProducts = createServerFn({ method: "GET" }).handler(async () =>
 });
 
 export const adminLogin = createServerFn({ method: "POST" }).validator((d: string) => d).handler(async ({ data }) => {
-  // Keep the original admin login exactly as requested: admin123.
-  const expected = DEFAULT_ADMIN_PASSWORD;
-  if (!safePasswordEqual(data, expected)) return { success: false as const, error: "Invalid password" };
-  const session = await useSession<AdminSession>(adminSessionConfig());
-  await session.update({ isAdmin: true });
-  return { success: true as const };
+  // Deprecated: admin login now uses Supabase Auth on the client side.
+  return { success: false as const, error: "Use Supabase Auth to sign in." };
 });
 
 export const adminLogout = createServerFn({ method: "POST" }).handler(async () => {
-  const session = await useSession<AdminSession>(adminSessionConfig()); await session.clear(); return { success: true as const };
+  // Deprecated: admin logout now uses supabase.auth.signOut() on the client side.
+  return { success: true as const };
 });
 
 type ProductInput = { slug: string; name: string; tagline: string; category: string; weight: string; price: number; mrp?: number; variants?: { weight: string; price: number; mrp?: number }[]; image: string; description: string; benefits: string[] };
