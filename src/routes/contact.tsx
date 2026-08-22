@@ -69,12 +69,10 @@ function Contact() {
                 <input name="phone" placeholder="Phone (optional)" className="w-full rounded-lg border border-border bg-white px-4 py-3 focus:outline-none focus:border-brand" />
                 <textarea required name="message" rows={5} placeholder="How can we help?" className="w-full rounded-lg border border-border bg-white px-4 py-3 focus:outline-none focus:border-brand" />
                 <button type="submit" className="w-full rounded-full bg-brand text-cream py-3 font-bold uppercase tracking-wider hover:opacity-90 transition"><i className="fab fa-whatsapp mr-2" />Send Message</button>
-              </form>
-              <div className="mt-4">
                 <a href="mailto:retronaturalproducts@gmail.com" className="w-full inline-flex items-center justify-center gap-2 rounded-full border-2 border-brand text-brand py-3 font-bold uppercase tracking-wider hover:bg-brand hover:text-cream transition">
                   <i className="fas fa-envelope" /> Email Us
                 </a>
-              </div>
+              </form>
             </div>
           </div>
         </section>

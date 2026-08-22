@@ -25,7 +25,7 @@ function Wholesale() {
       <section className="py-20 px-4">
         <div className="mx-auto max-w-5xl grid md:grid-cols-3 gap-6">
           {[
-            { i: "fa-boxes-stacked", t: "Bulk MOQ", d: "Starting at 20kg per SKU. Custom packing sizes on request." },
+            { i: "fa-boxes-stacked", t: "Bulk MOQ", d: "Starting at 20kg per SKU." },
             { i: "fa-tag", t: "Private Label", d: "We encourage new and young entrepreneurs. We manufacture and pack under your brand with your artwork." },
             { i: "fa-truck-fast", t: "Pan-India Dispatch", d: "Reliable, tracked shipments to stores and warehouses." },
           ].map((c) => (
