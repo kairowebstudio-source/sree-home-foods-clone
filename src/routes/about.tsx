@@ -147,7 +147,7 @@ function About() {
                   </div>
                   <div className="p-4 text-center">
                     <h3 className="font-display text-lg text-brand">{member.name}</h3>
-                    <p className="text-gold text-xs font-semibold uppercase tracking-wider mt-1">{member.role}</p>
+                    <p className="text-black text-xs font-semibold uppercase tracking-wider mt-1">{member.role}</p>
                     {member.location && (
                       <p className="text-foreground/60 text-xs mt-1 flex items-center justify-center gap-1">
                         <i className="fas fa-map-marker-alt text-gold/60" />
