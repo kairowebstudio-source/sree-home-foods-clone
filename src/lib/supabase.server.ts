@@ -5,15 +5,21 @@ import type { SupabaseClient } from "@supabase/supabase-js";
  * Server-only Supabase client.
  * Supports the newer secret key as well as the legacy service-role key.
  */
+function getSupabaseKey(): string | undefined {
+  return (
+    process.env.SUPABASE_SECRET_KEY ||
+    process.env.SUPABASE_SERVICE_ROLE_KEY ||
+    process.env.SUPABASE_ROLE_KEY
+  );
+}
+
 export function supabaseAdmin(): SupabaseClient {
   const configuredUrl = process.env.SUPABASE_URL?.trim();
   const url = configuredUrl && configuredUrl.includes("iifwenfvggpurohobsbq")
     ? configuredUrl
     : "https://iifwenfvggpurohobsbq.supabase.co";
 
-  const key = process.env.SUPABASE_SECRET_KEY
-    || process.env.SUPABASE_SERVICE_ROLE_KEY
-    || process.env.SUPABASE_ROLE_KEY;
+  const key = getSupabaseKey();
 
   if (!key) {
     throw new Error("Missing Supabase server key. Set SUPABASE_SECRET_KEY or SUPABASE_SERVICE_ROLE_KEY in Vercel.");
@@ -35,9 +41,5 @@ export function supabaseAdmin(): SupabaseClient {
 
 /** Returns true when the deployed Supabase server environment is configured. */
 export function supabaseEnabled(): boolean {
-  return Boolean(
-    process.env.SUPABASE_SECRET_KEY
-    || process.env.SUPABASE_SERVICE_ROLE_KEY
-    || process.env.SUPABASE_ROLE_KEY,
-  );
+  return Boolean(getSupabaseKey());
 }

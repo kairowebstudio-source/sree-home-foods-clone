@@ -35,6 +35,7 @@ export type Database = {
           razorpay_order_id: string | null
           razorpay_payment_id: string | null
           razorpay_signature: string | null
+          updated_at: string
         }
         Insert: {
           address?: string
@@ -54,6 +55,7 @@ export type Database = {
           razorpay_order_id?: string | null
           razorpay_payment_id?: string | null
           razorpay_signature?: string | null
+          updated_at?: string
         }
         Update: {
           address?: string
@@ -73,6 +75,7 @@ export type Database = {
           razorpay_order_id?: string | null
           razorpay_payment_id?: string | null
           razorpay_signature?: string | null
+          updated_at?: string
         }
         Relationships: []
       }
