@@ -105,9 +105,10 @@ function Checkout() {
           alert("We couldn't start the payment. Your order is saved as pending. Please retry or contact us.");
         }
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error("Order submission failed:", err);
-      alert("Something went wrong while placing your order. Please try again or contact us via WhatsApp.");
+      const msg = err?.message || err?.toString() || "Unknown error";
+      alert(`Order failed: ${msg}\n\nPlease try again or contact us via WhatsApp.`);
     } finally {
       setSubmitting(false);
     }
