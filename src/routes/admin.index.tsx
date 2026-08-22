@@ -1,29 +1,10 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { useEffect, useState, useCallback, useRef } from "react";
-import { getProducts, getOrders, addProduct, updateProduct, deleteProduct, uploadProductImage, migrateDataUrlImages, getCategories, addCategory, deleteCategory } from "@/lib/admin.server";
-import type { SupabaseClient } from "@supabase/supabase-js";
-import type { Session } from "@supabase/supabase-js";
+import { getProducts, getOrders, addProduct, updateProduct, deleteProduct, uploadProductImage, migrateDataUrlImages, getCategories, addCategory, deleteCategory, adminLogin, validateAdminSession } from "@/lib/admin.server";
 import { getVariants } from "@/lib/products";
 import type { Product, Variant } from "@/lib/products";
 
-// Only these email addresses are allowed to access the admin dashboard.
-const ALLOWED_ADMIN_EMAILS = new Set([
-  "retronaturalproducts@gmail.com",
-  "msantureddy177@gmail.com",
-]);
 
-// Lazy-init supabase client — avoids crashing during SSR when env vars are missing.
-let _supabaseMod: { supabase: SupabaseClient } | null = null;
-async function loadSupabase(): Promise<SupabaseClient | null> {
-  if (_supabaseMod) return _supabaseMod.supabase;
-  if (typeof window === "undefined") return null;
-  try {
-    _supabaseMod = await import("@/integrations/supabase/client");
-    return _supabaseMod.supabase;
-  } catch {
-    return null;
-  }
-}
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString("en-IN", {
@@ -436,35 +417,23 @@ function AdminPage() {
   const [password, setPassword] = useState("");
   const [loginError, setLoginError] = useState("");
   const [loggingIn, setLoggingIn] = useState(false);
-  const [loginMode, setLoginMode] = useState<"login" | "forgot">("login");
-  const [resetSent, setResetSent] = useState(false);
-  const [resetLoading, setResetLoading] = useState(false);
-
-  // Check Supabase auth session on mount
+  // Check session on mount via server-side token validation
   useEffect(() => {
     let mounted = true;
-    let unsub: (() => void) | undefined;
     (async () => {
       try {
-        const sb = await loadSupabase();
-        if (!sb || !mounted) { setAuthChecking(false); return; }
-        const { data } = await sb.auth.getSession();
-        if (!mounted) return;
-        const user = data.session?.user;
-        if (user && ALLOWED_ADMIN_EMAILS.has((user.email ?? "").toLowerCase())) {
-          setAuthed(true);
+        const token = sessionStorage.getItem("admin_token");
+        if (token && mounted) {
+          const valid = await validateAdminSession({ data: token });
+          if (mounted && valid) setAuthed(true);
         }
-        setAuthChecking(false);
-        const { data: { subscription } } = sb.auth.onAuthStateChange((_event, session) => {
-          const user = session?.user;
-          setAuthed(!!(user && ALLOWED_ADMIN_EMAILS.has((user.email ?? "").toLowerCase())));
-        });
-        unsub = () => subscription.unsubscribe();
       } catch {
-        setAuthChecking(false);
+        // Invalid token — stay on login
+      } finally {
+        if (mounted) setAuthChecking(false);
       }
     })();
-    return () => { mounted = false; unsub?.(); };
+    return () => { mounted = false; };
   }, []);
 
   // Tab state
@@ -569,32 +538,19 @@ function AdminPage() {
     })();
   }, [authed, tab]);
 
-  // Login handler — uses Supabase Auth email/password
+  // Login handler — validates credentials via server function
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoggingIn(true);
     setLoginError("");
     try {
-      const sb = await loadSupabase();
-      if (!sb) {
-        setLoginError("Supabase is not configured. Check environment variables.");
+      const result = await adminLogin({ data: { email: email.trim().toLowerCase(), password } });
+      if (!result.success) {
+        setLoginError(result.error);
         return;
       }
-      const { data, error } = await sb.auth.signInWithPassword({
-        email: email.trim().toLowerCase(),
-        password,
-      });
-      if (error) {
-        setLoginError(error.message || "Invalid email or password. Try again.");
-        return;
-      }
-      // Use the user returned directly from signInWithPassword — no extra request.
-      const user = data.user;
-      if (!user || !ALLOWED_ADMIN_EMAILS.has((user.email ?? "").toLowerCase())) {
-        await sb.auth.signOut();
-        setLoginError("Access denied. This email is not authorized for admin access.");
-        return;
-      }
+      sessionStorage.setItem("admin_token", result.token);
+      document.cookie = `admin_session=${result.token}; path=/; max-age=86400; SameSite=Lax`;
       setAuthed(true);
     } catch (err) {
       console.error("Admin login error:", err);
@@ -604,36 +560,12 @@ function AdminPage() {
     }
   };
 
-  // Forgot Password handler
-  const handleForgotPassword = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setResetLoading(true);
-    setLoginError("");
-    try {
-      const sb2 = await loadSupabase();
-      if (!sb2) {
-        setLoginError("Supabase is not configured. Check environment variables.");
-        return;
-      }
-      const { error } = await sb2.auth.resetPasswordForEmail(email.trim().toLowerCase(), {
-        redirectTo: `${window.location.origin}/admin`,
-      });
-      if (error) {
-        setLoginError(error.message || "Failed to send reset email.");
-      } else {
-        setResetSent(true);
-      }
-    } catch {
-      setLoginError("Something went wrong. Try again.");
-    } finally {
-      setResetLoading(false);
-    }
-  };
-
-  const handleLogout = async () => {
-    const sb = await loadSupabase();
-    await sb?.auth.signOut();
+  const handleLogout = () => {
+    sessionStorage.removeItem("admin_token");
+    document.cookie = "admin_session=; path=/; max-age=0";
     setAuthed(false);
+    setEmail("");
+    setPassword("");
     router.invalidate();
   };
 
@@ -728,7 +660,7 @@ function AdminPage() {
               </Link>
               <h1 className="font-display text-2xl text-brand">Admin Access</h1>
               <p className="text-sm text-foreground/60 mt-1">
-                {loginMode === "login" ? "Sign in with your email and password" : "Reset your password"}
+                Sign in with your email and password
               </p>
             </div>
 
@@ -738,12 +670,7 @@ function AdminPage() {
               </div>
             )}
 
-            {resetSent && loginMode === "forgot" ? (
-              <div className="bg-green-50 border border-green-200 text-green-700 rounded-lg px-4 py-3 text-sm flex items-center gap-2">
-                <i className="fas fa-check-circle" /> Check your email for the password reset link.
-              </div>
-            ) : (
-              <form onSubmit={loginMode === "login" ? handleLogin : handleForgotPassword} className="space-y-5">
+            <form onSubmit={handleLogin} className="space-y-5">
                 <div>
                   <label className="block text-xs uppercase tracking-wider font-semibold text-foreground/70 mb-1.5">Email</label>
                   <input
@@ -757,53 +684,28 @@ function AdminPage() {
                   />
                 </div>
 
-                {loginMode === "login" && (
-                  <div>
-                    <label className="block text-xs uppercase tracking-wider font-semibold text-foreground/70 mb-1.5">Password</label>
-                    <input
-                      type="password"
-                      required
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      placeholder="Enter your password"
-                      className="w-full rounded-lg border border-border bg-white px-4 py-3 text-sm focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand/30"
-                    />
-                  </div>
-                )}
-
-                <button
+                <div>
+                  <label className="block text-xs uppercase tracking-wider font-semibold text-foreground/70 mb-1.5">Password</label>
+                  <input
+                    type="password"
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Enter your password"
+                    className="w-full rounded-lg border border-border bg-white px-4 py-3 text-sm focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand/30"
+                  />
+                </div>                <button
                   type="submit"
-                  disabled={loggingIn || resetLoading}
+                  disabled={loggingIn}
                   className="w-full rounded-full bg-brand text-brand-foreground py-3 font-bold uppercase tracking-wider text-sm hover:opacity-90 transition disabled:opacity-50 flex items-center justify-center gap-2"
                 >
-                  {loggingIn || resetLoading ? (
-                    <><i className="fas fa-spinner fa-spin" /> {loginMode === "login" ? "Verifying..." : "Sending..."}</>
+                  {loggingIn ? (
+                    <><i className="fas fa-spinner fa-spin" /> Verifying...</>
                   ) : (
-                    <><i className="fas fa-lock-open" /> {loginMode === "login" ? "Sign In" : "Send Reset Link"}</>
+                    <><i className="fas fa-lock-open" /> Sign In</>
                   )}
                 </button>
-
-                <div className="text-center space-y-2">
-                  {loginMode === "login" ? (
-                    <button
-                      type="button"
-                      onClick={() => { setLoginMode("forgot"); setLoginError(""); setResetSent(false); }}
-                      className="text-xs text-brand hover:underline"
-                    >
-                      Forgot your password?
-                    </button>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={() => { setLoginMode("login"); setLoginError(""); setResetSent(false); }}
-                      className="text-xs text-brand hover:underline"
-                    >
-                      <i className="fas fa-arrow-left mr-1" /> Back to sign in
-                    </button>
-                  )}
-                </div>
               </form>
-            )}
 
             <div className="text-center">
               <Link to="/" className="text-xs text-foreground/50 hover:text-brand transition">

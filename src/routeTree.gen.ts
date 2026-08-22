@@ -22,6 +22,7 @@ import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as ShopSlugRouteImport } from './routes/shop.$slug'
 import { Route as CheckoutSuccessRouteImport } from './routes/checkout.success'
 import { Route as ApiRazorpayWebhookRouteImport } from './routes/api/razorpay-webhook'
+import { Route as ApiAdminAuthRouteImport } from './routes/api/admin-auth'
 
 const WholesaleRoute = WholesaleRouteImport.update({
   id: '/wholesale',
@@ -88,6 +89,11 @@ const ApiRazorpayWebhookRoute = ApiRazorpayWebhookRouteImport.update({
   path: '/api/razorpay-webhook',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAdminAuthRoute = ApiAdminAuthRouteImport.update({
+  id: '/api/admin-auth',
+  path: '/api/admin-auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -98,6 +104,7 @@ export interface FileRoutesByFullPath {
   '/shipping': typeof ShippingRoute
   '/terms': typeof TermsRoute
   '/wholesale': typeof WholesaleRoute
+  '/api/admin-auth': typeof ApiAdminAuthRoute
   '/api/razorpay-webhook': typeof ApiRazorpayWebhookRoute
   '/checkout/success': typeof CheckoutSuccessRoute
   '/shop/$slug': typeof ShopSlugRoute
@@ -113,6 +120,7 @@ export interface FileRoutesByTo {
   '/shipping': typeof ShippingRoute
   '/terms': typeof TermsRoute
   '/wholesale': typeof WholesaleRoute
+  '/api/admin-auth': typeof ApiAdminAuthRoute
   '/api/razorpay-webhook': typeof ApiRazorpayWebhookRoute
   '/checkout/success': typeof CheckoutSuccessRoute
   '/shop/$slug': typeof ShopSlugRoute
@@ -129,6 +137,7 @@ export interface FileRoutesById {
   '/shipping': typeof ShippingRoute
   '/terms': typeof TermsRoute
   '/wholesale': typeof WholesaleRoute
+  '/api/admin-auth': typeof ApiAdminAuthRoute
   '/api/razorpay-webhook': typeof ApiRazorpayWebhookRoute
   '/checkout/success': typeof CheckoutSuccessRoute
   '/shop/$slug': typeof ShopSlugRoute
@@ -146,6 +155,7 @@ export interface FileRouteTypes {
     | '/shipping'
     | '/terms'
     | '/wholesale'
+    | '/api/admin-auth'
     | '/api/razorpay-webhook'
     | '/checkout/success'
     | '/shop/$slug'
@@ -161,6 +171,7 @@ export interface FileRouteTypes {
     | '/shipping'
     | '/terms'
     | '/wholesale'
+    | '/api/admin-auth'
     | '/api/razorpay-webhook'
     | '/checkout/success'
     | '/shop/$slug'
@@ -176,6 +187,7 @@ export interface FileRouteTypes {
     | '/shipping'
     | '/terms'
     | '/wholesale'
+    | '/api/admin-auth'
     | '/api/razorpay-webhook'
     | '/checkout/success'
     | '/shop/$slug'
@@ -192,6 +204,7 @@ export interface RootRouteChildren {
   ShippingRoute: typeof ShippingRoute
   TermsRoute: typeof TermsRoute
   WholesaleRoute: typeof WholesaleRoute
+  ApiAdminAuthRoute: typeof ApiAdminAuthRoute
   ApiRazorpayWebhookRoute: typeof ApiRazorpayWebhookRoute
   ShopSlugRoute: typeof ShopSlugRoute
   AdminIndexRoute: typeof AdminIndexRoute
@@ -291,6 +304,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiRazorpayWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/admin-auth': {
+      id: '/api/admin-auth'
+      path: '/api/admin-auth'
+      fullPath: '/api/admin-auth'
+      preLoaderRoute: typeof ApiAdminAuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -315,6 +335,7 @@ const rootRouteChildren: RootRouteChildren = {
   ShippingRoute: ShippingRoute,
   TermsRoute: TermsRoute,
   WholesaleRoute: WholesaleRoute,
+  ApiAdminAuthRoute: ApiAdminAuthRoute,
   ApiRazorpayWebhookRoute: ApiRazorpayWebhookRoute,
   ShopSlugRoute: ShopSlugRoute,
   AdminIndexRoute: AdminIndexRoute,

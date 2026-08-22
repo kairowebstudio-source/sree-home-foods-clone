@@ -1,28 +1,70 @@
 import { createServerFn } from "@tanstack/react-start";
-import { getRequest } from "@tanstack/react-start/server";
+import { timingSafeEqual } from "node:crypto";
 import type { Product } from "./products";
 import { products as fallbackProducts } from "./products";
 import { supabaseAdmin, supabaseEnabled } from "./supabase.server";
 
-// Only these email addresses are allowed to access the admin dashboard.
-const ALLOWED_ADMIN_EMAILS = new Set([
-  "retronaturalproducts@gmail.com",
-  "msantureddy177@gmail.com",
-]);
+// ── Simple admin authentication ────────────────────────────────
+// Credentials come from server-side environment variables.
+// Password is NEVER exposed to the client.
+
+const ADMIN_EMAIL = (process.env.ADMIN_EMAIL ?? "").toLowerCase();
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD ?? "";
+
+function timingSafeCompare(a: string, b: string): boolean {
+  const bufA = Buffer.from(a);
+  const bufB = Buffer.from(b);
+  if (bufA.length !== bufB.length) return false;
+  return timingSafeEqual(bufA, bufB);
+}
+
+export const adminLogin = createServerFn({ method: "POST" })
+  .validator((d: { email: string; password: string }) => d)
+  .handler(async ({ data }) => {
+    if (!ADMIN_EMAIL || !ADMIN_PASSWORD) {
+      throw new Error("Admin credentials are not configured. Set ADMIN_EMAIL and ADMIN_PASSWORD.");
+    }
+    const emailOk = timingSafeCompare(data.email.trim().toLowerCase(), ADMIN_EMAIL);
+    const passOk = timingSafeCompare(data.password, ADMIN_PASSWORD);
+    if (!emailOk || !passOk) {
+      return { success: false as const, error: "Invalid email or password." };
+    }
+    // Generate a session token from the credentials.
+    const { createHash } = await import("node:crypto");
+    const token = createHash("sha256").update(`${ADMIN_EMAIL}:${ADMIN_PASSWORD}:retro-session`).digest("hex");
+    return { success: true as const, token };
+  });
+
+export const validateAdminSession = createServerFn({ method: "GET" })
+  .validator((d: string) => d)
+  .handler(async ({ data: token }) => {
+    if (!ADMIN_EMAIL || !ADMIN_PASSWORD) return false;
+    return timingSafeCompare(token, getExpectedToken());
+  });
+
+export const adminLogout = createServerFn({ method: "POST" }).handler(async () => {
+  return { success: true as const };
+});
+
+// ── requireAdmin() — validates server session for admin operations ──
+// Reads the admin token from the cookie (automatically sent by the browser).
+function getExpectedToken(): string {
+  const { createHash } = require("node:crypto");
+  return createHash("sha256").update(`${ADMIN_EMAIL}:${ADMIN_PASSWORD}:retro-session`).digest("hex");
+}
 
 async function requireAdmin(): Promise<void> {
-  if (!supabaseEnabled()) throw new Error("Supabase is not configured.");
+  if (!ADMIN_EMAIL || !ADMIN_PASSWORD) throw new Error("Admin credentials are not configured.");
+  const { getRequest } = await import("@tanstack/react-start/server");
   const request = getRequest();
-  const authHeader = request?.headers?.get("authorization");
-  if (!authHeader?.startsWith("Bearer ")) throw new Error("Unauthorized — no Supabase session");
-  const token = authHeader.slice(7);
-  if (!token) throw new Error("Unauthorized — empty token");
-  const client = supabaseAdmin();
-  const { data, error } = await client.auth.getUser(token);
-  if (error || !data?.user) throw new Error("Unauthorized — invalid token");
-  const email = (data.user.email ?? "").toLowerCase();
-  if (!ALLOWED_ADMIN_EMAILS.has(email)) throw new Error("Access denied — not an admin account");
+  const cookie = request?.headers?.get("cookie") ?? "";
+  const match = cookie.match(/admin_session=([a-f0-9]+)/);
+  if (!match) throw new Error("Unauthorized — no admin session");
+  const token = match[1];
+  if (!timingSafeCompare(token, getExpectedToken())) throw new Error("Unauthorized — invalid session");
 }
+
+// ── Products ───────────────────────────────────────────────────
 
 export const getProducts = createServerFn({ method: "GET" }).handler(async () => {
   if (!supabaseEnabled()) return fallbackProducts;
@@ -35,16 +77,6 @@ export const getProducts = createServerFn({ method: "GET" }).handler(async () =>
   } catch { return fallbackProducts; }
 });
 
-export const adminLogin = createServerFn({ method: "POST" }).validator((d: string) => d).handler(async ({ data }) => {
-  // Deprecated: admin login now uses Supabase Auth on the client side.
-  return { success: false as const, error: "Use Supabase Auth to sign in." };
-});
-
-export const adminLogout = createServerFn({ method: "POST" }).handler(async () => {
-  // Deprecated: admin logout now uses supabase.auth.signOut() on the client side.
-  return { success: true as const };
-});
-
 type ProductInput = { slug: string; name: string; tagline: string; category: string; weight: string; price: number; mrp?: number; variants?: { weight: string; price: number; mrp?: number }[]; image: string; description: string; benefits: string[] };
 const NEEDS_ENV_MSG = "Set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY in Vercel env vars to save products.";
 function withSchemaHint(action: string, error: { message?: string }): string { if (error?.message && error.message.includes("in the schema cache")) return `${action}: ${error.message} — run the migrations in supabase/migrations/ in your Supabase project.`; return `${action}: ${error?.message ?? "unknown error"}`; }
@@ -54,6 +86,8 @@ export const addProduct = createServerFn({ method: "POST" }).validator((d: Produ
 export const updateProduct = createServerFn({ method: "POST" }).validator((d: Product) => d).handler(async ({ data }) => { await requireAdmin(); if (!supabaseEnabled()) throw new Error(NEEDS_ENV_MSG); const client = supabaseAdmin(); const incomingImage = (data.image ?? "").trim(); let imagePatch: string | undefined; if (incomingImage && !incomingImage.startsWith("data:")) imagePatch = incomingImage; else if (incomingImage.startsWith("data:")) { const { data: existing } = await client.from("products").select("image").eq("slug", data.slug).maybeSingle(); const stored = (existing?.image as string | null) ?? ""; if (stored !== incomingImage) { if (incomingImage.length > 1_500_000) throw new Error("Failed to update product: image is too large. Re-upload the image with a smaller file."); imagePatch = incomingImage; } } const { error } = await client.from("products").update({ name: data.name, tagline: data.tagline, category: data.category, weight: data.weight, price: data.price, mrp: data.mrp || null, variants: data.variants ?? [], ...(imagePatch !== undefined ? { image: imagePatch } : {}), description: data.description, benefits: data.benefits, updated_at: new Date().toISOString() }).eq("slug", data.slug); if (error) throw new Error(withSchemaHint("Failed to update product", error)); return data; });
 
 export const deleteProduct = createServerFn({ method: "POST" }).validator((d: string) => d).handler(async ({ data }) => { await requireAdmin(); if (!supabaseEnabled()) throw new Error(NEEDS_ENV_MSG); const client = supabaseAdmin(); const { error } = await client.from("products").delete().eq("slug", data); if (error) throw new Error(`Failed to delete product: ${error.message}`); return { success: true }; });
+
+// ── Orders ─────────────────────────────────────────────────────
 
 export type OrderData = { customer_name: string; phone: string; email: string; address: string; city: string; state?: string; pincode: string; notes: string; items: { slug: string; name: string; weight?: string; price: number; qty: number }[]; total?: number; method: "cod" | "online"; notify?: boolean };
 type Variant = { weight: string; price: number; mrp?: number };
@@ -67,13 +101,19 @@ export async function sendOrderConfirmationEmail(input: { orderId: string; custo
 
 export async function sendOwnerOrderNotificationEmail(input: { orderId: string; customerName: string; email: string; phone: string; address: string; items: { name: string; price: number; qty: number }[]; total: number; method: "cod" | "online"; paymentStatus: string }): Promise<void> { const apiKey = process.env.RESEND_API_KEY; const ownerEmail = process.env.OWNER_EMAIL || process.env.ADMIN_EMAIL; if (!apiKey || !ownerEmail) return; const rows = input.items.map((i) => `<tr><td style="padding:8px;border-bottom:1px solid #eee;">${escapeHtml(i.name)} × ${i.qty}</td><td style="padding:8px;border-bottom:1px solid #eee;text-align:right;">₹${(i.price * i.qty).toLocaleString("en-IN")}</td></tr>`).join(""); const html = `<div style="font-family:Arial,sans-serif;max-width:650px;margin:auto;"><h2>Sree Home Foods — New Order</h2><p><strong>Order:</strong> ${escapeHtml(input.orderId)}</p><p><strong>Customer:</strong> ${escapeHtml(input.customerName)}<br/><strong>Phone:</strong> ${escapeHtml(input.phone)}<br/><strong>Email:</strong> ${escapeHtml(input.email)}<br/><strong>Address:</strong> ${escapeHtml(input.address)}<br/><strong>Payment:</strong> ${escapeHtml(input.method)} / ${escapeHtml(input.paymentStatus)}</p><table style="width:100%;border-collapse:collapse;">${rows}<tr><td style="padding:10px;font-weight:bold;">Total</td><td style="padding:10px;text-align:right;font-weight:bold;">₹${input.total.toLocaleString("en-IN")}</td></tr></table></div>`; const { Resend } = await import("resend"); const resend = new Resend(apiKey); const from = process.env.EMAIL_FROM || "Sree Home Foods <onboarding@resend.dev>"; const { error } = await resend.emails.send({ from, to: ownerEmail, subject: `New Sree Home Foods Order — ${input.orderId.slice(0, 8).toUpperCase()}`, html }); if (error) throw new Error(error.message); }
 
-function escapeHtml(s: string): string { return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\"/g, "&quot;").replace(/'/g, "&#39;"); }
+function escapeHtml(s: string): string { return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;"); }
+
+// ── Orders (admin) ────────────────────────────────────────────
 
 export const getOrders = createServerFn({ method: "GET" }).handler(async () => { await requireAdmin(); if (!supabaseEnabled()) return []; const client = supabaseAdmin(); const { data, error } = await client.from("orders").select("*").order("created_at", { ascending: false }); if (error) throw new Error(`Failed to load orders: ${error.message}`); return data || []; });
+
+// ── Image upload ───────────────────────────────────────────────
 
 export const uploadProductImage = createServerFn({ method: "POST" }).validator((d: { base64: string; filename: string; contentType: string }) => d).handler(async ({ data }) => { await requireAdmin(); if (data.base64.length > 3_000_000) throw new Error("Image is still too large after compression. Please use a JPG or PNG under 2MB."); if (!supabaseEnabled()) return { url: `data:${data.contentType};base64,${data.base64}` }; const client = supabaseAdmin(); const bucketName = "product-images"; const { data: buckets } = await client.storage.listBuckets(); const exists = buckets?.some((b) => b.name === bucketName); if (!exists) { const { error } = await client.storage.createBucket(bucketName, { public: false, fileSizeLimit: 5 * 1024 * 1024 }); if (error && !/already exists/i.test(error.message)) throw new Error(`Could not create image bucket: ${error.message}`); } const buffer = Buffer.from(data.base64, "base64"); const { error: uploadError } = await client.storage.from(bucketName).upload(data.filename, buffer, { contentType: data.contentType, upsert: true }); if (uploadError) throw new Error(`Storage rejected the upload: ${uploadError.message}`); const { data: signed, error: signError } = await client.storage.from(bucketName).createSignedUrl(data.filename, 60 * 60 * 24 * 365 * 10); if (signError || !signed?.signedUrl) throw new Error(`Could not create image URL: ${signError?.message ?? "unknown error"}`); return { url: signed.signedUrl }; });
 
 export const migrateDataUrlImages = createServerFn({ method: "POST" }).handler(async () => { await requireAdmin(); if (!supabaseEnabled()) throw new Error(NEEDS_ENV_MSG); const client = supabaseAdmin(); const { data: rows, error } = await client.from("products").select("slug, image").like("image", "data:%"); if (error) throw new Error(`Failed to load products: ${error.message}`); let migrated = 0; let failed = 0; for (const row of rows || []) { const image = (row.image as string) || ""; const match = image.match(/^data:([^;]+);base64,(.+)$/); if (!match) continue; const contentType = match[1] || "image/png"; const filename = `migrated-${row.slug}-${Date.now()}.png`; const { error: uploadError } = await client.storage.from("product-images").upload(filename, Buffer.from(match[2], "base64"), { contentType, upsert: true }); if (uploadError) { failed++; continue; } const { data: signed } = await client.storage.from("product-images").createSignedUrl(filename, 60 * 60 * 24 * 365 * 10); if (!signed?.signedUrl) { failed++; continue; } const { error: updateError } = await client.from("products").update({ image: signed.signedUrl, updated_at: new Date().toISOString() }).eq("slug", row.slug); if (updateError) { failed++; continue; } migrated++; } return { migrated, failed }; });
+
+// ── Categories ─────────────────────────────────────────────────
 
 const DEFAULT_CATEGORIES = ["Superfoods", "Spices", "Honey", "Dairy Foods", "Traditional"];
 export const getCategories = createServerFn({ method: "GET" }).handler(async () => { if (!supabaseEnabled()) return DEFAULT_CATEGORIES; try { const client = supabaseAdmin(); const { data, error } = await client.from("categories").select("name, sort_order, created_at").order("sort_order", { ascending: true }).order("created_at", { ascending: true }); if (error) throw new Error(error.message); const names = ((data as { name: string }[]) || []).map((c) => c.name); return names.length ? names : DEFAULT_CATEGORIES; } catch { return DEFAULT_CATEGORIES; } });
