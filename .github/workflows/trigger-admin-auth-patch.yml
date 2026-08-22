@@ -1,5 +1,8 @@
 name: Trigger Admin Auth Patch
 
+# Admin authentication migration workflow. Runs on main pushes and applies the
+# Supabase email/password admin setup without touching products, payments, or images.
+
 on:
   push:
     branches: [main]
@@ -172,6 +175,7 @@ jobs:
               if (!ADMIN_EMAILS.includes(normalizedEmail)) throw new Error("This email is not authorized for admin access.");
               const { data, error } = await supabase.auth.signInWithPassword({ email: normalizedEmail, password });
               if (error || !data.user) throw new Error(error?.message || "Invalid email or password.");
+              if (!data.user.email || !ADMIN_EMAILS.includes(data.user.email.toLowerCase())) { await supabase.auth.signOut(); throw new Error("This email is not authorized for admin access."); }
               setAuthed(true); setPassword("");
             } catch (err) { setLoginError(err instanceof Error ? err.message : "Unable to sign in."); }
             finally { setLoggingIn(false); }
@@ -193,7 +197,6 @@ jobs:
           if old_handlers not in p: raise SystemExit('legacy handlers missing')
           p = p.replace(old_handlers, handlers, 1)
 
-          # Replace only the old login screen. Dashboard and all existing admin UI remain unchanged.
           start = p.find('  // ── Login Screen ──\n\n  if (!authed) {')
           end = p.find('  // ── Dashboard ──', start)
           if start < 0 or end < 0: raise SystemExit('login screen bounds missing')
