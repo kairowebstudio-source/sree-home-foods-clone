@@ -10,8 +10,6 @@ export const Route = createFileRoute("/shop/")({
 });
 
 function mergeProducts(remote: Product[]): Product[] {
-  // Keep the original catalogue as a fallback, while Supabase is the source
-  // of truth for products that have the same slug or exist only in Supabase.
   const bySlug = new Map<string, Product>();
   for (const p of fallbackProducts) bySlug.set(p.slug, p);
   for (const p of remote) if (p?.slug) bySlug.set(p.slug, p);
@@ -25,7 +23,9 @@ function Shop() {
     let active = true;
 
     async function loadSupabaseProducts() {
-      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || "https://ilfwenfvgqpuronobsbq.supabase.co";
+      // This is the actual Supabase project URL. Vercel's environment variable
+      // remains preferred, but the fallback must point to the real project.
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || "https://iifwenfvggpurohobsbq.supabase.co";
       const publishableKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
       if (!publishableKey) {
@@ -34,16 +34,9 @@ function Shop() {
       }
 
       try {
-        // Publishable keys are sent as the apikey header. Do not send the
-        // publishable key as a Bearer token; Supabase's newer sb_publishable_
-        // keys are not JWT access tokens.
         const response = await fetch(
           `${supabaseUrl}/rest/v1/products?select=*&order=created_at.asc`,
-          {
-            headers: {
-              apikey: publishableKey,
-            },
-          },
+          { headers: { apikey: publishableKey } },
         );
 
         if (!response.ok) {
