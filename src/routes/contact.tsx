@@ -42,7 +42,7 @@ function Contact() {
                   { i: "fa-building", t: "Office", d: "'RETRO' Natural Products\nShop G9, H.no 19, Eeco Valley Apartments\nopposite Jana Priya Nile valley, PJR Layout\nMADHAVAPURI HILLS, Ameenpur\nHyderabad-500050" },
                   { i: "fa-phone", t: "Call", d: "+91 81212 73912" },
                   { i: "fa-envelope", t: "Email", d: "retronaturalproducts@gmail.com" },
-                  { i: "fa-clock", t: "Hours", d: "Mon–Sat · 9:00 AM – 7:00 PM" },
+                  { i: "fa-clock", t: "Hours", d: "Mon–Sun · 9:20 AM – 8:00 PM" },
                 ].map((c) => (
                   <div key={c.t} className="flex gap-4 items-start bg-cream rounded-xl p-5 border border-border">
                     <div className="h-12 w-12 rounded-full bg-brand text-gold grid place-items-center shrink-0"><i className={`fas ${c.i}`} /></div>
@@ -53,14 +53,28 @@ function Contact() {
                   </div>
                 ))}
               </div>
-              <form className="bg-cream rounded-2xl p-8 border border-border space-y-4" onSubmit={(e) => { e.preventDefault(); alert("Thanks! We'll get back to you shortly."); }}>
+              <form className="bg-cream rounded-2xl p-8 border border-border space-y-4" onSubmit={(e) => {
+                  e.preventDefault();
+                  const form = e.target as HTMLFormElement;
+                  const name = (form.elements.namedItem('name') as HTMLInputElement)?.value || '';
+                  const email = (form.elements.namedItem('email') as HTMLInputElement)?.value || '';
+                  const phone = (form.elements.namedItem('phone') as HTMLInputElement)?.value || '';
+                  const message = (form.elements.namedItem('message') as HTMLTextAreaElement)?.value || '';
+                  const waMsg = encodeURIComponent(`Hi, I'm ${name}.\nEmail: ${email}\nPhone: ${phone}\n\n${message}`);
+                  window.open(`https://wa.me/918121273912?text=${waMsg}`, '_blank');
+                }}>
                 <h2 className="font-display text-2xl text-brand">Send a Message</h2>
-                <input required placeholder="Your name" className="w-full rounded-lg border border-border bg-white px-4 py-3 focus:outline-none focus:border-brand" />
-                <input required type="email" placeholder="Email address" className="w-full rounded-lg border border-border bg-white px-4 py-3 focus:outline-none focus:border-brand" />
-                <input placeholder="Phone (optional)" className="w-full rounded-lg border border-border bg-white px-4 py-3 focus:outline-none focus:border-brand" />
-                <textarea required rows={5} placeholder="How can we help?" className="w-full rounded-lg border border-border bg-white px-4 py-3 focus:outline-none focus:border-brand" />
-                <button type="submit" className="w-full rounded-full bg-brand text-cream py-3 font-bold uppercase tracking-wider hover:opacity-90 transition">Send Message</button>
+                <input required name="name" placeholder="Your name" className="w-full rounded-lg border border-border bg-white px-4 py-3 focus:outline-none focus:border-brand" />
+                <input required name="email" type="email" placeholder="Email address" className="w-full rounded-lg border border-border bg-white px-4 py-3 focus:outline-none focus:border-brand" />
+                <input name="phone" placeholder="Phone (optional)" className="w-full rounded-lg border border-border bg-white px-4 py-3 focus:outline-none focus:border-brand" />
+                <textarea required name="message" rows={5} placeholder="How can we help?" className="w-full rounded-lg border border-border bg-white px-4 py-3 focus:outline-none focus:border-brand" />
+                <button type="submit" className="w-full rounded-full bg-brand text-cream py-3 font-bold uppercase tracking-wider hover:opacity-90 transition"><i className="fab fa-whatsapp mr-2" />Send Message</button>
               </form>
+              <div className="mt-4">
+                <a href="mailto:retronaturalproducts@gmail.com" className="w-full inline-flex items-center justify-center gap-2 rounded-full border-2 border-brand text-brand py-3 font-bold uppercase tracking-wider hover:bg-brand hover:text-cream transition">
+                  <i className="fas fa-envelope" /> Email Us
+                </a>
+              </div>
             </div>
           </div>
         </section>

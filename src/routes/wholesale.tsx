@@ -25,8 +25,8 @@ function Wholesale() {
       <section className="py-20 px-4">
         <div className="mx-auto max-w-5xl grid md:grid-cols-3 gap-6">
           {[
-            { i: "fa-boxes-stacked", t: "Bulk MOQ", d: "Starting at 25kg per SKU. Custom packing sizes on request." },
-            { i: "fa-tag", t: "Private Label", d: "We manufacture and pack under your brand with your artwork." },
+            { i: "fa-boxes-stacked", t: "Bulk MOQ", d: "Starting at 20kg per SKU. Custom packing sizes on request." },
+            { i: "fa-tag", t: "Private Label", d: "We encourage new and young entrepreneurs. We manufacture and pack under your brand with your artwork." },
             { i: "fa-truck-fast", t: "Pan-India Dispatch", d: "Reliable, tracked shipments to stores and warehouses." },
           ].map((c) => (
             <div key={c.t} className="bg-cream rounded-2xl p-8 text-center border border-border">
@@ -36,9 +36,12 @@ function Wholesale() {
             </div>
           ))}
         </div>
-        <div className="mt-12 text-center">
+        <div className="mt-12 text-center space-y-4">
           <a href="https://wa.me/918121273912?text=Hi,%20I'm%20interested%20in%20wholesale%20orders%20from%20Retro%20Natural%20Products." target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-full bg-brand text-cream px-8 py-4 font-bold uppercase tracking-wider hover:opacity-90 transition">
             <i className="fab fa-whatsapp" /> Message us for bulk orders
+          </a>
+          <a href="mailto:retronaturalproducts@gmail.com" className="inline-flex items-center gap-2 rounded-full border-2 border-brand text-brand px-8 py-4 font-bold uppercase tracking-wider hover:bg-brand hover:text-cream transition">
+            <i className="fas fa-envelope" /> Email Us
           </a>
         </div>
       </section>
