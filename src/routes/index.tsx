@@ -144,7 +144,7 @@ function Home() {
           </p>
           <div className="grid sm:grid-cols-4 gap-6 mt-12">
             {[
-              { i: "fa-jar", t: "Traditional Products", d: "Just like Home made." },
+              { i: "fa-jar", t: "Traditional Products", d: "Agarbatti, Dhoop, and carrying on the legacy from our ancestors." },
               { i: "fa-mortar-pestle", t: "Original Formulas", d: "Just like Home made." },
               { i: "fa-jar-wheat", t: "Raw Honey", d: "Wild-harvested and never heated." },
               { i: "fa-bowl-food", t: "Heritage Foods", d: "Made with rich knowledge transferred across generations from our history, like UGGU and more." },
