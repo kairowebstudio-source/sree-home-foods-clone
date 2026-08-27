@@ -70,22 +70,6 @@ function Home() {
             </Link>
           </div>
 
-          {/* Stamp */}
-          <div className="hidden md:block absolute top-10 right-10">
-            <svg viewBox="0 0 100 100" className="w-32 h-32 stamp-spin">
-              <circle cx="50" cy="50" r="46" fill="rgba(138,30,30,0.85)" stroke="#D4A12A" strokeWidth="1.5" strokeDasharray="2 3" />
-              <path id="c-top" d="M 15,50 a 35,35 0 1,1 70,0" fill="none" />
-              <text fontSize="9" fill="#D4A12A" fontFamily="Cinzel, serif" letterSpacing="1.5">
-                <textPath href="#c-top" startOffset="50%" textAnchor="middle">HANDCRAFTED</textPath>
-              </text>
-              <text x="50" y="46" textAnchor="middle" fill="#D4A12A" fontSize="8" fontFamily="Cinzel, serif">SINCE</text>
-              <text x="50" y="62" textAnchor="middle" fill="#D4A12A" fontSize="14" fontWeight="bold" fontFamily="Cinzel, serif">2020</text>
-              <path id="c-bot" d="M 85,50 a 35,35 0 0,1 -70,0" fill="none" />
-              <text fontSize="8" fill="#D4A12A" fontFamily="Cinzel, serif" letterSpacing="1.5">
-                <textPath href="#c-bot" startOffset="50%" textAnchor="middle">WITH LOVE</textPath>
-              </text>
-            </svg>
-          </div>
         </div>
       </section>
 
