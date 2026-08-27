@@ -8,11 +8,12 @@ export function Footer() {
       <footer className="bg-[#1a0d0d] text-cream/90">
         <div className="mx-auto max-w-7xl px-4 py-14 grid gap-10 md:grid-cols-4">
           <div>
-            <img src={logo} alt="Retro Natural Products" className="h-20 w-auto bg-cream rounded-md p-2 mb-4 object-contain" />
+            <img src={logo} alt="Retro Natural Products" className="h-32 w-auto bg-cream rounded-md p-2 mb-4 object-contain" />
             <p className="text-sm text-cream/70 leading-relaxed">
               Handcrafted powders, spices and traditional foods — pure, natural,
               and made with love.
             </p>
+            <p className="text-gold font-display text-sm mt-3 tracking-wide">IN ANDHRA PRADESH AND TELANGANA</p>
           </div>
           <div>
             <h4 className="text-gold font-display text-lg mb-4">Explore</h4>
