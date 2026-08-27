@@ -38,7 +38,7 @@ export function Footer() {
             </ul>
             <div className="flex gap-3 mt-4">
               <a href="https://www.instagram.com/retro.natural.products?igsi=MXhjdGljdDY1dmhuaw==" target="_blank" rel="noreferrer" className="h-9 w-9 grid place-items-center rounded-full border border-gold/40 hover:bg-gold hover:text-brand transition"><i className="fab fa-instagram" /></a>
-              <a href="#" className="h-9 w-9 grid place-items-center rounded-full border border-gold/40 hover:bg-gold hover:text-brand transition"><i className="fab fa-facebook-f" /></a>
+              <a href="https://www.facebook.com/share/1GgA3znuLD/" target="_blank" rel="noreferrer" className="h-9 w-9 grid place-items-center rounded-full border border-gold/40 hover:bg-gold hover:text-brand transition"><i className="fab fa-facebook-f" /></a>
               <a href="https://wa.me/918121273912" target="_blank" rel="noreferrer" className="h-9 w-9 grid place-items-center rounded-full border border-gold/40 hover:bg-gold hover:text-brand transition"><i className="fab fa-whatsapp" /></a>
             </div>
           </div>
