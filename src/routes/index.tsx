@@ -144,10 +144,10 @@ function Home() {
           </p>
           <div className="grid sm:grid-cols-4 gap-6 mt-12">
             {[
-              { i: "fa-jar", t: "Traditional Powders", d: "Stone-milled, sun-dried, nothing added." },
-              { i: "fa-mortar-pestle", t: "Original Formulas", d: "Just like home made." },
+              { i: "fa-jar", t: "Traditional Products", d: "Stone-milled, sun-dried, nothing added." },
+              { i: "fa-mortar-pestle", t: "Original Formulas", d: "Agarbatti, Dhoop, and carrying on the legacy from our ancestors." },
               { i: "fa-jar-wheat", t: "Raw Honey", d: "Wild-harvested and never heated." },
-              { i: "fa-bowl-food", t: "Heritage Foods", d: "Age-old Andhra recipes, ready in minutes." },
+              { i: "fa-bowl-food", t: "Heritage Foods", d: "Made with rich knowledge transferred across generations from our history, like UGGU and more." },
             ].map((b) => (
               <div key={b.t} className="text-center">
                 <div className="mx-auto h-20 w-20 rounded-full bg-brand text-gold grid place-items-center text-3xl border-4 border-gold/40">
