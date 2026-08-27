@@ -127,16 +127,16 @@ function Home() {
         <video autoPlay muted loop playsInline className="absolute inset-0 w-full h-full object-cover">
           <source src="/media/867549244_1784619221031257.mp4" type="video/mp4" />
         </video>
-        <div className="absolute inset-0 bg-black/30" />
+        <div className="absolute inset-0 bg-black/50" />
         <div className="relative mx-auto max-w-5xl text-center">
-          <span className="text-leaf-dark text-xs tracking-[0.3em] font-bold uppercase">Retro Natural Products</span>
-          <h2 className="mt-2 font-display text-4xl md:text-5xl text-brand">A Legacy of Purity & Care</h2>
+          <span className="text-gold text-xs tracking-[0.3em] font-bold uppercase">Retro Natural Products</span>
+          <h2 className="mt-2 font-display text-4xl md:text-5xl text-white">A Legacy of Purity & Care</h2>
           <div className="flex items-center justify-center gap-3 mt-4 mb-8">
             <span className="h-px w-16 bg-gold" />
-            <i className="fas fa-seedling text-leaf-dark" />
+            <i className="fas fa-seedling text-gold" />
             <span className="h-px w-16 bg-gold" />
           </div>
-          <p className="text-black md:text-lg leading-relaxed">
+          <p className="text-cream md:text-lg leading-relaxed">
             Rooted in the fertile soils of the Godavari delta, Retro Natural Products is a small
             family workshop dedicated to keeping traditional recipes alive. From single-origin
             spice powders to raw wild honey and slow-milled superfoods — every product is
@@ -144,8 +144,8 @@ function Home() {
           </p>
           <div className="grid sm:grid-cols-4 gap-6 mt-12">
             {[
-              { i: "fa-jar", t: "Traditional Products", d: "Stone-milled, sun-dried, nothing added." },
-              { i: "fa-mortar-pestle", t: "Original Formulas", d: "Agarbatti, Dhoop, and carrying on the legacy from our ancestors." },
+              { i: "fa-jar", t: "Traditional Products", d: "Agarbatti, Dhoop, and carrying on the legacy from our ancestors." },
+              { i: "fa-mortar-pestle", t: "Original Formulas", d: "Just like Home made." },
               { i: "fa-jar-wheat", t: "Raw Honey", d: "Wild-harvested and never heated." },
               { i: "fa-bowl-food", t: "Heritage Foods", d: "Made with rich knowledge transferred across generations from our history, like UGGU and more." },
             ].map((b) => (
@@ -153,8 +153,8 @@ function Home() {
                 <div className="mx-auto h-20 w-20 rounded-full bg-brand text-gold grid place-items-center text-3xl border-4 border-gold/40">
                   <i className={`fas ${b.i}`} />
                 </div>
-                <h3 className="font-display text-lg text-brand mt-4">{b.t}</h3>
-                <p className="text-sm text-black/80 mt-1">{b.d}</p>
+                <h3 className="font-display text-lg text-white mt-4">{b.t}</h3>
+                <p className="text-sm text-cream/90 mt-1">{b.d}</p>
               </div>
             ))}
           </div>
