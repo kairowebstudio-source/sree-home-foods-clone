@@ -145,7 +145,7 @@ function Home() {
           <div className="grid sm:grid-cols-4 gap-6 mt-12">
             {[
               { i: "fa-jar", t: "Traditional Powders", d: "Stone-milled, sun-dried, nothing added." },
-              { i: "fa-mortar-pestle", t: "Origin Spices", d: "Direct from the finest farms." },
+              { i: "fa-mortar-pestle", t: "Original Formulas", d: "Just like home made." },
               { i: "fa-jar-wheat", t: "Raw Honey", d: "Wild-harvested and never heated." },
               { i: "fa-bowl-food", t: "Heritage Foods", d: "Age-old Andhra recipes, ready in minutes." },
             ].map((b) => (
