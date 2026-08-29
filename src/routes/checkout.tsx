@@ -77,8 +77,8 @@ function Checkout() {
 
       if (form.method === "cod") {
         saveLastOrder(orderId);
-        clear();
         navigate({ to: "/checkout/success", search: { id: orderId } });
+        setTimeout(() => clear(), 100);
       } else {
         try {
           await loadRazorpayScript();
@@ -95,8 +95,8 @@ function Checkout() {
 
           if (outcome === "paid") {
             saveLastOrder(orderId);
-            clear();
             navigate({ to: "/checkout/success", search: { id: orderId } });
+            setTimeout(() => clear(), 100);
           } else {
             alert("Payment was not completed. Your order is saved as pending. You can retry or contact us for help.");
           }
