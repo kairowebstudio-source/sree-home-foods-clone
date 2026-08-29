@@ -114,10 +114,9 @@ function Checkout() {
     }
   };
 
-  // Child routes like /checkout/success must always render
-  // Check if we're on the exact /checkout path (not a child)
   const exactCheckout = window.location.pathname === "/checkout";
-  if (items.length === 0 && exactCheckout) {
+  if (!exactCheckout) return <Outlet />;
+  if (items.length === 0) {
     return (
       <div className="min-h-screen bg-background"><Header variant="solid" /><section className="py-24 px-4 text-center"><div className="mx-auto max-w-lg bg-cream/80 backdrop-blur border border-gold/30 rounded-3xl p-10 shadow-sm"><div className="mx-auto h-20 w-20 rounded-full bg-brand/10 text-brand grid place-items-center text-3xl"><i className="fas fa-basket-shopping" /></div><h1 className="font-display text-3xl text-brand mt-4">Your basket is empty</h1><p className="text-muted-foreground mt-2">Add a few jars from our collection to check out.</p><Link to="/shop" className="mt-6 inline-flex items-center gap-2 rounded-full bg-brand text-cream px-6 py-3 font-bold uppercase tracking-wider text-xs hover:opacity-90"><i className="fas fa-shopping-bag" /> Browse the Shop</Link></div></section><Footer /></div>
     );
@@ -152,7 +151,6 @@ function Checkout() {
           </aside>
         </form>
       </section><Footer />
-      <Outlet />
     </div>
   );
 }
