@@ -76,6 +76,21 @@ function ProductPage() {
             <div className="mt-6 flex items-center gap-4 text-sm text-foreground/70"><span><i className="fas fa-shield-heart text-gold mr-2" />100% Natural</span></div>
             <div className="mt-6"><span className="block text-xs uppercase tracking-[0.25em] text-foreground/60 font-bold mb-2">{variants.length > 1 ? "Choose a size" : "Size"}</span><div className="flex flex-wrap gap-2">{variants.map((v, i) => <button key={`${v.weight}-${i}`} type="button" onClick={() => setVIdx(i)} className={`px-4 py-2 rounded-full border-2 text-sm font-semibold transition ${i === vIdx ? "bg-brand text-cream border-brand" : "bg-cream/70 text-brand border-brand/30 hover:border-brand"}`}>{v.weight} · {formatPrice(v.price)}</button>)}</div></div>
             <div className="mt-5 flex items-baseline gap-3"><span className="font-display text-3xl text-brand font-bold">{formatPrice(variant.price)}</span>{variant.mrp && variant.mrp > variant.price && <span className="text-base text-foreground/50 line-through">{formatPrice(variant.mrp)}</span>}</div>
+            {product.stock != null && (
+              <div className="mt-4">
+                {product.stock > 0 ? (
+                  <span className={`inline-flex items-center gap-2 text-sm font-semibold px-4 py-1.5 rounded-full ${product.stock <= 5 ? 'bg-red-100 text-red-700' : product.stock <= 10 ? 'bg-amber-100 text-amber-700' : 'bg-green-100 text-green-700'}`}>
+                    <span className={`h-2 w-2 rounded-full ${product.stock <= 5 ? 'bg-red-500' : product.stock <= 10 ? 'bg-amber-500' : 'bg-green-500'}`} />
+                    {product.stock <= 5 ? `Only ${product.stock} left — order soon!` : `${product.stock} units in stock`}
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-2 text-sm font-semibold px-4 py-1.5 rounded-full bg-red-100 text-red-700">
+                    <span className="h-2 w-2 rounded-full bg-red-500" />
+                    Out of stock
+                  </span>
+                )}
+              </div>
+            )}
             <div className="mt-8 flex flex-wrap items-center gap-3">
               <div className="inline-flex items-center border-2 border-brand/30 rounded-full bg-cream/70 backdrop-blur"><button onClick={() => setQty((q) => Math.max(1, q - 1))} className="h-11 w-11 grid place-items-center text-brand hover:bg-brand/10 rounded-l-full" aria-label="Decrease"><i className="fas fa-minus" /></button><span className="w-10 text-center font-bold text-brand">{qty}</span><button onClick={() => setQty((q) => q + 1)} className="h-11 w-11 grid place-items-center text-brand hover:bg-brand/10 rounded-r-full" aria-label="Increase"><i className="fas fa-plus" /></button></div>
               <button onClick={() => add(product, qty, variant)} className="inline-flex items-center gap-2 rounded-full bg-brand text-brand-foreground px-7 py-3 font-bold uppercase tracking-wider text-sm hover:opacity-90 transition"><i className="fas fa-basket-shopping" /> Add to Cart</button>
