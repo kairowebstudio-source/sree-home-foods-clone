@@ -140,7 +140,12 @@ function ProductForm({
   const [name, setName] = useState(initial?.name ?? "");
   const [tagline, setTagline] = useState(initial?.tagline ?? "");
   const [category, setCategory] = useState<string>(initial?.category ?? categoryList[0] ?? "Superfoods");
-  const [deliveryCharge, setDeliveryCharge] = useState<string>(initial?.delivery_charge != null ? String(initial.delivery_charge) : "");
+  const [deliveryCharge, setDeliveryCharge] = useState<string>(() => {
+    if (initial?.delivery_charge != null) {
+      return String(initial.delivery_charge);
+    }
+    return "70";
+  });
   const options = Array.from(new Set([...categoryList, ...(initial?.category ? [initial.category] : [])]));
   const [rows, setRows] = useState<{ weight: string; price: string; mrp: string }[]>(
     initial
@@ -339,10 +344,12 @@ function ProductForm({
 
       {/* Delivery Charge */}
       <div>
-        <label className="block text-xs uppercase tracking-wider font-semibold text-foreground/70 mb-1">Delivery Charge (₹)</label>
-        <input type="number" min={0} value={deliveryCharge} onChange={(e) => setDeliveryCharge(e.target.value)} placeholder="e.g. 70"
-          className="w-full rounded-lg border border-border bg-white px-3 py-2.5 text-sm focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand/30" />
-        <p className="text-[11px] text-foreground/50 mt-1">No delivery charge if left empty.</p>
+        <label className="block text-xs uppercase tracking-wider font-semibold text-foreground/70 mb-1">Delivery Charge</label>
+        <select value={deliveryCharge} onChange={(e) => setDeliveryCharge(e.target.value)}
+          className="w-full rounded-lg border border-border bg-white px-3 py-2.5 text-sm focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand/30">
+          <option value="0">Free Delivery</option>
+          <option value="70">Standard ₹70</option>
+        </select>
       </div>
 
       {/* Image Upload */}
