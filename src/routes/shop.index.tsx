@@ -119,6 +119,21 @@ function Shop() {
                   <span className="text-xs uppercase tracking-widest text-gold font-bold">{p.category}</span>
                   <h3 className="mt-1 font-display text-xl text-brand">{p.name}</h3>
                   <p className="text-sm text-muted-foreground mt-1">{p.tagline}</p>
+                  {p.stock != null && (
+                    <div className="mt-2">
+                      {p.stock > 0 ? (
+                        <span className={`inline-flex items-center gap-1 text-xs font-semibold ${p.stock <= 5 ? 'text-red-600' : p.stock <= 10 ? 'text-amber-600' : 'text-green-600'}`}>
+                          <span className={`h-1.5 w-1.5 rounded-full ${p.stock <= 5 ? 'bg-red-500' : p.stock <= 10 ? 'bg-amber-500' : 'bg-green-500'}`} />
+                          {p.stock <= 5 ? `Only ${p.stock} left!` : `${p.stock} in stock`}
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 text-xs font-semibold text-red-600">
+                          <span className="h-1.5 w-1.5 rounded-full bg-red-500" />
+                          Out of stock
+                        </span>
+                      )}
+                    </div>
+                  )}
                   <div className="mt-4 flex items-center justify-between"><span className="text-xs text-foreground/60">{getVariants(p).length > 1 ? `${getVariants(p).length} sizes · ${priceRange(p)}` : `${p.weight} · ${priceRange(p)}`}</span><span className="text-sm font-semibold text-brand">Buy →</span></div>
                 </div>
               </Link>
