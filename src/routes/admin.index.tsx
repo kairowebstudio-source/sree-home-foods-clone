@@ -340,9 +340,9 @@ function ProductForm({
       {/* Delivery Charge */}
       <div>
         <label className="block text-xs uppercase tracking-wider font-semibold text-foreground/70 mb-1">Delivery Charge (₹)</label>
-        <input type="number" min={0} value={deliveryCharge} onChange={(e) => setDeliveryCharge(e.target.value)} placeholder="Leave empty for default ₹60"
+        <input type="number" min={0} value={deliveryCharge} onChange={(e) => setDeliveryCharge(e.target.value)} placeholder="Leave empty for default ₹70"
           className="w-full rounded-lg border border-border bg-white px-3 py-2.5 text-sm focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand/30" />
-        <p className="text-[11px] text-foreground/50 mt-1">Optional. If empty, standard ₹60 shipping applies (free above ₹999).</p>
+        <p className="text-[11px] text-foreground/50 mt-1">If empty, default ₹70 per product applies.</p>
       </div>
 
       {/* Image Upload */}
