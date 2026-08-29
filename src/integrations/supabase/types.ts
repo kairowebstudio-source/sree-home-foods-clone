@@ -84,6 +84,7 @@ export type Database = {
           benefits: string[]
           category: string
           created_at: string
+          delivery_charge: number | null
           description: string
           id: string
           image: string
@@ -100,6 +101,7 @@ export type Database = {
           benefits?: string[]
           category?: string
           created_at?: string
+          delivery_charge?: number | null
           description?: string
           id?: string
           image?: string
@@ -116,6 +118,7 @@ export type Database = {
           benefits?: string[]
           category?: string
           created_at?: string
+          delivery_charge?: number | null
           description?: string
           id?: string
           image?: string

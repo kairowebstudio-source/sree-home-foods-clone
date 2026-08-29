@@ -24,6 +24,8 @@ export type Product = {
   image: string;
   description: string;
   benefits: string[];
+  /** Optional delivery charge set by admin. If not set, default ₹60 applies. */
+  delivery_charge?: number;
 };
 
 export const formatPrice = (n: number) =>
