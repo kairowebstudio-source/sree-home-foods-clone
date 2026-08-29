@@ -122,13 +122,13 @@ function Shop() {
                   {p.stock != null && (
                     <div className="mt-2">
                       {p.stock > 0 ? (
-                        <span className={`inline-flex items-center gap-1 text-xs font-semibold ${p.stock <= 5 ? 'text-red-600' : p.stock <= 10 ? 'text-amber-600' : 'text-green-600'}`}>
-                          <span className={`h-1.5 w-1.5 rounded-full ${p.stock <= 5 ? 'bg-red-500' : p.stock <= 10 ? 'bg-amber-500' : 'bg-green-500'}`} />
-                          {p.stock <= 5 ? `Only ${p.stock} left!` : `${p.stock} in stock`}
+                        <span className={`inline-flex items-center gap-1.5 text-xs font-bold px-2.5 py-1 rounded-full ${p.stock <= 5 ? 'bg-red-100 text-red-700' : p.stock <= 10 ? 'bg-amber-100 text-amber-700' : 'bg-green-100 text-green-700'}`}>
+                          <span className={`h-2 w-2 rounded-full ${p.stock <= 5 ? 'bg-red-500 animate-pulse' : p.stock <= 10 ? 'bg-amber-500' : 'bg-green-500'}`} />
+                          {p.stock <= 5 ? `Only ${p.stock} left!` : `${p.stock} left`}
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1 text-xs font-semibold text-red-600">
-                          <span className="h-1.5 w-1.5 rounded-full bg-red-500" />
+                        <span className="inline-flex items-center gap-1.5 text-xs font-bold px-2.5 py-1 rounded-full bg-red-100 text-red-700">
+                          <span className="h-2 w-2 rounded-full bg-red-500" />
                           Out of stock
                         </span>
                       )}

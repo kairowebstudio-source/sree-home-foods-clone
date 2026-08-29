@@ -79,13 +79,13 @@ function ProductPage() {
             {product.stock != null && (
               <div className="mt-4">
                 {product.stock > 0 ? (
-                  <span className={`inline-flex items-center gap-2 text-sm font-semibold px-4 py-1.5 rounded-full ${product.stock <= 5 ? 'bg-red-100 text-red-700' : product.stock <= 10 ? 'bg-amber-100 text-amber-700' : 'bg-green-100 text-green-700'}`}>
-                    <span className={`h-2 w-2 rounded-full ${product.stock <= 5 ? 'bg-red-500' : product.stock <= 10 ? 'bg-amber-500' : 'bg-green-500'}`} />
-                    {product.stock <= 5 ? `Only ${product.stock} left — order soon!` : `${product.stock} units in stock`}
+                  <span className={`inline-flex items-center gap-2 text-sm font-bold px-4 py-1.5 rounded-full ${product.stock <= 5 ? 'bg-red-100 text-red-700' : product.stock <= 10 ? 'bg-amber-100 text-amber-700' : 'bg-green-100 text-green-700'}`}>
+                    <span className={`h-2.5 w-2.5 rounded-full ${product.stock <= 5 ? 'bg-red-500 animate-pulse' : product.stock <= 10 ? 'bg-amber-500' : 'bg-green-500'}`} />
+                    {product.stock <= 5 ? `Only ${product.stock} left — order soon!` : `${product.stock} left in stock`}
                   </span>
                 ) : (
-                  <span className="inline-flex items-center gap-2 text-sm font-semibold px-4 py-1.5 rounded-full bg-red-100 text-red-700">
-                    <span className="h-2 w-2 rounded-full bg-red-500" />
+                  <span className="inline-flex items-center gap-2 text-sm font-bold px-4 py-1.5 rounded-full bg-red-100 text-red-700">
+                    <span className="h-2.5 w-2.5 rounded-full bg-red-500" />
                     Out of stock
                   </span>
                 )}
