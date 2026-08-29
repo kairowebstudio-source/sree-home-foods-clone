@@ -6,7 +6,7 @@ import { useState, useEffect } from "react";
 import type { Product, Variant } from "@/lib/products";
 import { getVariants, formatPrice, products as fallbackProducts } from "@/lib/products";
 
-const SUPABASE_PRODUCTS_URL = "https://iifwenfvggpurohobsbq.supabase.co/rest/v1/products?select=*&order=created_at.asc";
+const SUPABASE_PRODUCTS_URL = "https://iifwenfvggpurohobsbq.supabase.co/rest/v1/products?select=*,stock&order=created_at.asc";
 
 export const Route = createFileRoute("/shop/$slug")({
   loader: async ({ params }) => {
@@ -15,7 +15,7 @@ export const Route = createFileRoute("/shop/$slug")({
       const publishableKey = typeof import.meta !== "undefined" && import.meta.env?.VITE_SUPABASE_PUBLISHABLE_KEY;
       if (publishableKey) {
         const response = await fetch(SUPABASE_PRODUCTS_URL, {
-          headers: { apikey: publishableKey },
+          headers: { apikey: publishableKey, Prefer: "return=representation" },
         });
         if (response.ok) {
           remoteProducts = (await response.json()) as Product[];

@@ -4,7 +4,7 @@ import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { type Product, categories, priceRange, getVariants, products as fallbackProducts } from "@/lib/products";
 
-const SUPABASE_PRODUCTS_URL = "https://iifwenfvggpurohobsbq.supabase.co/rest/v1/products?select=*&order=created_at.asc";
+const SUPABASE_PRODUCTS_URL = "https://iifwenfvggpurohobsbq.supabase.co/rest/v1/products?select=*,stock&order=created_at.asc";
 
 export const Route = createFileRoute("/shop/")({
   head: () => ({ meta: [{ title: "Shop — Retro Natural Products" }, { name: "description", content: "Browse our full range of natural powders, spices, raw honey and traditional Andhra foods." }] }),
@@ -36,7 +36,7 @@ function Shop() {
 
       try {
         const response = await fetch(SUPABASE_PRODUCTS_URL, {
-          headers: { apikey: publishableKey },
+          headers: { apikey: publishableKey, Prefer: "return=representation" },
         });
 
         if (!response.ok) {
