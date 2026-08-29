@@ -144,7 +144,13 @@ function ProductForm({
     if (initial?.delivery_charge != null) {
       return String(initial.delivery_charge);
     }
-    return "70";
+    return "0";
+  });
+  const [stock, setStock] = useState<string>(() => {
+    if (initial?.stock != null) {
+      return String(initial.stock);
+    }
+    return "";
   });
   const options = Array.from(new Set([...categoryList, ...(initial?.category ? [initial.category] : [])]));
   const [rows, setRows] = useState<{ weight: string; price: string; mrp: string }[]>(
@@ -275,6 +281,7 @@ function ProductForm({
       description,
       benefits,
       ...(deliveryCharge ? { delivery_charge: Number(deliveryCharge) } : {}),
+      ...(stock ? { stock: Number(stock) } : {}),
     } as Product & { image: string });
   };
 
@@ -342,14 +349,23 @@ function ProductForm({
         <p className="text-[11px] text-foreground/50 mt-2">The first size is shown as the default on the website.</p>
       </div>
 
-      {/* Delivery Charge */}
-      <div>
-        <label className="block text-xs uppercase tracking-wider font-semibold text-foreground/70 mb-1">Delivery Charge</label>
-        <select value={deliveryCharge} onChange={(e) => setDeliveryCharge(e.target.value)}
-          className="w-full rounded-lg border border-border bg-white px-3 py-2.5 text-sm focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand/30">
-          <option value="0">Free Delivery</option>
-          <option value="70">Standard ₹70</option>
-        </select>
+      <div className="grid sm:grid-cols-2 gap-4">
+        {/* Delivery Charge */}
+        <div>
+          <label className="block text-xs uppercase tracking-wider font-semibold text-foreground/70 mb-1">Delivery Charge</label>
+          <select value={deliveryCharge} onChange={(e) => setDeliveryCharge(e.target.value)}
+            className="w-full rounded-lg border border-border bg-white px-3 py-2.5 text-sm focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand/30">
+            <option value="0">Free Delivery</option>
+            <option value="70">Standard ₹70</option>
+          </select>
+        </div>
+        {/* Stock Quantity */}
+        <div>
+          <label className="block text-xs uppercase tracking-wider font-semibold text-foreground/70 mb-1">Stock (Qty Left)</label>
+          <input type="number" min={0} value={stock} onChange={(e) => setStock(e.target.value)} placeholder="e.g. 50"
+            className="w-full rounded-lg border border-border bg-white px-3 py-2.5 text-sm focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand/30" />
+          <p className="text-[11px] text-foreground/50 mt-1">Leave empty if stock tracking is not needed.</p>
+        </div>
       </div>
 
       {/* Image Upload */}
@@ -903,6 +919,7 @@ function AdminPage() {
                     <th className="text-left px-4 py-3 font-semibold text-foreground/70 uppercase tracking-wider text-xs hidden sm:table-cell">Weight</th>
                     <th className="text-right px-4 py-3 font-semibold text-foreground/70 uppercase tracking-wider text-xs">Price</th>
                     <th className="text-right px-4 py-3 font-semibold text-foreground/70 uppercase tracking-wider text-xs hidden sm:table-cell">MRP</th>
+                    <th className="text-right px-4 py-3 font-semibold text-foreground/70 uppercase tracking-wider text-xs hidden sm:table-cell">Stock</th>
                     <th className="text-right px-4 py-3 font-semibold text-foreground/70 uppercase tracking-wider text-xs">Actions</th>
                   </tr>
                 </thead>
@@ -930,6 +947,15 @@ function AdminPage() {
                       <td className="px-4 py-4 text-right font-semibold text-foreground">₹{p.price}</td>
                       <td className="px-4 py-4 text-right text-foreground/50 line-through hidden sm:table-cell">
                         {p.mrp ? `₹${p.mrp}` : "—"}
+                      </td>
+                      <td className="px-4 py-4 text-right hidden sm:table-cell">
+                        {p.stock != null ? (
+                          <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold ${p.stock > 10 ? 'bg-green-100 text-green-700' : p.stock > 0 ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700'}`}>
+                            {p.stock > 0 ? `${p.stock} left` : 'Out of stock'}
+                          </span>
+                        ) : (
+                          <span className="text-foreground/30 text-xs">—</span>
+                        )}
                       </td>
                       <td className="px-4 py-4 text-right">
                         <div className="flex items-center justify-end gap-1">

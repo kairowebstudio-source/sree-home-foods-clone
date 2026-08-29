@@ -24,8 +24,10 @@ export type Product = {
   image: string;
   description: string;
   benefits: string[];
-  /** Optional delivery charge set by admin. If not set, default ₹60 applies. */
+  /** Optional delivery charge set by admin. If not set, no delivery charge. */
   delivery_charge?: number;
+  /** Optional stock quantity for this product. */
+  stock?: number;
 };
 
 export const formatPrice = (n: number) =>
