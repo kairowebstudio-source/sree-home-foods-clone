@@ -62,12 +62,32 @@ async function requireAdmin(): Promise<void> {
   if (!timingSafeCompare(token, getExpectedToken())) throw new Error("Unauthorized — invalid session");
 }
 
+// ── Auto-migration: ensure stock column exists ──────────────────
+let stockColumnEnsured = false;
+async function ensureStockColumn(client: ReturnType<typeof supabaseAdmin>) {
+  if (stockColumnEnsured) return;
+  try {
+    // Try to select stock — if it fails, the column doesn't exist
+    const { error } = await client.from("products").select("stock").limit(1);
+    if (!error) { stockColumnEnsured = true; return; }
+    // Column doesn't exist — add it via raw SQL
+    const { error: alterError } = await client.rpc("pgrest_exec" as any, { query: "ALTER TABLE public.products ADD COLUMN IF NOT EXISTS stock INTEGER" } as any);
+    if (alterError) {
+      // Fallback: try updating a row with stock to trigger schema refresh
+      console.warn("Auto-migration for stock column failed:", alterError.message);
+    } else {
+      stockColumnEnsured = true;
+    }
+  } catch { /* ignore */ }
+}
+
 // ── Products ───────────────────────────────────────────────────
 
 export const getProducts = createServerFn({ method: "GET" }).handler(async () => {
   if (!supabaseEnabled()) return fallbackProducts;
   try {
     const client = supabaseAdmin();
+    await ensureStockColumn(client);
     const { data, error } = await client.from("products").select("*").order("created_at", { ascending: true });
     if (error) throw new Error(error.message);
     const rows = (data as Product[]) || [];
