@@ -1,2 +1,4 @@
 User-agent: *
 Allow: /
+
+Sitemap: https://retronaturalproducts.com/sitemap.xml
