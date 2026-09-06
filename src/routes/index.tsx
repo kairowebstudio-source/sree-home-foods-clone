@@ -120,9 +120,7 @@ function Home() {
             <span className="h-px w-16 bg-gold" />
           </div>
           <p className="text-cream md:text-lg leading-relaxed">
-            RETRO is one of the biggest distributors for FMCG products in the North West Hyderabad
-            supply chain, and a manufacturer of handmade premium products under our very own
-            brand RETRO.
+            RETRO has emerged as one of the prominent distributors of FMCG products in the North-West Hyderabad supply chain. Backed by a rapidly growing distribution network, RETRO is also expanding its footprint as a manufacturer of premium handmade products, proudly developed and marketed under our very own RETRO brand.
           </p>
           <div className="grid sm:grid-cols-4 gap-6 mt-12">
             {[

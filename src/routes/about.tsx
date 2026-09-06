@@ -175,7 +175,7 @@ function About() {
               {/* Quote marks */}
               <div className="absolute -top-6 left-1/2 -translate-x-1/2 text-gold/30 text-8xl font-serif leading-none">&ldquo;</div>
               <blockquote className="relative z-10 font-display text-2xl md:text-3xl lg:text-4xl leading-relaxed px-8 md:px-16 py-4">
-                &ldquo;Our vision is to build a trusted natural products brand where quality, authenticity and customer satisfaction always come first.&rdquo;
+                &ldquo;Our vision is to build a trusted natural products brand alongside creating a platform for young entrepreneurs and new generation businesses by offering distribution supply chain where quality, authenticity and customer satisfaction always come first.&rdquo;
               </blockquote>
               <div className="mt-8 flex items-center justify-center gap-3">
                 <span className="h-px w-16 bg-gold/50" />
