@@ -126,24 +126,24 @@ function About() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
               {teamMembers.map((member) => (
                 <div
                   key={member.name}
-                  className="group bg-white rounded-2xl border border-border overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+                  className="group bg-white rounded-2xl border border-border overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 flex flex-col h-full"
                 >
-                  <div className="relative overflow-hidden bg-brand/10">
+                  <div className="relative overflow-hidden bg-brand/10 aspect-[3/4] shrink-0">
                     <img
                       src={member.image}
                       alt={member.name}
-                      className="w-full aspect-[3/4] object-cover group-hover:scale-105 transition-transform duration-500"
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       onError={(e) => {
                         const target = e.target as HTMLImageElement;
                         target.style.display = 'none';
                         const parent = target.parentElement;
                         if (parent) {
                           const fallback = document.createElement('div');
-                          fallback.className = 'w-full aspect-[3/4] flex items-center justify-center bg-brand text-gold';
+                          fallback.className = 'w-full h-full flex items-center justify-center bg-brand text-gold';
                           fallback.innerHTML = `<span class="text-4xl font-display">${member.initials}</span>`;
                           parent.appendChild(fallback);
                         }
@@ -151,7 +151,7 @@ function About() {
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-brand/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                   </div>
-                  <div className="p-4 text-center">
+                  <div className="p-4 text-center flex-1 flex flex-col justify-center">
                     <h3 className="font-display text-lg text-brand">{member.name}</h3>
                     <p className="text-black text-xs font-semibold uppercase tracking-wider mt-1">{member.role}</p>
                     {member.location && (
