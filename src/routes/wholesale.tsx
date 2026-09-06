@@ -20,13 +20,13 @@ function Wholesale() {
         <section className="bg-brand text-cream py-20 px-4 text-center">
         <span className="text-gold text-xs tracking-[0.3em] uppercase font-bold">Wholesale & Manufacturing</span>
         <h1 className="font-display text-5xl mt-2">Top Brands Source Their Stock Here.</h1>
-        <p className="mt-4 text-cream/80 max-w-2xl mx-auto">Partner with Retro Natural Products for bulk supply, private-label packing, and reliable dispatch from our facility.</p>
+        <p className="mt-4 text-cream/80 max-w-2xl mx-auto">Partner with RETRO Natural Products for bulk supply, Investments and reliable dispatch from our facility.</p>
       </section>
       <section className="py-20 px-4">
         <div className="mx-auto max-w-5xl grid md:grid-cols-3 gap-6">
           {[
-            { i: "fa-boxes-stacked", t: "Bulk MOQ", d: "Starting at 20kg per SKU." },
-            { i: "fa-tag", t: "Private Label", d: "We encourage new and young entrepreneurs. We manufacture and pack under your brand with your artwork." },
+            { i: "fa-boxes-stacked", t: "Bulk MOQ", d: "Starting from 15kg for Honey and Ghee. ₹5000 worth product for rest." },
+            { i: "fa-seedling", t: "Investments", d: "We also provide Angel Investments in new Brands encouraging young entrepreneurs." },
             { i: "fa-truck-fast", t: "Pan-India Dispatch", d: "Reliable, tracked shipments to stores and warehouses." },
           ].map((c) => (
             <div key={c.t} className="bg-cream rounded-2xl p-8 text-center border border-border">
