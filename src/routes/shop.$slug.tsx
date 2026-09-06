@@ -63,38 +63,49 @@ function ProductPage() {
       <section className="relative py-16 md:py-24 px-4 overflow-hidden">
         <video autoPlay muted loop playsInline className="absolute inset-0 w-full h-full object-cover"><source src="/media/hero.mp4" type="video/mp4" /></video>
         <div className="absolute inset-0 bg-cream/90" />
-        <div className="relative mx-auto max-w-6xl grid md:grid-cols-2 gap-12 items-center">
-          <div className="bg-white rounded-3xl p-8 shadow-xl border border-border"><img src={product.image} alt={product.name} className="w-full h-[420px] object-contain" /></div>
-          <div>
-            <Link to="/shop" className="text-sm text-brand hover:underline"><i className="fas fa-arrow-left mr-2" />Back to shop</Link>
-            <span className="mt-4 inline-block text-xs uppercase tracking-[0.3em] text-gold font-bold">{product.category}</span>
-            <h1 className="font-display text-4xl md:text-5xl text-brand mt-2">{product.name}</h1>
-            <p className="font-script text-2xl text-leaf-dark mt-1">{product.tagline}</p>
-            <div className="flex items-center gap-3 mt-4"><span className="h-px w-16 bg-gold" /><i className="fas fa-leaf text-leaf" /><span className="h-px w-16 bg-gold" /></div>
-            <p className="text-foreground/80 mt-6 leading-relaxed">{product.description}</p>
-            <div className="mt-6 flex flex-wrap gap-2">{product.benefits.map((b: string) => <span key={b} className="px-3 py-1 rounded-full bg-leaf/15 text-leaf-dark text-xs font-semibold border border-leaf/30">{b}</span>)}</div>
-            <div className="mt-6 flex items-center gap-4 text-sm text-foreground/70"><span><i className="fas fa-shield-heart text-gold mr-2" />100% Natural</span></div>
-            <div className="mt-6"><span className="block text-xs uppercase tracking-[0.25em] text-foreground/60 font-bold mb-2">{variants.length > 1 ? "Choose a size" : "Size"}</span><div className="flex flex-wrap gap-2">{variants.map((v, i) => <button key={`${v.weight}-${i}`} type="button" onClick={() => setVIdx(i)} className={`px-4 py-2 rounded-full border-2 text-sm font-semibold transition ${i === vIdx ? "bg-brand text-cream border-brand" : "bg-cream/70 text-brand border-brand/30 hover:border-brand"}`}>{v.weight} · {formatPrice(v.price)}</button>)}</div></div>
-            <div className="mt-5 flex items-baseline gap-3"><span className="font-display text-3xl text-brand font-bold">{formatPrice(variant.price)}</span>{variant.mrp && variant.mrp > variant.price && <span className="text-base text-foreground/50 line-through">{formatPrice(variant.mrp)}</span>}</div>
-            {product.stock != null && (
-              <div className="mt-4">
-                {product.stock > 0 ? (
-                  <span className={`inline-flex items-center gap-2 text-sm font-bold px-4 py-1.5 rounded-full ${product.stock <= 5 ? 'bg-red-100 text-red-700' : product.stock <= 10 ? 'bg-amber-100 text-amber-700' : 'bg-green-100 text-green-700'}`}>
-                    <span className={`h-2.5 w-2.5 rounded-full ${product.stock <= 5 ? 'bg-red-500 animate-pulse' : product.stock <= 10 ? 'bg-amber-500' : 'bg-green-500'}`} />
-                    {product.stock <= 5 ? `Only ${product.stock} left — order soon!` : `${product.stock} left in stock`}
-                  </span>
-                ) : (
-                  <span className="inline-flex items-center gap-2 text-sm font-bold px-4 py-1.5 rounded-full bg-red-100 text-red-700">
-                    <span className="h-2.5 w-2.5 rounded-full bg-red-500" />
-                    Out of stock
-                  </span>
-                )}
+        <div className="relative mx-auto max-w-6xl">
+          <Link to="/shop" className="text-sm text-brand hover:underline"><i className="fas fa-arrow-left mr-2" />Back to shop</Link>
+          <div className="mt-6 grid md:grid-cols-2 gap-8 lg:gap-12 items-start">
+            <div className="bg-white rounded-3xl p-6 md:p-10 shadow-xl border border-border overflow-hidden">
+              <div className="aspect-square w-full flex items-center justify-center">
+                <img src={product.image} alt={product.name} className="w-full h-full object-contain" />
               </div>
-            )}
-            <div className="mt-8 flex flex-wrap items-center gap-3">
-              <div className="inline-flex items-center border-2 border-brand/30 rounded-full bg-cream/70 backdrop-blur"><button onClick={() => setQty((q) => Math.max(1, q - 1))} className="h-11 w-11 grid place-items-center text-brand hover:bg-brand/10 rounded-l-full" aria-label="Decrease"><i className="fas fa-minus" /></button><span className="w-10 text-center font-bold text-brand">{qty}</span><button onClick={() => setQty((q) => q + 1)} className="h-11 w-11 grid place-items-center text-brand hover:bg-brand/10 rounded-r-full" aria-label="Increase"><i className="fas fa-plus" /></button></div>
-              <button onClick={() => add(product, qty, variant)} className="inline-flex items-center gap-2 rounded-full bg-brand text-brand-foreground px-7 py-3 font-bold uppercase tracking-wider text-sm hover:opacity-90 transition"><i className="fas fa-basket-shopping" /> Add to Cart</button>
-              <a href={`https://wa.me/918121273912?text=${waMsg}`} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-full border-2 border-brand text-brand px-7 py-3 font-bold uppercase tracking-wider text-sm hover:bg-brand hover:text-cream transition"><i className="fab fa-whatsapp" /> WhatsApp</a>
+            </div>
+            <div className="space-y-5">
+              <div>
+                <span className="inline-block text-xs uppercase tracking-[0.3em] text-gold font-bold">{product.category}</span>
+                <h1 className="font-display text-3xl sm:text-4xl md:text-5xl text-brand mt-2 leading-tight">{product.name}</h1>
+                <p className="font-script text-2xl text-leaf-dark mt-1">{product.tagline}</p>
+              </div>
+              <div className="flex items-center gap-3"><span className="h-px w-16 bg-gold" /><i className="fas fa-leaf text-leaf" /><span className="h-px w-16 bg-gold" /></div>
+              <p className="text-foreground/80 leading-relaxed">{product.description}</p>
+              <div className="flex flex-wrap gap-2">{product.benefits.map((b: string) => <span key={b} className="px-3 py-1 rounded-full bg-leaf/15 text-leaf-dark text-xs font-semibold border border-leaf/30">{b}</span>)}</div>
+              <div className="flex items-center gap-4 text-sm text-foreground/70"><span><i className="fas fa-shield-heart text-gold mr-2" />100% Natural</span></div>
+              <div>
+                <span className="block text-xs uppercase tracking-[0.25em] text-foreground/60 font-bold mb-2">{variants.length > 1 ? "Choose a size" : "Size"}</span>
+                <div className="flex flex-wrap gap-2">{variants.map((v, i) => <button key={`${v.weight}-${i}`} type="button" onClick={() => setVIdx(i)} className={`px-4 py-2 rounded-full border-2 text-sm font-semibold transition ${i === vIdx ? "bg-brand text-cream border-brand" : "bg-cream/70 text-brand border-brand/30 hover:border-brand"}`}>{v.weight} · {formatPrice(v.price)}</button>)}</div>
+              </div>
+              <div className="flex items-baseline gap-3"><span className="font-display text-3xl text-brand font-bold">{formatPrice(variant.price)}</span>{variant.mrp && variant.mrp > variant.price && <span className="text-base text-foreground/50 line-through">{formatPrice(variant.mrp)}</span>}</div>
+              {product.stock != null && (
+                <div>
+                  {product.stock > 0 ? (
+                    <span className={`inline-flex items-center gap-2 text-sm font-bold px-4 py-1.5 rounded-full ${product.stock <= 5 ? 'bg-red-100 text-red-700' : product.stock <= 10 ? 'bg-amber-100 text-amber-700' : 'bg-green-100 text-green-700'}`}>
+                      <span className={`h-2.5 w-2.5 rounded-full ${product.stock <= 5 ? 'bg-red-500 animate-pulse' : product.stock <= 10 ? 'bg-amber-500' : 'bg-green-500'}`} />
+                      {product.stock <= 5 ? `Only ${product.stock} left — order soon!` : `${product.stock} left in stock`}
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-2 text-sm font-bold px-4 py-1.5 rounded-full bg-red-100 text-red-700">
+                      <span className="h-2.5 w-2.5 rounded-full bg-red-500" />
+                      Out of stock
+                    </span>
+                  )}
+                </div>
+              )}
+              <div className="flex flex-wrap items-center gap-3">
+                <div className="inline-flex items-center border-2 border-brand/30 rounded-full bg-cream/70 backdrop-blur"><button onClick={() => setQty((q) => Math.max(1, q - 1))} className="h-11 w-11 grid place-items-center text-brand hover:bg-brand/10 rounded-l-full" aria-label="Decrease"><i className="fas fa-minus" /></button><span className="w-10 text-center font-bold text-brand">{qty}</span><button onClick={() => setQty((q) => q + 1)} className="h-11 w-11 grid place-items-center text-brand hover:bg-brand/10 rounded-r-full" aria-label="Increase"><i className="fas fa-plus" /></button></div>
+                <button onClick={() => add(product, qty, variant)} className="inline-flex items-center gap-2 rounded-full bg-brand text-brand-foreground px-7 py-3 font-bold uppercase tracking-wider text-sm hover:opacity-90 transition"><i className="fas fa-basket-shopping" /> Add to Cart</button>
+                <a href={`https://wa.me/918121273912?text=${waMsg}`} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-full border-2 border-brand text-brand px-7 py-3 font-bold uppercase tracking-wider text-sm hover:bg-brand hover:text-cream transition"><i className="fab fa-whatsapp" /> WhatsApp</a>
+              </div>
             </div>
           </div>
         </div>
