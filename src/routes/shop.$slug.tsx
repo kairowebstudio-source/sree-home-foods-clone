@@ -40,7 +40,7 @@ export const Route = createFileRoute("/shop/$slug")({
     { property: "og:image", content: loaderData.product.image },
   ] : [{ title: "Product not found" }, { name: "robots", content: "noindex" }] }),
   notFoundComponent: () => (
-    <div className="min-h-screen bg-background"><Header /><div className="py-32 text-center"><h1 className="font-display text-4xl text-brand">Product not found</h1><Link to="/shop" className="text-gold mt-4 inline-block">← Back to shop</Link></div><Footer /></div>
+    <div className="min-h-screen bg-background"><Header variant="solid" /><div className="py-32 text-center"><h1 className="font-display text-4xl text-brand">Product not found</h1><Link to="/shop" className="text-gold mt-4 inline-block">← Back to shop</Link></div><Footer /></div>
   ),
   errorComponent: () => <div className="p-10 text-center">Something went wrong. <Link to="/shop" className="text-brand underline">Back to shop</Link></div>,
   component: ProductPage,
@@ -59,19 +59,19 @@ function ProductPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
-      <section className="relative py-16 md:py-24 px-4 overflow-hidden">
+      <Header variant="solid" />
+      <section className="relative py-12 md:py-20 px-4 overflow-hidden">
         <video autoPlay muted loop playsInline className="absolute inset-0 w-full h-full object-cover"><source src="/media/hero.mp4" type="video/mp4" /></video>
         <div className="absolute inset-0 bg-cream/90" />
         <div className="relative mx-auto max-w-6xl">
-          <Link to="/shop" className="text-sm text-brand hover:underline"><i className="fas fa-arrow-left mr-2" />Back to shop</Link>
-          <div className="mt-6 grid md:grid-cols-2 gap-8 lg:gap-12 items-start">
-            <div className="bg-white rounded-3xl p-6 md:p-10 shadow-xl border border-border overflow-hidden">
-              <div className="aspect-square w-full flex items-center justify-center">
+          <Link to="/shop" className="inline-flex items-center gap-2 text-sm text-brand hover:underline mt-2 mb-4"><i className="fas fa-arrow-left" />Back to shop</Link>
+          <div className="mt-8 grid md:grid-cols-2 gap-10 lg:gap-14 items-start">
+            <div className="bg-white rounded-3xl p-6 md:p-8 shadow-xl border border-border overflow-hidden">
+              <div className="aspect-square w-full flex items-center justify-center bg-white rounded-2xl">
                 <img src={product.image} alt={product.name} className="w-full h-full object-contain" />
               </div>
             </div>
-            <div className="space-y-5">
+            <div className="space-y-6">
               <div>
                 <span className="inline-block text-xs uppercase tracking-[0.3em] text-gold font-bold">{product.category}</span>
                 <h1 className="font-display text-3xl sm:text-4xl md:text-5xl text-brand mt-2 leading-tight">{product.name}</h1>
