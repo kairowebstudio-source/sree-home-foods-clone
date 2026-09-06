@@ -205,7 +205,7 @@ function Home() {
               { q: "Are your products truly natural?", a: "Yes. Everything is single-origin, minimally processed, and free from artificial colours, flavours or preservatives." },
               { q: "How long does delivery take?", a: "Orders within India ship in 3–7 business days. We currently serve pan-India." },
               { q: "Do you offer bulk / wholesale pricing?", a: "Absolutely. Head to our Wholesale page or WhatsApp us and we'll share our bulk catalogue." },
-              { q: "Are these delivered internationally?", a: "We currently deliver across India. International shipping is not available at the moment, but we're working to bring Retro products worldwide soon." },
+              { q: "Are these delivered internationally?", a: "Yes, we deliver through cargo and shipping charges applicable." },
             ].map((f) => (
               <details key={f.q} className="group bg-card border border-border rounded-xl overflow-hidden">
                 <summary className="cursor-pointer list-none flex items-center justify-between p-5 font-semibold text-brand">
