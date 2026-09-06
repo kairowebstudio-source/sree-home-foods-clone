@@ -23,7 +23,7 @@ const teamMembers = [
   {
     name: "Mr Kiran Babu Arigela",
     role: "Business Strategist & Market Analysis Lead",
-    location: null,
+    location: "UK",
     image: "/media/IMG-20260819-WA0002.jpg",
     initials: "KBA",
   },
