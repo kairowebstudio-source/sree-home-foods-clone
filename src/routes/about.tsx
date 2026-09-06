@@ -86,20 +86,26 @@ function About() {
               {/* Founder Info */}
               <div className="space-y-6">
                 <div>
-                  <h3 className="font-display text-2xl text-brand">Dr. Raviraja</h3>
+                  <h3 className="font-display text-2xl text-brand">Dr. Raviraja Muddana</h3>
                   <p className="text-gold font-semibold text-sm tracking-wider uppercase mt-1">Founder & Director | UK</p>
                 </div>
 
                 <div className="space-y-4">
                   <h4 className="font-display text-lg text-brand">About Dr. Raviraja</h4>
                   <p className="text-foreground/80 leading-relaxed">
-                    Dr. Raviraja is the Founder and Director of Retro Natural Products, driven by a strong passion for natural, quality-focused products and a commitment to bringing trusted solutions to customers.
+                    Dr. Raviraja Muddana is the Founder and Director of RETRO Natural Products, bringing together a distinguished professional career in medicine with a strong passion for entrepreneurship and business innovation.
                   </p>
                   <p className="text-foreground/80 leading-relaxed">
-                    With a vision of building a reliable and customer-focused natural products brand, he plays a key role in guiding the company's direction, product standards, and long-term growth.
+                    Alongside his work as a busy Emergency Medicine doctor in the United Kingdom, Dr. Raviraja currently serves as the Medical Director and International Advisor for the prestigious AROGYABHARATH Organisation. Despite a demanding medical career, his long-standing vision for entrepreneurship inspired him to establish the RETRO Group with the ambition of building a trusted and forward-thinking business in the natural products and FMCG sector.
                   </p>
                   <p className="text-foreground/80 leading-relaxed">
-                    His approach combines a focus on quality, authenticity, customer trust, and responsible business practices, with the aim of making natural products more accessible and dependable for customers.
+                    Under his leadership and strategic direction, RETRO Natural Products has rapidly established itself as a significant player in Hyderabad's B2B distribution and supply-chain ecosystem. The company continues to expand its footprint across new markets and states while also progressing towards the development and manufacturing of its own products under the RETRO brand.
+                  </p>
+                  <p className="text-foreground/80 leading-relaxed">
+                    As Founder and Director, Dr. Raviraja plays a key role in shaping the company's strategic direction, maintaining product standards, building strong partnerships, and driving sustainable long-term growth.
+                  </p>
+                  <p className="text-foreground/80 leading-relaxed">
+                    His approach to business is founded on the principles of quality, authenticity, customer trust, innovation, and responsible business practices. Through RETRO Natural Products, his vision is to make high-quality natural and dependable products increasingly accessible to customers while creating meaningful opportunities for brands and young entrepreneurs.
                   </p>
                 </div>
               </div>
