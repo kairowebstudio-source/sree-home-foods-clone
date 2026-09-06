@@ -52,8 +52,7 @@ function Home() {
             <span className="h-px w-16 bg-gold" />
           </div>
           <p className="max-w-2xl mx-auto text-cream/85 md:text-lg leading-relaxed">
-            Farm-fresh spices, ghee, honey and traditional powders — crafted the way our
-            grandparents did. Nothing added. Nothing hidden.
+            Farm-fresh honey, ghee, handmade soaps — crafted the way it should be. Nothing hidden.
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-4">
             <Link
@@ -121,17 +120,16 @@ function Home() {
             <span className="h-px w-16 bg-gold" />
           </div>
           <p className="text-cream md:text-lg leading-relaxed">
-            Rooted in the fertile soils of the Godavari delta, Retro Natural Products is a small
-            family workshop dedicated to keeping traditional recipes alive. From single-origin
-            spice powders to raw wild honey and slow-milled superfoods — every product is
-            crafted the way our grandmothers would have wanted.
+            RETRO is one of the biggest distributors for FMCD products in the North West Hyderabad
+            supply chain, and a manufacturer of handmade premium products under our very own
+            brand RETRO.
           </p>
           <div className="grid sm:grid-cols-4 gap-6 mt-12">
             {[
               { i: "fa-jar", t: "Traditional Products", d: "Agarbatti, Dhoop, and carrying on the legacy from our ancestors." },
               { i: "fa-mortar-pestle", t: "Original Formulas", d: "Just like Home made." },
               { i: "fa-jar-wheat", t: "Raw Honey", d: "Wild-harvested and never heated." },
-              { i: "fa-bowl-food", t: "Heritage Foods", d: "Made with rich knowledge transferred across generations from our history, like UGGU and more." },
+              { i: "fa-bowl-food", t: "Handmade Products", d: "Made with rich knowledge and tender approach." },
             ].map((b) => (
               <div key={b.t} className="text-center">
                 <div className="mx-auto h-20 w-20 rounded-full bg-brand text-gold grid place-items-center text-3xl border-4 border-gold/40">
@@ -207,7 +205,7 @@ function Home() {
               { q: "Are your products truly natural?", a: "Yes. Everything is single-origin, minimally processed, and free from artificial colours, flavours or preservatives." },
               { q: "How long does delivery take?", a: "Orders within India ship in 3–7 business days. We currently serve pan-India." },
               { q: "Do you offer bulk / wholesale pricing?", a: "Absolutely. Head to our Wholesale page or WhatsApp us and we'll share our bulk catalogue." },
-              { q: "How should I store the powders?", a: "Keep in a cool, dry place away from direct sunlight. Once opened, use within 3 months for best flavour." },
+              { q: "Are these delivered internationally?", a: "We currently deliver across India. International shipping is not available at the moment, but we're working to bring Retro products worldwide soon." },
             ].map((f) => (
               <details key={f.q} className="group bg-card border border-border rounded-xl overflow-hidden">
                 <summary className="cursor-pointer list-none flex items-center justify-between p-5 font-semibold text-brand">
