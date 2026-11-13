@@ -36,13 +36,6 @@ const partners: Partner[] = [
     nameClass: "text-neutral-900 tracking-[0.14em]",
   },
   {
-    name: "Nand Gokul",
-    tagline: "Pure Ghee",
-    tileClass: "bg-white border-[#1f4e9c]/25",
-    nameClass: "text-[#1f4e9c] tracking-[0.06em]",
-    taglineClass: "text-[#c8a24a] font-script text-lg leading-none",
-  },
-  {
     name: "Velvet Valley",
     tagline: "Inspired by Nature",
     logo: "/media/partners/velvet-valley-logo.jpg",
@@ -57,16 +50,9 @@ const partners: Partner[] = [
     nameClass: "text-white italic tracking-[0.02em] drop-shadow-[0_2px_2px_rgba(0,0,0,0.25)]",
   },
   {
-    name: "kalories",
-    tagline: "Chocolates",
-    logo: "/media/partners/kalories-logo.jpg",
-    tileClass: "bg-[#141210] border-[#b98a45]/50",
-    nameClass: "text-[#d9ab63] font-normal tracking-[0.02em]",
-    taglineClass: "text-[#b98a45]/80 tracking-[0.24em] uppercase",
-  },
-  {
     name: "Beyond Flavour",
     tagline: "Rooted in Nature",
+    logo: "/media/partners/beyond-flavour-logo.jpg",
     tileClass: "bg-[#f7efcd] border-[#5d7a26]/30",
     nameClass: "text-[#4a6420] tracking-[0.02em]",
     taglineClass: "text-[#5d7a26]/85 normal-case tracking-normal",
