@@ -36,6 +36,14 @@ const partners: Partner[] = [
     nameClass: "text-neutral-900 tracking-[0.14em]",
   },
   {
+    name: "Nand Gokul",
+    tagline: "Pure Ghee",
+    logo: "/media/partners/nand-gokul-logo.png",
+    tileClass: "bg-white border-[#1f4e9c]/25",
+    nameClass: "text-[#1f4e9c] tracking-[0.06em]",
+    taglineClass: "text-[#c8a24a] font-script text-lg leading-none",
+  },
+  {
     name: "Velvet Valley",
     tagline: "Inspired by Nature",
     logo: "/media/partners/velvet-valley-logo.jpg",
