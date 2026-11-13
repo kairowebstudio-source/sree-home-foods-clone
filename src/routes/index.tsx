@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { Marquee } from "@/components/site/Marquee";
+import { TrustedPartners } from "@/components/site/TrustedPartners";
 import { type Product, formatPrice, getVariants } from "@/lib/products";
 import { useCart } from "@/lib/cart";
 import { getProducts } from "@/lib/admin.server";
@@ -216,6 +217,8 @@ function Home() {
           </div>
         </div>
       </section>
+
+      <TrustedPartners />
 
       <Footer />
     </div>
