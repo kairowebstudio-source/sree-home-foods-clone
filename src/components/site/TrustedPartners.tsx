@@ -1,17 +1,10 @@
 import { useState } from "react";
-import meraheLogo from "@/assets/merahe-logo.jpg.asset.json";
-import kamadhenuvuLogo from "@/assets/kamadhenuvu-logo.jpg.asset.json";
-import velvetValleyLogo from "@/assets/velvet-valley-logo.jpg.asset.json";
-import amruthLogo from "@/assets/amruth-logo.jpg.asset.json";
-import kaloriesLogo from "@/assets/kalories-logo.jpg.asset.json";
-import lalithaaLogo from "@/assets/lalithaa-logo.jpg.asset.json";
 
 /**
  * Trusted partners strip.
  *
- * To use the real logo artwork, drop the image files into `public/media/partners/`
- * and set the `logo` field below to its public path, e.g.
- *   logo: "/media/partners/kamadhenuvu.png"
+ * Logo artwork lives in `public/media/partners/` and is referenced by public
+ * path, so it is served by whatever host the site is deployed on.
  * Any partner without a `logo` (or whose image fails to load) renders as a
  * styled wordmark tile instead.
  */
@@ -31,14 +24,14 @@ const partners: Partner[] = [
   {
     name: "Kamadhenuvu",
     tagline: "Milk Junnu Powder",
-    logo: kamadhenuvuLogo.url,
+    logo: "/media/partners/kamadhenuvu-logo.jpg",
     tileClass: "bg-white border-[#1f5136]/25",
     nameClass: "text-[#1f5136] tracking-[0.08em] uppercase",
     taglineClass: "text-[#d43a35] font-semibold tracking-[0.22em] uppercase",
   },
   {
     name: "Merāhe",
-    logo: meraheLogo.url,
+    logo: "/media/partners/merahe-logo.jpg",
     tileClass: "bg-white border-neutral-300",
     nameClass: "text-neutral-900 tracking-[0.14em]",
   },
@@ -52,21 +45,21 @@ const partners: Partner[] = [
   {
     name: "Velvet Valley",
     tagline: "Inspired by Nature",
-    logo: velvetValleyLogo.url,
+    logo: "/media/partners/velvet-valley-logo.jpg",
     tileClass: "bg-white border-[#2b5fb0]/25",
     nameClass: "text-[#1f4e9c] tracking-[0.03em] italic",
     taglineClass: "text-[#8e4f9e] tracking-[0.2em] uppercase",
   },
   {
     name: "Amruth",
-    logo: amruthLogo.url,
+    logo: "/media/partners/amruth-logo.jpg",
     tileClass: "bg-[#d81f26] border-[#f0b429] border-2",
     nameClass: "text-white italic tracking-[0.02em] drop-shadow-[0_2px_2px_rgba(0,0,0,0.25)]",
   },
   {
     name: "kalories",
     tagline: "Chocolates",
-    logo: kaloriesLogo.url,
+    logo: "/media/partners/kalories-logo.jpg",
     tileClass: "bg-[#141210] border-[#b98a45]/50",
     nameClass: "text-[#d9ab63] font-normal tracking-[0.02em]",
     taglineClass: "text-[#b98a45]/80 tracking-[0.24em] uppercase",
@@ -81,7 +74,7 @@ const partners: Partner[] = [
   {
     name: "Lalithaa",
     tagline: "Agarbatti",
-    logo: lalithaaLogo.url,
+    logo: "/media/partners/lalithaa-logo.jpg",
     tileClass: "bg-white border-neutral-300",
     nameClass: "text-black tracking-[0.06em]",
     taglineClass: "text-neutral-600 tracking-[0.3em] uppercase",
@@ -99,30 +92,30 @@ function PartnerTile({ partner: p }: { partner: Partner }) {
           p.tileClass ?? "bg-white border-border"
         }`}
       >
-      {showLogo ? (
-        <img
-          src={p.logo}
-          alt={p.name}
-          loading="lazy"
-          onError={() => setBroken(true)}
-          className="h-full w-full object-contain"
-        />
-      ) : (
-        <div className="flex flex-col items-center justify-center gap-1 text-center">
-          <span
-            className={`font-display text-sm leading-tight sm:text-lg ${p.nameClass ?? "text-brand"}`}
-          >
-            {p.name}
-          </span>
-          {p.tagline && (
+        {showLogo ? (
+          <img
+            src={p.logo}
+            alt={p.name}
+            loading="lazy"
+            onError={() => setBroken(true)}
+            className="h-full w-full object-contain"
+          />
+        ) : (
+          <div className="flex flex-col items-center justify-center gap-1 text-center">
             <span
-              className={`text-[8px] leading-tight sm:text-[9px] ${p.taglineClass ?? "text-muted-foreground"}`}
+              className={`font-display text-sm leading-tight sm:text-lg ${p.nameClass ?? "text-brand"}`}
             >
-              {p.tagline}
+              {p.name}
             </span>
-          )}
-        </div>
-      )}
+            {p.tagline && (
+              <span
+                className={`text-[8px] leading-tight sm:text-[9px] ${p.taglineClass ?? "text-muted-foreground"}`}
+              >
+                {p.tagline}
+              </span>
+            )}
+          </div>
+        )}
       </div>
       <span className="max-w-full truncate text-center text-xs font-medium text-foreground/70 sm:text-sm">
         {p.name}
