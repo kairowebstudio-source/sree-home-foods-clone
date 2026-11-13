@@ -58,7 +58,7 @@ const partners: Partner[] = [
     nameClass: "text-white italic tracking-[0.02em] drop-shadow-[0_2px_2px_rgba(0,0,0,0.25)]",
   },
   {
-    name: "Beyond Flavour",
+    name: "Beyond Flavourz",
     tagline: "Rooted in Nature",
     logo: "/media/partners/beyond-flavour-logo.jpg",
     tileClass: "bg-[#f7efcd] border-[#5d7a26]/30",
